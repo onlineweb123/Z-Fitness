@@ -212,6 +212,44 @@ function saveTodayStatus(){
   localStorage.setItem("workout_"+today, todayStatus);
   alert("🔥 Today's Workout Saved: " + todayStatus);
 }
+function saveTodayStatus(){
+  if(todayStatus === ""){ 
+    alert("Select today's workout first!"); 
+    return; 
+  }
+
+  let date = new Date();
+  let today = date.toISOString().split('T')[0];
+  let day = date.getDate();  // 1,2,3....
+
+  // Save single status
+  localStorage.setItem("todayWorkout", todayStatus);
+  localStorage.setItem("workout_"+today, todayStatus);
+
+  // Get existing arrays
+  let doneDays = JSON.parse(localStorage.getItem("doneWorkoutDays")) || [];
+  let mediumDays = JSON.parse(localStorage.getItem("mediumWorkoutDays")) || [];
+
+  // Remove day if previously saved to avoid duplicate
+  doneDays = doneDays.filter(d => d !== day);
+  mediumDays = mediumDays.filter(d => d !== day);
+
+  // Push to correct array
+  if(todayStatus.includes("✅")){
+    doneDays.push(day);
+  } 
+  else if(todayStatus.includes("🟡")){
+    mediumDays.push(day);
+  } 
+  // ❌ case = skip (missed auto handle in graph)
+
+  // Save arrays back
+  localStorage.setItem("doneWorkoutDays", JSON.stringify(doneDays));
+  localStorage.setItem("mediumWorkoutDays", JSON.stringify(mediumDays));
+
+  alert("🔥 Workout Saved: " + todayStatus);
+}
+
 </script>
 
 </body>
