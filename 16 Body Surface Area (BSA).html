@@ -1,82 +1,119 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
   <meta charset="UTF-8">
-  <title>BSA Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BSA கணிப்பான்</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f8fb;
-      padding: 30px;
-      color: #333;
+      font-family: 'Noto Sans Tamil', sans-serif;
+      background-color: #eaf4ff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
+
     .calculator {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 123, 255, 0.1);
+      width: 90%;
       max-width: 400px;
-      margin: auto;
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     h2 {
       text-align: center;
-      color: #2b7a78;
+      color: #0066cc;
+      margin-bottom: 20px;
     }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+      color: #004080;
+    }
+
     input {
       width: 100%;
-      padding: 10px;
-      margin: 8px 0 16px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      padding: 12px;
+      border: 1px solid #a3c9f9;
+      border-radius: 10px;
+      font-size: 16px;
+      margin-bottom: 15px;
     }
+
     button {
       width: 100%;
-      background-color: #2b7a78;
-      color: white;
       padding: 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      background-color: #007bff;
+      color: white;
       font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
     }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
     .result {
       margin-top: 20px;
       font-size: 18px;
       text-align: center;
       font-weight: bold;
-      color: #004d40;
+      color: #004d99;
     }
   </style>
 </head>
 <body>
 
-<div class="calculator">
-  <h2>Body Surface Area (BSA) Calculator</h2>
-  <label for="height">Height (cm):</label>
-  <input type="number" id="height" placeholder="உயரம் (செ.மீ.)" />
+  <div class="calculator">
+    <h2>🔹 BSA (உடல் மேற்பரப்பளவு) கணிப்பான்</h2>
 
-  <label for="weight">Weight (kg):</label>
-  <input type="number" id="weight" placeholder="எடை (கிலோ)" />
+    <label for="height">உயரம் (செ.மீ.):</label>
+    <input type="number" id="height" placeholder="உங்கள் உயரத்தை உள்ளிடவும்">
 
-  <button onclick="calculateBSA()">கணக்கிடு</button>
+    <label for="weight">எடை (கிலோ):</label>
+    <input type="number" id="weight" placeholder="உங்கள் எடையை உள்ளிடவும்">
 
-  <div class="result" id="result"></div>
-</div>
+    <button onclick="calculateBSA()">கணக்கிடு</button>
 
-<script>
-  function calculateBSA() {
-    const height = parseFloat(document.getElementById('height').value);
-    const weight = parseFloat(document.getElementById('weight').value);
+    <div class="result" id="result"></div>
+  </div>
 
-    if (isNaN(height) || isNaN(weight) || height <= 0 || weight <= 0) {
-      document.getElementById('result').innerText = "தவறான உள்ளீடு. மீண்டும் சரிபார்க்கவும்.";
-      return;
+  <script>
+    function calculateBSA() {
+      const height = parseFloat(document.getElementById('height').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const resultDiv = document.getElementById('result');
+
+      if (isNaN(height) || isNaN(weight) || height <= 0 || weight <= 0) {
+        resultDiv.innerText = "❗ சரியான உயரம் மற்றும் எடையை உள்ளிடவும்.";
+        return;
+      }
+
+      const bsa = Math.sqrt((height * weight) / 3600).toFixed(2);
+      resultDiv.innerText = `✅ உங்கள் BSA: ${bsa} m²`;
     }
-
-    const bsa = Math.sqrt((height * weight) / 3600).toFixed(2);
-    document.getElementById('result').innerText = `உங்கள் BSA: ${bsa} m²`;
-  }
-</script>
+  </script>
 
 </body>
+</html>
+
+
+
 </html>
