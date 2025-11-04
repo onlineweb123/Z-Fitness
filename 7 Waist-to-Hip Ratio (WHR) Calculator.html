@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WHR Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Tamil', sans-serif;
+      background: linear-gradient(to right, #f1f5f9, #dbeafe);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .calculator {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1d4ed8;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #2563eb;
+      color: white;
+      padding: 12px;
+      border: none;
+      width: 100%;
+      font-size: 16px;
+      margin-top: 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .result {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #10b981;
+    }
+
+    .note {
+      font-size: 14px;
+      margin-top: 10px;
+      color: #6b7280;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h2>🔸 Waist-to-Hip Ratio (WHR)</h2>
+
+    <label for="waist">உங்கள் இடுப்பு சுற்றளவு (cm):</label>
+    <input type="number" id="waist" placeholder="உதா: 85" />
+
+    <label for="hip">உங்கள் தொடை சுற்றளவு (cm):</label>
+    <input type="number" id="hip" placeholder="உதா: 100" />
+
+    <button onclick="calculateWHR()">WHR கணக்கிடு</button>
+
+    <div class="result" id="result"></div>
+    <div class="note">📌 WHR = Waist ÷ Hip</div>
+  </div>
+
+  <script>
+    function calculateWHR() {
+      const waist = parseFloat(document.getElementById("waist").value);
+      const hip = parseFloat(document.getElementById("hip").value);
+      const result = document.getElementById("result");
+
+      if (!waist || !hip || waist <= 0 || hip <= 0) {
+        result.textContent = "தயவுசெய்து சரியான மதிப்புகளை உள்ளிடவும்.";
+        result.style.color = "#dc2626";
+        return;
+      }
+
+      const whr = waist / hip;
+      result.textContent = `உங்கள் WHR: ${whr.toFixed(2)}`;
+
+      if (whr < 0.85) {
+        result.style.color = "#22c55e"; // green
+      } else if (whr < 0.95) {
+        result.style.color = "#3b82f6"; // blue
+      } else {
+        result.style.color = "#dc2626"; // red
+      }
+    }
+  </script>
+</body>
+</html>

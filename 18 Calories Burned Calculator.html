@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <title>Calories Burned Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      background-color: #f2f2f2;
+      border-radius: 10px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+    }
+    .result {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Calories Burned Calculator</h2>
+  <p><strong>📌 Formula:</strong> Calories Burned = MET × Weight(kg) × Duration(hr)</p>
+
+  <label for="met">MET Value:</label>
+  <input type="number" id="met" step="0.1" placeholder="உங்கள் MET மதிப்பை உள்ளிடுங்கள்">
+
+  <label for="weight">உடல் எடை (kg):</label>
+  <input type="number" id="weight" placeholder="உடல் எடையை உள்ளிடவும்">
+
+  <label for="duration">நேரம் (மணிநேரத்தில்):</label>
+  <input type="number" id="duration" step="0.1" placeholder="பயிற்சி நேரத்தை உள்ளிடவும்">
+
+  <button onclick="calculateCalories()">கலோரி எரிப்பு கணக்கிடு</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function calculateCalories() {
+      const met = parseFloat(document.getElementById('met').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const duration = parseFloat(document.getElementById('duration').value);
+
+      if (isNaN(met) || isNaN(weight) || isNaN(duration)) {
+        document.getElementById('result').innerText = "அனைத்து தகவலையும் சரியாக உள்ளிடவும்.";
+        return;
+      }
+
+      const calories = met * weight * duration;
+      document.getElementById('result').innerText = `நீங்கள் எரித்துள்ள கலோரி: ${calories.toFixed(2)} kcal`;
+    }
+  </script>
+</body>
+</html>

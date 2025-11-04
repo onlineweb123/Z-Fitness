@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FFMI Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    .calculator {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      color: #555;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h2>🧮 FFMI Calculator</h2>
+    <label>உடல் மெலிதான திணிவு (kg):</label>
+    <input type="number" id="leanMass" placeholder="உங்கள் Lean Mass (கிலோ)">
+
+    <label>உயரம் (செ.மீ.):</label>
+    <input type="number" id="heightCm" placeholder="உங்கள் உயரம் (cm)">
+
+    <button onclick="calculateFFMI()">FFMI கணக்கிடு</button>
+
+    <div class="result" id="ffmiResult"></div>
+  </div>
+
+  <script>
+    function calculateFFMI() {
+      const leanMass = parseFloat(document.getElementById("leanMass").value);
+      const heightCm = parseFloat(document.getElementById("heightCm").value);
+
+      if (isNaN(leanMass) || isNaN(heightCm) || heightCm === 0) {
+        document.getElementById("ffmiResult").innerText = "தவறான மதிப்புகள் – மீண்டும் சரிபார்க்கவும்.";
+        return;
+      }
+
+      const heightM = heightCm / 100;
+      const ffmi = leanMass / (heightM * heightM);
+      const ffmiRounded = ffmi.toFixed(2);
+
+      document.getElementById("ffmiResult").innerText = `உங்கள் FFMI: ${ffmiRounded}`;
+    }
+  </script>
+</body>
+</html>

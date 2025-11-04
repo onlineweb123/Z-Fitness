@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Workouts - Maathu Fitness</title>
+
+<style>
+:root{
+  --bg:#eef3f8;
+  --card:#ffffffcc;
+  --border:#d7e0ea;
+  --accent:#007bff;
+  --accent2:#009f7b;
+  --text:#1c1c1c;
+  --blur:blur(18px);
+}
+
+body{
+  margin:0;
+  font-family:'Poppins',Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+*,button,a{transition:0.25s;}
+
+header{
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:19px;
+  font-weight:700;
+  position:fixed;
+  top:0;left:0;right:0;
+  background:blue;
+  backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--border);
+  z-index:10;
+  color:white;
+}
+.menu-btn{
+  position:absolute;
+  left:14px;
+  font-size:26px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:white;
+}
+
+.sidebar{
+  width:250px;
+  background:#ffffffdd;
+  backdrop-filter:var(--blur);
+  position:fixed;
+  top:0;bottom:0;left:-260px;
+  padding-top:75px;
+  border-right:1px solid var(--border);
+  z-index:20;
+}
+.sidebar.open{left:0;}
+.sidebar a{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:16px 22px;
+  font-size:17px;
+  color:var(--text);
+  text-decoration:none;
+  border-bottom:1px solid #f1f4f6;
+  font-weight:500;
+}
+.sidebar a:hover{
+  background:#f8fffd;
+  color:var(--accent);
+  padding-left:28px;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:#0006;
+  display:none;
+  z-index:15;
+}
+.overlay.show{display:block;}
+
+.main{
+  position:absolute;
+  top:65px;bottom:65px;left:0;right:0;
+  overflow-y:auto;
+  padding:1px;
+}
+
+/* Workout Card */
+.work-card{
+  background:var(--card);
+  padding:18px;
+  border-radius:16px;
+  margin-bottom:12px;
+  border:1px solid var(--border);
+  box-shadow:0 6px 14px rgba(0,0,0,.08);
+  cursor:pointer;
+}
+.work-card:hover{
+  transform:scale(1.02);
+  border-color:var(--accent);
+}
+.work-card h3{
+  margin:0;
+  font-size:18px;
+  font-weight:700;
+}
+.work-card p{
+  margin:5px 0 0;
+  font-size:14px;
+  opacity:.7;
+}
+
+.section-title{
+  font-size:17px;
+  font-weight:700;
+  margin:16px 0 8px;
+}
+
+/* Bottom Nav */
+.bottom{
+  height:60px;
+  position:fixed;
+  bottom:0;left:0;right:0;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  background:#ffffffcc;
+  border-top:1px solid var(--border);
+}
+.bottom button{
+  background:none;
+  border:none;
+  font-size:13px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  opacity:.6;
+  cursor:pointer;
+  font-weight:600;
+}
+.bottom button.active,
+.bottom button:hover{
+  opacity:1;
+  color:var(--accent);
+  transform:scale(1.1);
+}
+.bottom button span{
+  font-size:22px;
+}
+
+<!--  -->
+
+body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Noto Sans Tamil', sans-serif;
+      background: #f8f9fa;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 2rem 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: white;
+      padding: 1.2rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1rem;
+      transition: all 0.3s;
+      border: 1.5px solid transparent;
+    }
+
+    .card:hover {
+      border-color: #0d6efd;
+      transform: translateY(-3px);
+    }
+
+    .card a {
+      text-decoration: none;
+      background-color: #0d6efd;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .card a:hover {
+      background-color: #084298;
+    }
+
+    .ads-box {
+      text-align: center;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      background: #e9ecef;
+      border-radius: 8px;
+    }
+
+    .ads-box img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    footer {
+      background: #212529;
+      color: white;
+      text-align: center;
+      padding: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+</style>
+</head>
+
+
+<body>
+
+<header>
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  Fitness Calculator Tools
+</header>
+
+<div id="sidebar" class="sidebar">
+  <a href="index.html">🏠 Dashboard</a>
+  <a href="workouts.html">🔥 Workouts</a>
+  <a href="diet.html">🥗 Diet Plans</a>
+  <a href="fit tools.html">📋 Fit Tools</a>
+  <a href="progress.html">📊 Progress Tracker</a>
+  <a href="profile.html">👤 Profile</a>
+  <a href="settings.html">⚙️ Settings</a>
+</div>
+
+<div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+
+<div class="main">
+ 
+    
+  <center> 
+
+
+  <br>
+     
+  <div class="grid">
+    <div class="card"><div>🔥 Calorie Calculator</div><a href="1 Calorie.html">Go →</a></div>
+    <div class="card"><div>📏 BMI Calculator</div><a href="2 BMI Calculator.html">Go →</a></div>
+    <div class="card"><div>💤 BMR Calculator</div><a href="3  BMR Calculator .html">Go →</a></div>
+    <div class="card"><div>🧪 Body Fat % Calculator</div><a href="4 Body Fat Percentage Calculator.html">Go →</a></div>
+    <div class="card"><div>🍱 Macro Calculator</div><a href="5 Macro Calculator (Protein, Carb, Faacro Calculatort Split).html">Go →</a></div>
+    <div class="card"><div>🎯 Ideal Body Weight</div><a href="6 Ideal Body Weight Calculator.html">Go →</a></div>
+    <div class="card"><div>📐 Waist-to-Hip Ratio</div><a href="7 Waist-to-Hip Ratio (WHR) Calculator.html">Go →</a></div>
+    <div class="card"><div>📏 Waist-to-Height Ratio</div><a href="8 Waist-to-Height Ratio Calculator.html">Go →</a></div>
+    <div class="card"><div>💪 Lean Body Mass</div><a href="9 Lean Body Mass Calculator (LBM).html">Go →</a></div>
+    <div class="card"><div>🥚 Protein Intake</div><a href="10 Protein Intake Calculator.html">Go →</a></div>
+    <div class="card"><div>💧 Water Intake</div><a href="11 Water Intake Calculator.html">Go →</a></div>
+    <div class="card"><div>❤️ Target Heart Rate</div><a href="12 Target Heart Rate (THR) Calculator.html">Go →</a></div>
+    <div class="card"><div>🏃 VO₂ Max</div><a href="13 VO2 Max Calculator (Cardio Fitness).html">Go →</a></div>
+    <div class="card"><div>📊 FFMI Calculator</div><a href="14 FFMI Calculator (Fat-Free Mass Index).html">Go →</a></div>
+    <div class="card"><div>🏋️ One Rep Max</div><a href="15 One Rep Max (1RM) Calculator.html">Go →</a></div>
+    <div class="card"><div>🖐️ Body Surface Area</div><a href="16 Body Surface Area (BSA).html">Go →</a></div>
+    <div class="card"><div>🍞 Glycemic Load</div><a href="17 Glycemic Load Calculator.html">Go →</a></div>
+    <div class="card"><div>🔥 Calories Burned</div><a href="18 Calories Burned Calculator.html">Go →</a></div>
+    <div class="card"><div>📈 MET Calculator</div><a href="19 MET Calculator (Metabolic Equivalent Task).html">Go →</a></div>
+    <div class="card"><div>😴 Sleep Calculator</div><a href="20 Sleep Calculator.html">Go →</a></div>
+  </div>
+<br><br><br>
+  
+
+
+  <!-- ✅ Updated Floating Help Button -->
+  <a id="helpButton" href="help.html" title="உதவி / Help">
+    <div class="iconBox">?</div>
+  </a>
+
+  <style>
+    #helpButton {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      z-index: 1000;
+      transition: transform 0.2s ease;
+      cursor: grab;
+      touch-action: none;
+      text-decoration: none;
+    }
+    .iconBox {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #00b4d8, #0077b6);
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 60px;
+      border-radius: 50%;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+    .iconBox:hover {
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+      transform: scale(1.1);
+    }
+  </style>
+
+  <script>
+    const button = document.getElementById("helpButton");
+    let isDragging = false;
+    let currentX = 0, currentY = 0;
+    let initialX, initialY;
+    let xOffset = 0, yOffset = 0;
+
+    const setTranslate = (xPos, yPos, el) => {
+      el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+    };
+
+    const dragStart = (e) => {
+      isDragging = true;
+      initialX = e.type === "touchstart" ? e.touches[0].clientX - xOffset : e.clientX - xOffset;
+      initialY = e.type === "touchstart" ? e.touches[0].clientY - yOffset : e.clientY - yOffset;
+    };
+
+    const dragEnd = () => {
+      isDragging = false;
+      xOffset = currentX;
+      yOffset = currentY;
+    };
+
+    const drag = (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+      currentX = clientX - initialX;
+      currentY = clientY - initialY;
+      setTranslate(currentX, currentY, button);
+    };
+
+    button.addEventListener("mousedown", dragStart);
+    button.addEventListener("mouseup", dragEnd);
+    button.addEventListener("mousemove", drag);
+    button.addEventListener("mouseleave", dragEnd);
+
+    button.addEventListener("touchstart", dragStart, { passive: false });
+    button.addEventListener("touchend", dragEnd);
+    button.addEventListener("touchmove", drag, { passive: false });
+  </script>
+
+  </div>
+
+
+   
+
+
+</div>
+
+<div class="bottom">
+  <button onclick="location.href='index.html'"><span>🏠</span>Home</button>
+  <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
+  <button onclick="location.href='diet.html'"><span>🥗</span>Diet</button>
+  <button onclick="location.href='profile.html'"><span>👤</span>Profile</button>
+</div>
+
+<script>
+function toggleMenu(){
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("show");
+}
+</script>
+
+</body>
+</html>

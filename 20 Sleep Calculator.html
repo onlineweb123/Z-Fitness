@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <title>Sleep Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Tamil', sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #4a90e2;
+    }
+    .card {
+      background-color: #fff;
+      padding: 20px;
+      margin: auto;
+      border-radius: 12px;
+      max-width: 600px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .time-list {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>🛌 Sleep Calculator</h1>
+    <p>🔸 90 நிமிட தூக்க சுழற்சி அடிப்படையில் (Ideal = 4–6 cycles/night)</p>
+
+    <label>உங்கள் எழும் நேரம்:</label><br>
+    <input type="time" id="wakeTime"><br>
+    <button onclick="calculateBedTimes()">எப்போது உறங்க வேண்டும்?</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculateBedTimes() {
+      const input = document.getElementById("wakeTime").value;
+      const resultDiv = document.getElementById("result");
+
+      if (!input) {
+        resultDiv.innerHTML = "⛔️ தயவுசெய்து எழும் நேரத்தை தேர்வு செய்யவும்.";
+        return;
+      }
+
+      const [wakeHour, wakeMin] = input.split(":").map(Number);
+      const wakeDate = new Date();
+      wakeDate.setHours(wakeHour, wakeMin, 0, 0);
+
+      const cycleMinutes = 90;
+      const fallAsleepBuffer = 15; // minutes
+
+      let bedTimes = [];
+
+      for (let i = 6; i >= 4; i--) {
+        const totalMinutes = (cycleMinutes * i) + fallAsleepBuffer;
+        const bedTime = new Date(wakeDate.getTime() - totalMinutes * 60000);
+
+        let hr = bedTime.getHours();
+        let min = bedTime.getMinutes();
+        const suffix = hr >= 12 ? "PM" : "AM";
+        hr = hr % 12 || 12;
+
+        bedTimes.push(`${hr}:${min.toString().padStart(2, '0')} ${suffix} (${i} cycles)`);
+      }
+
+      resultDiv.innerHTML = `<div class="time-list">🕰️ உறங்க வேண்டிய நேரங்கள்:<br><br>${bedTimes.join("<br>")}</div>`;
+    }
+  </script>
+
+</body>
+</html>

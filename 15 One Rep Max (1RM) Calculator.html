@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>One Rep Max (1RM) Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Tamil', sans-serif;
+      background: linear-gradient(to right, #f8f8ff, #e6f2ff);
+      padding: 30px;
+      text-align: center;
+    }
+    h2 {
+      color: #1a237e;
+    }
+    .container {
+      background-color: #ffffff;
+      max-width: 400px;
+      margin: auto;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    label {
+      display: block;
+      margin: 12px 0 5px;
+      font-weight: bold;
+      color: #333;
+    }
+    input {
+      width: 90%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #3949ab;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #303f9f;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #2e7d32;
+    }
+    .formula {
+      margin-top: 10px;
+      font-size: 0.95em;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>💪 One Rep Max (1RM) Calculator</h2>
+    <p class="formula">🔸 Formula: 1RM = weight × (1 + reps ÷ 30)</p>
+    <label for="weight">உங்களது எடை (kg):</label>
+    <input type="number" id="weight" placeholder="உங்கள் தூக்கும் எடை (kg)" />
+
+    <label for="reps">Reps (ஒரே எடையில் எத்தனை முறை?):</label>
+    <input type="number" id="reps" placeholder="உங்கள் repetition count" />
+
+    <button onclick="calculate1RM()">கணக்கிடு</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculate1RM() {
+      const weight = parseFloat(document.getElementById('weight').value);
+      const reps = parseFloat(document.getElementById('reps').value);
+
+      if (isNaN(weight) || isNaN(reps) || weight <= 0 || reps <= 0) {
+        document.getElementById('result').innerHTML = "தவறான உள்ளீடு! மீண்டும் சரிபார்க்கவும்.";
+        return;
+      }
+
+      const oneRM = weight * (1 + reps / 30);
+      document.getElementById('result').innerHTML = `உங்கள் 1RM: <strong>${oneRM.toFixed(2)} kg</strong>`;
+    }
+  </script>
+</body>
+</html>

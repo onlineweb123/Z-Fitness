@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WHtR கணிப்பான்</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Tamil', sans-serif;
+      background-color: #f0f8ff;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #1a73e8;
+    }
+    input {
+      padding: 10px;
+      margin: 10px;
+      width: 200px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #1a73e8;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #155bb5;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .green { color: green; }
+    .orange { color: orange; }
+    .red { color: red; }
+    .gray { color: gray; }
+  </style>
+</head>
+<body>
+  <h1>📏 Waist-to-Height Ratio கணிப்பான்</h1>
+  <p>🔹 சூத்திரம்: இடுப்பு / உயரம்</p>
+
+  <input type="number" id="waist" placeholder="இடுப்பு (செ.மீ)" />
+  <input type="number" id="height" placeholder="உயரம் (செ.மீ)" />
+  <br>
+  <button onclick="calculateWHtR()">கணக்கிடு</button>
+
+  <div id="result"></div>
+
+  <script>
+    function calculateWHtR() {
+      const waist = parseFloat(document.getElementById('waist').value);
+      const height = parseFloat(document.getElementById('height').value);
+      const resultDiv = document.getElementById('result');
+
+      if (isNaN(waist) || isNaN(height) || height === 0) {
+        resultDiv.innerHTML = "<span class='gray'>சரியான மதிப்புகளை உள்ளிடவும்.</span>";
+        return;
+      }
+
+      const whtr = waist / height;
+      let comment = '';
+      let colorClass = '';
+
+      if (whtr < 0.35) {
+        comment = 'மிக குறைவான உடல் பருமன் (ஆபத்தான அளவு)';
+        colorClass = 'gray';
+      } else if (whtr < 0.44) {
+        comment = 'குறைந்த உடற் கொழுப்பு';
+        colorClass = 'green';
+      } else if (whtr <= 0.52) {
+        comment = 'சராசரி / ஆரோக்கியமான அளவு';
+        colorClass = 'green';
+      } else if (whtr <= 0.57) {
+        comment = 'அதிக உடற் கொழுப்பு';
+        colorClass = 'orange';
+      } else {
+        comment = 'மிக அதிக உடற் கொழுப்பு (ஆபத்து)';
+        colorClass = 'red';
+      }
+
+      resultDiv.innerHTML = `
+        WHtR: <strong>${whtr.toFixed(2)}</strong><br>
+        <span class='${colorClass}'>${comment}</span>
+      `;
+    }
+  </script>
+</body>
+</html>

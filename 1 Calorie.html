@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TDEE Calorie Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Tamil', sans-serif;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #f9f9f9;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #2e86de;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #2e86de;
+      color: white;
+      padding: 12px;
+      width: 100%;
+      margin-top: 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .result-box {
+      margin-top: 25px;
+      background-color: #eaf2f8;
+      padding: 20px;
+      border-radius: 10px;
+      line-height: 1.8;
+    }
+    .note {
+      margin-top: 30px;
+      background: #fff5e6;
+      border-left: 6px solid #ffa502;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .note h4 {
+      margin: 0;
+      color: #d35400;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔥 TDEE / Calorie Calculator</h2>
+    <label>பாலினம் (Gender)</label>
+    <select id="gender">
+      <option value="male">ஆண் (Male)</option>
+      <option value="female">பெண் (Female)</option>
+    </select>
+
+    <label>எடை (Weight in kg)</label>
+    <input type="number" id="weight" placeholder="உங்கள் எடை kg-ல்">
+
+    <label>உயரம் (Height in cm)</label>
+    <input type="number" id="height" placeholder="உங்கள் உயரம் cm-ல்">
+
+    <label>வயது (Age)</label>
+    <input type="number" id="age" placeholder="உங்கள் வயது">
+
+    <label>நடமாட்ட நிலை (Activity Level)</label>
+    <select id="activity">
+      <option value="1.2">Sedentary – very little activity</option>
+      <option value="1.375">Light – light exercise 1-3 days/week</option>
+      <option value="1.55">Moderate – moderate exercise 3–5 days/week</option>
+      <option value="1.725">Active – hard exercise 6–7 days/week</option>
+      <option value="1.9">Very Active – daily intense training</option>
+    </select>
+
+    <button onclick="calculateTDEE()">கணக்கிடு</button>
+
+    <div class="result-box" id="result"></div>
+
+    <div class="note">
+      <h4>📘 கூடுதல் அறிவு:</h4>
+      <ul>
+        <li><b>BMR</b> என்பது உங்கள் உடல் ஓய்வில் இருக்கும்போது செலவழிக்கும் கலோரி அளவு.</li>
+        <li><b>TDEE</b> என்பது உங்கள் உடல் நாளடைவில் உண்மையில் தேவையான கலோரிகள்.</li>
+        <li><b>Maintain:</b> உடல் எடையை அதேபடி வைத்திருக்க.</li>
+        <li><b>Lose:</b> 500 கலோரி குறைவாக எடுத்தால் வாரத்திற்கு ~0.5kg குறையும்.</li>
+        <li><b>Gain:</b> 500 கலோரி அதிகமாக எடுத்தால் வாரத்திற்கு ~0.5kg அதிகரிக்கும்.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function calculateTDEE() {
+      const gender = document.getElementById("gender").value;
+      const weight = parseFloat(document.getElementById("weight").value);
+      const height = parseFloat(document.getElementById("height").value);
+      const age = parseInt(document.getElementById("age").value);
+      const activity = parseFloat(document.getElementById("activity").value);
+
+      if (isNaN(weight) || isNaN(height) || isNaN(age)) {
+        alert("தயவு செய்து எல்லா புலங்களையும் சரியாக நிரப்பவும்.");
+        return;
+      }
+
+      let bmr;
+      if (gender === "male") {
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+      } else {
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+      }
+
+      const tdee = bmr * activity;
+      const maintain = tdee.toFixed(0);
+      const lose = (tdee - 500).toFixed(0);
+      const gain = (tdee + 500).toFixed(0);
+
+      document.getElementById("result").innerHTML = `
+        ✅ <b>Result:</b><br>
+        🔸 <b>BMR:</b> ${bmr.toFixed(0)} kcal/day<br>
+        🔸 <b>TDEE:</b> ${tdee.toFixed(0)} kcal/day<br><br>
+        📌 <b>எடையை:</b><br>
+        ▪️ Maintain: <b>${maintain} kcal/day</b><br>
+        ▪️ குறைக்க: <b>${lose} kcal/day</b><br>
+        ▪️ அதிகரிக்க: <b>${gain} kcal/day</b>
+      `;
+    }
+  </script>
+</body>
+</html>

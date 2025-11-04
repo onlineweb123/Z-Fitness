@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glycemic Load Calculator</title>
+  <style>
+    body {
+      font-family: 'Noto Sans Tamil', sans-serif;
+      background: #f1f5f9;
+      color: #111827;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2563eb;
+    }
+
+    .calculator {
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      font-size: 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+    }
+
+    button {
+      width: 100%;
+      background: #2563eb;
+      color: #fff;
+      padding: 10px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+
+    .result {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #10b981;
+    }
+
+    .info {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #4b5563;
+      background: #f0f9ff;
+      padding: 10px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Glycemic Load (GL) Calculator</h2>
+
+  <div class="calculator">
+    <label for="gi">🔸 Glycemic Index (GI):</label>
+    <input type="number" id="gi" placeholder="உதாரணம்: 70">
+
+    <label for="carbs">🔸 Net Carbs (g):</label>
+    <input type="number" id="carbs" placeholder="உதாரணம்: 30">
+
+    <button onclick="calculateGL()">கணக்கிடு</button>
+
+    <div id="result" class="result"></div>
+
+    <div class="info">
+      ➤ Formula: GL = (GI × Net Carbs in g) ÷ 100<br>
+      ➤ GL Level Meaning:<br>
+      ▪️ Low GL: 1–10<br>
+      ▪️ Medium GL: 11–19<br>
+      ▪️ High GL: 20+
+    </div>
+  </div>
+
+  <script>
+    function calculateGL() {
+      const gi = parseFloat(document.getElementById("gi").value);
+      const carbs = parseFloat(document.getElementById("carbs").value);
+
+      if (isNaN(gi) || isNaN(carbs) || gi < 0 || carbs < 0) {
+        document.getElementById("result").innerHTML = "சரியான மதிப்புகளை உள்ளிடவும்.";
+        return;
+      }
+
+      const gl = (gi * carbs) / 100;
+      let category = '';
+
+      if (gl <= 10) category = '🟢 குறைந்த GL';
+      else if (gl <= 19) category = '🟡 நடுத்தர GL';
+      else category = '🔴 அதிகமான GL';
+
+      document.getElementById("result").innerHTML = 
+        `👉 GL = ${gl.toFixed(2)} (${category})`;
+    }
+  </script>
+
+</body>
+</html>
