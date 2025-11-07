@@ -1,5 +1,3 @@
-self.addEventListener('install', 
-
 self.addEventListener('install', function(e) {
     console.log('[Service Worker] Install');
 });
