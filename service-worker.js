@@ -1,5 +1,3 @@
-const cacheName = 'v1';
-
 // ✅ Service Worker - Z-Fitness
 
 const cacheName = 'zfitness-v1';
