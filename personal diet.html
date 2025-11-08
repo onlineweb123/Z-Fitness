@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GYM Workout Control</title>
+<style>
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    background-color: #f0f4f8;
+    line-height: 1.6;
+  }
+
+  header {
+    background-color: #086584;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 28px;
+  }
+
+  header p {
+    margin: 5px 0 0;
+    font-size: 16px;
+  }
+
+  main {
+    padding: 20px;
+    text-align: center;
+    max-width: 700px;
+    margin: auto;
+  }
+
+  /* Control (Add Diet) Section */
+  .control-panel {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .control-panel h2 {
+    color: #086584;
+    font-size: 20px;
+  }
+
+  .input-box, textarea {
+    width: 85%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-top: 10px;
+  }
+
+  textarea {
+    height: 100px;
+    resize: vertical;
+  }
+
+  #addBtn {
+    background:#007bf4 ;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-top: 10px;
+  }
+
+  #addBtn:hover { background:#0006be ; }
+
+  /* Button Style */
+  .toggle-button {
+    display: inline-block;
+    width: 90%;
+    padding: 15px;
+    font-size: 18px;
+    color: white;
+    background-color: #FF0000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.25s ease;
+    margin: 10px 0;
+  }
+
+  .toggle-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+  }
+
+  /* Content box */
+  .content-box {
+    margin-top: 10px;
+    padding: 18px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background: white;
+    text-align: left;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .content-box h3 { color: #086584; margin-top: 0; }
+
+  .delete-btn {
+    background: #ff4b4b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    float: right;
+    cursor: pointer;
+  }
+
+  footer {
+    text-align: center;
+    padding: 15px;
+    background-color: #086584;
+    color: #fff;
+    font-size: 14px;
+    margin-top: 30px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1> My Personal Diet Plan </h1>
+  <p> Daily Diet Food </p>
+</header>
+
+<main>
+
+  <!-- 🥗 Diet List (Add ஆனது மேல வரும்) -->
+  <div id="dietContainer"></div>
+
+  <!-- ⚙️ Control System கீழே -->
+  <div class="control-panel">
+    <h2>🎯 Personal Diet System - புதிய Diet Plan சேர்க்க</h2>
+    <input type="text" id="dietName" class="input-box" placeholder="Diet பெயரை எழுதுங்கள்">
+    <textarea id="dietDetails" placeholder="Diet விவரங்களை இங்கே எழுதுங்கள்..."></textarea>
+    <button id="addBtn" onclick="addDiet()">சேர்</button>
+  </div>
+
+</main>
+
+
+
+<script>
+let diets = JSON.parse(localStorage.getItem("dietPlans")) || [];
+
+function saveData(){
+  localStorage.setItem("dietPlans", JSON.stringify(diets));
+}
+
+function addDiet(){
+  const name = document.getElementById("dietName").value.trim();
+  const details = document.getElementById("dietDetails").value.trim();
+
+  if(!name){ alert("Diet பெயரை எழுதுங்கள்!"); return; }
+  if(!details){ alert("Diet விவரங்களை எழுதுங்கள்!"); return; }
+
+  diets.unshift({name, details}); // புதியது மேல வர
+  document.getElementById("dietName").value = "";
+  document.getElementById("dietDetails").value = "";
+  saveData();
+  renderDiets();
+}
+
+function deleteDiet(index){
+  if(confirm(`"${diets[index].name}" என்ற Diet-ஐ நீக்க விரும்புகிறீர்களா?`)){
+    diets.splice(index,1);
+    saveData();
+    renderDiets();
+  }
+}
+
+function toggleContent(i){
+  const box = document.querySelector(`#diet_${i}`);
+  const btn = document.querySelector(`#btn_${i}`);
+  const show = box.style.display === "block";
+  box.style.display = show ? "none" : "block";
+  btn.textContent = show ? `🍽️ ${diets[i].name} open` : `❌ ${diets[i].name} close`;
+}
+
+function renderDiets(){
+  const container = document.getElementById("dietContainer");
+  container.innerHTML = "";
+  diets.forEach((diet, i) => {
+    const btn = document.createElement("button");
+    btn.className = "toggle-button";
+    btn.id = `btn_${i}`;
+    btn.textContent = `🍽️ ${diet.name} open`;
+    btn.onclick = () => toggleContent(i);
+
+    const box = document.createElement("div");
+    box.className = "content-box";
+    box.id = `diet_${i}`;
+    box.innerHTML = `
+      <h3>${diet.name} <button class="delete-btn" onclick="deleteDiet(${i})">🗑️ Delete</button></h3>
+      <p>${diet.details.replace(/\n/g, "<br>")}</p>
+    `;
+    container.appendChild(btn);
+    container.appendChild(box);
+  });
+}
+
+renderDiets();
+</script>
+
+</body>
+</html>
