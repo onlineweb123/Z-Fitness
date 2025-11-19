@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Meditation Music</title>
+<style>
+  :root{--bg:#17121d;--card:#241b34;--accent:#8a5cff;--muted:#bdb6c7}
+  body{margin:0;background:linear-gradient(180deg,#0f0b12,#17121d);color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:10px}
+  .wrap{max-width:720px;margin:0 auto}
+  .main{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:14px;border-radius:14px;margin-bottom:14px}
+  h1{margin:0 0 8px 0;font-size:20px}
+  .title{font-weight:700;font-size:18px;color:#fff;line-height:1.4}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:14px 0}
+  .btn{background:var(--card);border:0;padding:8px 12px;border-radius:10px;cursor:pointer;color:#fff;font-size:18px;flex-shrink:0}
+  .btn:active{transform:scale(.98)}
+  .progress{width:100%;height:16px;background:#2a2540;border-radius:8px;overflow:hidden;position:relative}
+  .progress input[type=range]{width:100%;appearance:none;background:transparent;height:16px;margin:0;padding:0}
+  .progress input[type=range]::-webkit-slider-runnable-track{
+    height:16px;
+    background:linear-gradient(90deg,var(--accent) var(--val,0%),#2a2540 var(--val,0%));
+    border-radius:8px
+  }
+  .progress input[type=range]::-webkit-slider-thumb{
+    appearance:none;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:white;
+    margin-top:-1px;
+    box-shadow:0 0 4px rgba(0,0,0,0.5);
+  }
+  .progress input[type=range]::-moz-range-track{
+    height:16px;
+    background:linear-gradient(90deg,var(--accent) var(--val,0%),#2a2540 var(--val,0%));
+    border-radius:8px
+  }
+  .progress input[type=range]::-moz-range-thumb{
+    width:18px;height:18px;border-radius:50%;background:white;border:none
+  }
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:var(--muted);font-size:13px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .small{font-size:13px;color:var(--muted)}
+  .track-list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+  .track{display:flex;align-items:center;justify-content:space-between;background:#241b34;padding:10px;border-radius:10px;flex-wrap:wrap}
+  .tn{display:flex;gap:10px;align-items:center;flex:1;flex-wrap:wrap}
+  .tn .name{min-width:80px;font-size:14px}
+  .track input[type=range]{width:120px}
+  @media (max-width:480px){
+    .title{font-size:16px}
+    .btn{font-size:16px;padding:6px 10px}
+    .tn .name{min-width:60px;font-size:12px}
+    .track input[type=range]{width:100px}
+    .small{font-size:12px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="main">
+    <div class="title"> <center> Meditation Music </center> </div>
+    <div id="currentFile" style="margin-top:6px;font-weight:600">a.mp3</div>
+
+    <div style="margin-top:10px">
+      <div class="progress">
+        <input id="seek" type="range" min="0" max="100" value="0">
+      </div>
+      <div class="meta">
+        <div class="small" id="timeDisplay">00:00 / 00:00</div>
+        <div class="small">Index: <span id="indexDisplay">0</span> / 20</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="prev" class="btn">⏮</button>
+      <button id="play" class="btn">▶</button>
+      <button id="next" class="btn">⏭</button>
+      <div class="row">
+        <div class="small">Vol</div>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" style="width:100px">
+      </div>
+    </div>
+    <div class="small" style="text-align:center;margin-top:6px;color:var(--muted)">Note: missing files are skipped; if no next available, returns to a.mp3.</div>
+  </div>
+
+  <!-- other simple tracks -->
+  <div class="track-list">
+    <div class="track">
+      <div class="tn"><div class="name"> 
+          🌧️ Rine</div><div class="small">independent (loops)</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="miniVol" data-src="B.mp3" type="range" min="0" max="1" step="0.01" value="0.8">
+        <button class="miniPlay btn" data-src="B.mp3">▶</button>
+      </div>
+    </div>
+    <div class="track">
+      <div class="tn"><div class="name">
+          🔥 Fire</div><div class="small">independent (loops)</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="miniVol" data-src="C.mp3" type="range" min="0" max="1" step="0.01" value="0.8">
+        <button class="miniPlay btn" data-src="C.mp3">▶</button>
+      </div>
+    </div>
+    <div class="track">
+      <div class="tn"><div class="name">
+          🌊 Sea</div><div class="small">independent (loops)</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="miniVol" data-src="D.mp3" type="range" min="0" max="1" step="0.01" value="0.8">
+        <button class="miniPlay btn" data-src="D.mp3">▶</button>
+      </div>
+    </div>
+    <div class="track">
+      <div class="tn"><div class="name">
+          ⚡ Thunder</div><div class="small">independent (loops)</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="miniVol" data-src="E.mp3" type="range" min="0" max="1" step="0.01" value="0.8">
+        <button class="miniPlay btn" data-src="E.mp3">▶</button>
+      </div>
+    </div>
+    <div class="track">
+      <div class="tn"><div class="name">
+          🧠 Alpha Wave</div><div class="small">independent (loops)</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="miniVol" data-src="F.mp3" type="range" min="0" max="1" step="0.01" value="0.8">
+        <button class="miniPlay btn" data-src="F.mp3">▶</button>
+      </div>
+    </div>
+    <div class="track">
+      <div class="tn"><div class="name"> 
+          🌲 Forest</div><div class="small">independent (loops)</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="miniVol" data-src="G.mp3" type="range" min="0" max="1" step="0.01" value="0.8">
+        <button class="miniPlay btn" data-src="G.mp3">▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+
+<script>
+const playlist = [];
+for (let i = 0; i <= 20; i++) playlist.push(i === 0 ? 'a.mp3' : `a${i}.mp3`);
+let currentIndex = 0;
+
+const audio = document.getElementById('audio');
+const playBtn = document.getElementById('play');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const seek = document.getElementById('seek');
+const vol = document.getElementById('vol');
+const currentFile = document.getElementById('currentFile');
+const indexDisplay = document.getElementById('indexDisplay');
+const timeDisplay = document.getElementById('timeDisplay');
+
+audio.volume = parseFloat(vol.value);
+
+function fmt(s){
+  if (!isFinite(s)) return '00:00';
+  const m = Math.floor(s/60).toString().padStart(2,'0');
+  const sec = Math.floor(s%60).toString().padStart(2,'0');
+  return `${m}:${sec}`;
+}
+
+function testAudioExists(url, timeout = 2000){
+  return new Promise(resolve => {
+    const t = document.createElement('audio');
+    let done = false;
+    function clean(ok){
+      if(done) return; done = true;
+      t.onloadedmetadata = null; t.onerror = null;
+      resolve(ok);
+    }
+    t.preload = 'metadata';
+    t.onloadedmetadata = () => clean(true);
+    t.onerror = () => clean(false);
+    t.src = url;
+    setTimeout(()=> clean(false), timeout);
+    try { t.load(); } catch (e) { clean(false); }
+  });
+}
+
+async function findAvailable(start, dir){
+  const n = playlist.length;
+  let tries = 0;
+  let idx = start;
+  while(tries < n){
+    if (idx >= n) idx = 0;
+    if (idx < 0) idx = n - 1;
+    const ok = await testAudioExists(playlist[idx]);
+    if (ok) return idx;
+    idx += dir;
+    tries++;
+  }
+  return -1;
+}
+
+async function loadAndPlayIndex(idx){
+  const track = playlist[idx];
+  currentIndex = idx;
+  audio.src = track;
+  currentFile.textContent = track;
+  indexDisplay.textContent = `${idx}`;
+  audio.pause();
+  try {
+    audio.load();
+    await new Promise((resolve) => {
+      let done = false;
+      function ok(){ if(done) return; done = true; cleanup(); resolve(); }
+      function cleanup(){ audio.onloadedmetadata = null; audio.onerror = null; clearTimeout(timer); }
+      const timer = setTimeout(ok, 3000);
+      audio.onloadedmetadata = ok;
+      audio.onerror = ok;
+    });
+    await audio.play().catch(()=>{});
+    playBtn.textContent = audio.paused ? '▶' : '⏸';
+  } catch (e){
+    playBtn.textContent = '▶';
+  }
+}
+
+// Function to pause & reset all miniPlayers
+function pauseResetAllMiniPlayers() {
+  miniPlayers.forEach((a, i) => {
+    if (!a.paused && !a.ended) {
+      a.pause();
+      try { a.currentTime = 0; } catch(e) {}
+      // Update button text to ▶ for corresponding miniPlay button
+      miniPlayBtns[i].textContent = '▶';
+    }
+  });
+}
+
+async function loadNext(direction = 1){
+  pauseResetAllMiniPlayers();  // <---- pause all mini players here
+
+  let start = currentIndex + direction;
+  const found = await findAvailable(start, direction);
+  if (found >= 0){
+    await loadAndPlayIndex(found);
+  } else {
+    const ok0 = await testAudioExists(playlist[0]);
+    if (ok0) await loadAndPlayIndex(0);
+    else {
+      audio.pause();
+      audio.removeAttribute('src');
+      currentFile.textContent = 'No audio files found';
+      playBtn.textContent = '▶';
+      indexDisplay.textContent = '-';
+      timeDisplay.textContent = '00:00 / 00:00';
+      seek.value = 0;
+      seek.style.setProperty('--val', '0%');
+    }
+  }
+}
+
+(async function init(){
+  const first = await findAvailable(0, 1);
+  if (first >= 0) await loadAndPlayIndex(first);
+  else {
+    currentFile.textContent = 'No audio files found (a..a20 missing)';
+    indexDisplay.textContent = '-';
+  }
+})();
+
+playBtn.addEventListener('click', ()=>{
+  if (!audio.src) return;
+  if (audio.paused){
+    audio.play().catch(()=>{});
+    playBtn.textContent = '⏸';
+  } else {
+    audio.pause();
+    playBtn.textContent = '▶';
+  }
+});
+prevBtn.addEventListener('click', ()=> loadNext(-1));
+nextBtn.addEventListener('click', ()=> loadNext(1));
+vol.addEventListener('input', ()=> { audio.volume = vol.value; });
+
+audio.addEventListener('timeupdate', () => {
+  if (isFinite(audio.duration) && audio.duration > 0){
+    const pct = (audio.currentTime / audio.duration) * 100;
+    seek.value = pct;
+    seek.style.setProperty('--val', pct + '%');
+    timeDisplay.textContent = `${fmt(audio.currentTime)} / ${fmt(audio.duration)}`;
+  }
+});
+
+seek.addEventListener('input', ()=>{
+  if (isFinite(audio.duration) && audio.duration > 0){
+    const pct = seek.value;
+    seek.style.setProperty('--val', pct + '%');
+    audio.currentTime = (pct / 100) * audio.duration;
+  }
+});
+
+audio.addEventListener('ended', ()=> loadNext(1));
+
+/* -------------------------
+   MINI PLAY: each mini track loops itself
+   Modified so that stopping resets to start, and replay always starts from beginning
+   ------------------------- */
+
+const miniPlayBtns = Array.from(document.querySelectorAll('.miniPlay'));
+const miniVolEls = Array.from(document.querySelectorAll('.miniVol'));
+
+// create a dedicated Audio object for each mini control and set loop = true
+const miniPlayers = miniPlayBtns.map(btn => {
+  const src = btn.dataset.src;
+  const a = new Audio(src);
+  a.preload = 'metadata';
+  a.loop = true; // <-- loop the same track automatically when it ends
+  // set initial volume from corresponding slider
+  const volEl = miniVolEls.find(v => v.dataset.src === src);
+  a.volume = volEl ? parseFloat(volEl.value) : 0.8;
+  // update slider control to change volume live
+  if (volEl) volEl.addEventListener('input', ()=> a.volume = parseFloat(volEl.value));
+  // when error, disable controls
+  a.addEventListener('error', () => {
+    btn.disabled = true;
+    if (volEl) volEl.disabled = true;
+    btn.textContent = '✖';
+  });
+  // ensure UI shows ▶ when paused
+  a.addEventListener('pause', () => {
+    btn.textContent = '▶';
+  });
+  a.addEventListener('play', () => {
+    btn.textContent = '⏸';
+  });
+
+  // When paused (i.e., user stops), reset currentTime so next play starts from beginning
+  a.addEventListener('pause', () => {
+    try { a.currentTime = 0; } catch(e) { /* ignore if not allowed yet */ }
+  });
+
+  return a;
+});
+
+// toggle play/pause for clicked mini; each mini is independent and will loop when playing
+miniPlayBtns.forEach((btn, i) => {
+  const a = miniPlayers[i];
+  btn.addEventListener('click', async () => {
+    // if this mini is playing -> pause it AND reset to start
+    if (!a.paused && !a.ended) {
+      a.pause();
+      try { a.currentTime = 0; } catch (e) { /* ignore */ }
+      btn.textContent = '▶';
+      return;
+    }
+
+    // otherwise ensure we start from beginning then play
+    try {
+      try { a.currentTime = 0; } catch(e) { /* ignore */ }
+      await a.play();
+      btn.textContent = '⏸';
+    } catch (e) {
+      // autoplay may be blocked until user gesture; leave button as ▶
+      btn.textContent = '▶';
+    }
+  });
+});
+</script>
+</body>
+</html>
