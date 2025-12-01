@@ -122,7 +122,6 @@ input,select{
 
 <div class="main">
 
-  <!-- Profile Card -->
   <div class="card">
     <h3>👤 Profile Details</h3>
 
@@ -163,7 +162,6 @@ input,select{
     <button class="save-btn" onclick="saveProfile()">💾 Save / Edit Profile</button>
   </div>
 
-  <!-- Today Workout Card -->
   <div class="card">
     <h3>🏋️ Today Workout?</h3>
 
@@ -178,7 +176,6 @@ input,select{
 
 </div>
 
-<!-- Bottom Nav -->
 <div class="bottom">
   <button onclick="location.href='index.html'"><span>🏠</span>Home</button>
   <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
@@ -203,7 +200,7 @@ const inputWorkout = document.getElementById("workout");
 const inputDiet = document.getElementById("diet");
 const inputCalorie = document.getElementById("calorie");
 
-// ✅ Load saved profile
+// ✅ Load saved profile (இந்த பகுதி திருத்தப்பட்டுள்ளது)
 window.onload = () => {
   inputName.value = localStorage.getItem("name") || "";
   inputAge.value = localStorage.getItem("age") || "";
@@ -213,7 +210,9 @@ window.onload = () => {
   inputGoal.value = localStorage.getItem("goal") || "Goal";
   inputWorkout.value = localStorage.getItem("workout-level") || "Workout Level";
   inputDiet.value = localStorage.getItem("diet") || "Diet Type";
-  inputDiet.value = localStorage.getItem("diet") || "Diet Type";
+  
+  // ✅ இங்கே Calorie மதிப்பை localStorage-லிருந்து எடுத்து, அதை உள்ளீட்டுப் புலத்தில் நிரப்புகிறது.
+  inputCalorie.value = localStorage.getItem("calorie") || ""; 
 };
 
 // ✅ Save Profile
@@ -226,8 +225,8 @@ function saveProfile(){
   localStorage.setItem("goal", inputGoal.value);
   localStorage.setItem("workout-level", inputWorkout.value);
   localStorage.setItem("diet", inputDiet.value);
-localStorage.setItem("diet", inputDiet.value);
-localStorage.setItem("calorie", inputCalorie.value);
+  // localStorage.setItem("diet", inputDiet.value); // இது தேவையற்ற நகல்
+  localStorage.setItem("calorie", inputCalorie.value);
   alert("✅ Profile Saved!");
 }
 
