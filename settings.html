@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
@@ -112,11 +113,9 @@ input,select{
   <a href="diet.html">🥗 Diet Plans</a>
   <a href="fit tools.html">📋 Fit Tools</a>
   <a href="habit traker.html">♾️ Habit Traker</a>
-<a href="meditation.html">🎧 Meditation</a>
   <a href="progress.html">📊 Progress Tracker</a>
   <a href="profile.html">👤 Profile</a>
   <a href="settings.html">⚙️ Settings</a>
-<a href="#" onclick="shareApp()">🔁 Share</a>
 </div>
 
 <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
@@ -158,6 +157,8 @@ input,select{
       <option>Non-Veg</option>
       <option>Mixed</option>
     </select>
+    
+    <input type="number" id="calorie" placeholder="Your Calorie (kcal)">
 
     <button class="save-btn" onclick="saveProfile()">💾 Save / Edit Profile</button>
   </div>
@@ -200,6 +201,7 @@ const inputHeight = document.getElementById("height");
 const inputGoal = document.getElementById("goal");
 const inputWorkout = document.getElementById("workout");
 const inputDiet = document.getElementById("diet");
+const inputCalorie = document.getElementById("calorie");
 
 // ✅ Load saved profile
 window.onload = () => {
@@ -210,6 +212,7 @@ window.onload = () => {
   inputHeight.value = localStorage.getItem("height") || "";
   inputGoal.value = localStorage.getItem("goal") || "Goal";
   inputWorkout.value = localStorage.getItem("workout-level") || "Workout Level";
+  inputDiet.value = localStorage.getItem("diet") || "Diet Type";
   inputDiet.value = localStorage.getItem("diet") || "Diet Type";
 };
 
@@ -223,6 +226,8 @@ function saveProfile(){
   localStorage.setItem("goal", inputGoal.value);
   localStorage.setItem("workout-level", inputWorkout.value);
   localStorage.setItem("diet", inputDiet.value);
+localStorage.setItem("diet", inputDiet.value);
+localStorage.setItem("calorie", inputCalorie.value);
   alert("✅ Profile Saved!");
 }
 
@@ -304,19 +309,6 @@ else if (parseInt(savedMonth) !== currentMonth || parseInt(savedYear) !== curren
     console.log("✅ New Month Started! Previous month data archived successfully.");
 }
 
-
-function shareApp(){
-    if (navigator.share) {
-        navigator.share({
-            title: "Z Fitness",
-            text: "Check out this Fitness App!",
-            url: "https://onlineweb123.github.io/Z-Fitness/"
-        })
-        .catch(err => console.log("Share cancelled"));
-    } else {
-        alert("Your device does not support sharing.");
-    }
-}
 
 </script>
 
