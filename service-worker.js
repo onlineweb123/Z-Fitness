@@ -1,7 +1,5 @@
 // ✅ Service Worker - Z-Fitness
 
-// ✅ Service Worker - Z-Fitness
-
 const cacheName = 'zfitness-v1';
 const appShellFiles = [
   './',
