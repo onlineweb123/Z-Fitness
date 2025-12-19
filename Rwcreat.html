@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workout Log – Maathu</title>
+
+<style>
+:root{
+  --bg:#eef3f8;
+  --card:#ffffff;
+  --accent:#00b894;
+  --danger:#ff4757;
+  --warn:#f1c40f;
+  --text:#1c1c1c;
+}
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  justify-content:center;
+}
+
+.container{
+  width:100%;
+  max-width:420px;
+  padding:15px;
+}
+
+h2{
+  text-align:center;
+}
+
+.card{
+  background:var(--card);
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,.1);
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px;
+}
+
+.status-box{
+  display:flex;
+  justify-content:space-between;
+  margin:10px 0;
+}
+
+.status-box button{
+  width:32%;
+  padding:12px 0;
+  font-size:16px;
+  font-weight:bold;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.done{background:var(--accent); color:#fff;}
+.medium{background:var(--warn);}
+.missed{background:var(--danger); color:#fff;}
+
+.action-btn{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.save{background:var(--accent); color:#fff;}
+.delete{background:var(--danger); color:#fff;}
+
+.info{
+  margin-top:10px;
+  font-size:14px;
+  text-align:center;
+  opacity:.8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>🏋️ Workout Log</h2>
+
+  <div class="card">
+
+    <!-- Date -->
+    <input type="date" id="workoutDate">
+
+    <!-- Status -->
+    <div class="status-box">
+      <button class="done" onclick="selectStatus('✅ Done')">✅</button>
+      <button class="medium" onclick="selectStatus('🟡 Medium')">🟡</button>
+      <button class="missed" onclick="selectStatus('❌ Missed')">❌</button>
+    </div>
+
+    <!-- Actions -->
+    <button class="action-btn save" onclick="saveWorkout()">💾 Save / Update</button>
+    <button class="action-btn delete" onclick="deleteWorkout()">🗑️ Delete</button>
+
+    <div class="info" id="infoText">📅 Date select செய்து workout choose பண்ணு</div>
+
+  </div>
+</div>
+
+<script>
+const dateInput = document.getElementById("workoutDate");
+const infoText = document.getElementById("infoText");
+
+let selectedStatus = "";
+
+/* Select workout */
+function selectStatus(status){
+  selectedStatus = status;
+  infoText.innerText = "Selected: " + status;
+}
+
+/* Load data when date changes (Edit mode) */
+dateInput.addEventListener("change", () => {
+  const date = dateInput.value;
+  let workouts = JSON.parse(localStorage.getItem("workouts")) || {};
+
+  if(workouts[date]){
+    selectedStatus = workouts[date];
+    infoText.innerText = "Saved workout: " + workouts[date];
+  }else{
+    selectedStatus = "";
+    infoText.innerText = "No workout saved for this date";
+  }
+});
+
+/* Save / Update workout */
+function saveWorkout(){
+  const date = dateInput.value;
+
+  if(!date){
+    alert("📅 Date select பண்ணு");
+    return;
+  }
+  if(selectedStatus === ""){
+    alert("🏋️ Workout status select பண்ணு");
+    return;
+  }
+
+  let workouts = JSON.parse(localStorage.getItem("workouts")) || {};
+  workouts[date] = selectedStatus;
+
+  localStorage.setItem("workouts", JSON.stringify(workouts));
+  alert("✅ Workout saved for " + date);
+}
+
+/* Delete workout */
+function deleteWorkout(){
+  const date = dateInput.value;
+  if(!date){
+    alert("📅 Date select பண்ணு");
+    return;
+  }
+
+  let workouts = JSON.parse(localStorage.getItem("workouts")) || {};
+
+  if(!workouts[date]){
+    alert("❌ This date-ல data இல்லை");
+    return;
+  }
+
+  delete workouts[date];
+  localStorage.setItem("workouts", JSON.stringify(workouts));
+
+  selectedStatus = "";
+  infoText.innerText = "🗑️ Workout deleted for " + date;
+}
+</script>
+
+</body>
+</html>
