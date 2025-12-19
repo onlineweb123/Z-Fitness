@@ -1,197 +1,226 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Workout Log – Maathu</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Workout Tracker - Maathu Fitness</title>
 
 <style>
 :root{
   --bg:#eef3f8;
-  --card:#ffffff;
-  --accent:#00b894;
-  --danger:#ff4757;
-  --warn:#f1c40f;
+  --card:#ffffffcc;
+  --border:#d7e0ea;
+  --accent:#007bff;
+  --accent2:#00b894;
   --text:#1c1c1c;
 }
 
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:'Poppins',Arial,sans-serif;
   background:var(--bg);
   color:var(--text);
-  display:flex;
-  justify-content:center;
+}
+*,button,a{transition:0.25s;}
+
+header{
+  height:60px; display:flex; align-items:center; justify-content:center;
+  font-size:19px; font-weight:700;
+  position:fixed; top:0; left:0; right:0;
+  background:blue; color:white;
+  z-index:10;
+}
+.menu-btn{
+  position:absolute; left:14px; font-size:26px; background:none; border:none; cursor:pointer; color:white;
 }
 
-.container{
-  width:100%;
-  max-width:420px;
-  padding:15px;
+.sidebar{
+  width:250px; background:#ffffffee; position:fixed; top:0; bottom:0; left:-260px; 
+  padding-top:75px; border-right:1px solid var(--border); transition:.35s;
+  backdrop-filter:blur(10px);
+  z-index:20;
 }
+.sidebar.open{left:0;}
+.sidebar a{
+  display:flex; align-items:center; padding:16px 22px; font-size:17px; 
+  text-decoration:none; color:var(--text); border-bottom:1px solid #f1f4f6;
+}
+.sidebar a:hover{background:#f8fffd; color:var(--accent); padding-left:28px;}
 
-h2{
-  text-align:center;
+.main{
+  position:absolute; top:65px; bottom:65px; left:0; right:0;
+  overflow-y:auto; padding:18px;
 }
 
 .card{
-  background:var(--card);
-  padding:15px;
-  border-radius:12px;
-  box-shadow:0 3px 10px rgba(0,0,0,.1);
+  background:white; padding:15px; border-radius:12px; margin-bottom:15px;
+  box-shadow:0 3px 10px rgba(0,0,0,.08);
 }
 
 input{
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:15px;
+  width:94%; padding:12px; margin:8px 0; border-radius:10px;
+  border:1px solid var(--border); font-size:14px;
 }
 
-.status-box{
-  display:flex;
-  justify-content:space-between;
-  margin:10px 0;
-}
-
+.status-box{display:flex; justify-content:space-between; margin-top:5px; margin-bottom: 10px;}
 .status-box button{
-  width:32%;
-  padding:12px 0;
-  font-size:16px;
-  font-weight:bold;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
+  width:32%; padding:10px; font-size:15px; font-weight:700; border:2px solid transparent; border-radius:8px; cursor:pointer;
 }
+.status-box button.selected { border-color: #000; transform: scale(1.05); }
+.yes{background:#00b894;color:white;}
+.medium{background:#f1c40f;color:black;}
+.no{background:#ff4757;color:white;}
 
-.done{background:var(--accent); color:#fff;}
-.medium{background:var(--warn);}
-.missed{background:var(--danger); color:#fff;}
-
-.action-btn{
-  width:100%;
-  padding:12px;
+.save-btn{
+  width:100%; padding:12px; background:var(--accent2);
+  color:white; font-weight:700; border:none; border-radius:10px; font-size:15px; cursor:pointer;
   margin-top:10px;
-  border:none;
-  border-radius:8px;
-  font-size:15px;
-  font-weight:bold;
-  cursor:pointer;
 }
 
-.save{background:var(--accent); color:#fff;}
-.delete{background:var(--danger); color:#fff;}
-
-.info{
-  margin-top:10px;
-  font-size:14px;
-  text-align:center;
-  opacity:.8;
+.history-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px; border-bottom: 1px solid #eee;
 }
+.delete-btn {
+  background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;
+}
+
+.bottom{
+  height:60px; position:fixed; bottom:0; left:0; right:0; display:flex;
+  justify-content:space-around; align-items:center; background:#ffffffcc; border-top:1px solid var(--border);
+}
+.bottom button{
+  background:none; border:none; font-size:13px; display:flex; flex-direction:column; align-items:center; opacity:.6; cursor:pointer; font-weight:600;
+}
+.bottom button span{font-size:22px;}
+
+.overlay{
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.4); display:none; z-index:15;
+}
+.overlay.show{ display:block; }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-  <h2>🏋️ Workout Log</h2>
+<header>
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  📥 Save Workout Data
+</header>
+
+<div id="sidebar" class="sidebar">
+  <a href="#">🏠 Dashboard</a>
+  <a href="#">🔥 Workouts</a>
+  <a href="#">🥗 Diet Plans</a>
+</div>
+
+<div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+
+<div class="main">
 
   <div class="card">
-
-    <!-- Date -->
+    <h3>🏋️ Log Workout</h3>
+    
+    <label>Select Date:</label>
     <input type="date" id="workoutDate">
 
-    <!-- Status -->
     <div class="status-box">
-      <button class="done" onclick="selectStatus('✅ Done')">✅</button>
-      <button class="medium" onclick="selectStatus('🟡 Medium')">🟡</button>
-      <button class="missed" onclick="selectStatus('❌ Missed')">❌</button>
+      <button class="yes" id="btn-done" onclick="selectStatus('✅ Done')">✅</button>
+      <button class="medium" id="btn-med" onclick="selectStatus('🟡 Medium')">🟡</button>
+      <button class="no" id="btn-miss" onclick="selectStatus('❌ Missed')">❌</button>
     </div>
 
-    <!-- Actions -->
-    <button class="action-btn save" onclick="saveWorkout()">💾 Save / Update</button>
-    <button class="action-btn delete" onclick="deleteWorkout()">🗑️ Delete</button>
-
-    <div class="info" id="infoText">📅 Date select செய்து workout choose பண்ணு</div>
-
+    <button class="save-btn" onclick="saveWorkoutLog()">💾 Save Workout</button>
   </div>
+
+  <div class="card">
+    <h3>📊 Workout History</h3>
+    <div id="historyList">
+      </div>
+  </div>
+
 </div>
+
+<div class="bottom">
+  <button><span>🏠</span>Home</button>
+  <button><span>🔥</span>Workout</button>
+  <button><span>🥗</span>Diet</button>
+</div>
+
 <script>
-const dateInput = document.getElementById("workoutDate");
-const infoText = document.getElementById("infoText");
+function toggleMenu(){
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("show");
+}
 
 let selectedStatus = "";
 
-/* Select workout */
-function selectStatus(status){
-  selectedStatus = status;
-  infoText.innerText = "Selected: " + status;
+// Default date set to today
+document.getElementById('workoutDate').valueAsDate = new Date();
+
+function selectStatus(status) {
+    selectedStatus = status;
+    document.querySelectorAll('.status-box button').forEach(btn => btn.classList.remove('selected'));
+    if(status.includes("✅")) document.getElementById('btn-done').classList.add('selected');
+    if(status.includes("🟡")) document.getElementById('btn-med').classList.add('selected');
+    if(status.includes("❌")) document.getElementById('btn-miss').classList.add('selected');
 }
 
-/* Load workout using SAME KEY as first page */
-dateInput.addEventListener("change", () => {
-  const date = dateInput.value;
-  if(!date) return;
+// ✅ Save Workout Log
+function saveWorkoutLog() {
+    const dateInput = document.getElementById("workoutDate").value;
+    
+    if(!dateInput || !selectedStatus) {
+        alert("Please select both Date and Status!");
+        return;
+    }
 
-  const key = "workout_" + date;
-  const saved = localStorage.getItem(key);
-
-  if(saved){
-    selectedStatus = saved;
-    infoText.innerText = "Saved workout: " + saved;
-  }else{
-    selectedStatus = "";
-    infoText.innerText = "No workout saved for this date";
-  }
-});
-
-/* Save / Update */
-function saveWorkout(){
-  const date = dateInput.value;
-  if(!date){
-    alert("📅 Date select பண்ணு");
-    return;
-  }
-  if(selectedStatus === ""){
-    alert("🏋️ Workout status select பண்ணு");
-    return;
-  }
-
-  const key = "workout_" + date;
-  localStorage.setItem(key, selectedStatus);
-
-  // also update todayWorkout if today
-  const today = new Date().toISOString().split("T")[0];
-  if(date === today){
-    localStorage.setItem("todayWorkout", selectedStatus);
-  }
-
-  alert("✅ Workout saved for " + date);
+    let workoutHistory = JSON.parse(localStorage.getItem("workoutHistory")) || {};
+    workoutHistory[dateInput] = selectedStatus;
+    
+    localStorage.setItem("workoutHistory", JSON.stringify(workoutHistory));
+    alert("Data saved for " + dateInput);
+    loadHistory();
 }
 
-/* Delete */
-function deleteWorkout(){
-  const date = dateInput.value;
-  if(!date){
-    alert("📅 Date select பண்ணு");
-    return;
-  }
+// ✅ Load History
+function loadHistory() {
+    const historyList = document.getElementById("historyList");
+    historyList.innerHTML = "";
+    
+    let workoutHistory = JSON.parse(localStorage.getItem("workoutHistory")) || {};
+    const sortedDates = Object.keys(workoutHistory).sort().reverse();
 
-  const key = "workout_" + date;
+    if(sortedDates.length === 0) {
+        historyList.innerHTML = "<p style='text-align:center;color:grey;'>No records found.</p>";
+        return;
+    }
 
-  if(!localStorage.getItem(key)){
-    alert("❌ Data இல்லை");
-    return;
-  }
-
-  localStorage.removeItem(key);
-  selectedStatus = "";
-  infoText.innerText = "🗑️ Workout deleted for " + date;
+    sortedDates.forEach(date => {
+        const item = document.createElement("div");
+        item.className = "history-item";
+        item.innerHTML = `
+            <span><strong>${date}</strong>: ${workoutHistory[date]}</span>
+            <button class="delete-btn" onclick="deleteEntry('${date}')">Delete</button>
+        `;
+        historyList.appendChild(item);
+    });
 }
+
+// ✅ Delete Entry
+function deleteEntry(date) {
+    if(confirm("Do you want to delete this record?")) {
+        let workoutHistory = JSON.parse(localStorage.getItem("workoutHistory")) || {};
+        delete workoutHistory[date];
+        localStorage.setItem("workoutHistory", JSON.stringify(workoutHistory));
+        loadHistory();
+    }
+}
+
+window.onload = loadHistory;
 </script>
-
 
 </body>
 </html>
