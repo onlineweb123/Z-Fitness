@@ -111,9 +111,9 @@ input{
 </header>
 
 <div id="sidebar" class="sidebar">
-  <a href="#">🏠 Dashboard</a>
-  <a href="#">🔥 Workouts</a>
-  <a href="#">🥗 Diet Plans</a>
+  <a href="index.html">🏠 Dashboard</a>
+  <a href="workouts.html">🔥 Workouts</a>
+  <a href="diet.html">🥗 Diet Plans</a>
 </div>
 
 <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
@@ -138,15 +138,15 @@ input{
   <div class="card">
     <h3>📊 Workout History</h3>
     <div id="historyList">
-      </div>
+    </div>
   </div>
 
 </div>
 
 <div class="bottom">
-  <button><span>🏠</span>Home</button>
-  <button><span>🔥</span>Workout</button>
-  <button><span>🥗</span>Diet</button>
+  <button onclick="location.href='index.html'"><span>🏠</span>Home</button>
+  <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
+  <button onclick="location.href='diet.html'"><span>🥗</span>Diet</button>
 </div>
 
 <script>
@@ -157,7 +157,7 @@ function toggleMenu(){
 
 let selectedStatus = "";
 
-// Default date set to today
+// இன்றைய தேதியைத் தானாக அமைக்க
 document.getElementById('workoutDate').valueAsDate = new Date();
 
 function selectStatus(status) {
@@ -173,16 +173,53 @@ function saveWorkoutLog() {
     const dateInput = document.getElementById("workoutDate").value;
     
     if(!dateInput || !selectedStatus) {
-        alert("Please select both Date and Status!");
+        alert("தயவுசெய்து தேதி மற்றும் வொர்க்அவுட் நிலையைத் தேர்ந்தெடுக்கவும்!");
         return;
     }
 
+    // 1. வரலாற்றில் சேமிக்க
     let workoutHistory = JSON.parse(localStorage.getItem("workoutHistory")) || {};
     workoutHistory[dateInput] = selectedStatus;
-    
     localStorage.setItem("workoutHistory", JSON.stringify(workoutHistory));
-    alert("Data saved for " + dateInput);
+    
+    // 2. Dashboard Chart-உடன் இணைக்க
+    syncWithDashboard();
+
+    alert("✅ தரவு சேமிக்கப்பட்டது: " + dateInput);
     loadHistory();
+}
+
+// ✅ Dashboard-க்குத் தேவையான Arrays-களைப் புதுப்பிக்க (Chart Update)
+function syncWithDashboard() {
+    let workoutHistory = JSON.parse(localStorage.getItem("workoutHistory")) || {};
+    let doneDays = [];
+    let mediumDays = [];
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+    const currentMonth = new Date().getMonth();
+
+    for (let date in workoutHistory) {
+        let d = new Date(date);
+        // நடப்பு மாதத்தின் தரவுகளை மட்டும் Chart-க்கு அனுப்ப
+        if (d.getMonth() === currentMonth) {
+            let dayNumber = d.getDate();
+            let status = workoutHistory[date];
+
+            if (status.includes("✅")) {
+                doneDays.push(dayNumber);
+            } else if (status.includes("🟡")) {
+                mediumDays.push(dayNumber);
+            }
+        }
+
+        // இன்றுக்கான வொர்க்அவுட் என்றால் "Today Goals"-க்குச் சேமிக்க
+        if (date === todayStr) {
+            localStorage.setItem("todayWorkout", workoutHistory[date]);
+        }
+    }
+
+    localStorage.setItem("doneWorkoutDays", JSON.stringify(doneDays));
+    localStorage.setItem("mediumWorkoutDays", JSON.stringify(mediumDays));
 }
 
 // ✅ Load History
@@ -194,7 +231,7 @@ function loadHistory() {
     const sortedDates = Object.keys(workoutHistory).sort().reverse();
 
     if(sortedDates.length === 0) {
-        historyList.innerHTML = "<p style='text-align:center;color:grey;'>No records found.</p>";
+        historyList.innerHTML = "<p style='text-align:center;color:grey;'>பதிவுகள் எதுவும் இல்லை.</p>";
         return;
     }
 
@@ -203,7 +240,7 @@ function loadHistory() {
         item.className = "history-item";
         item.innerHTML = `
             <span><strong>${date}</strong>: ${workoutHistory[date]}</span>
-            <button class="delete-btn" onclick="deleteEntry('${date}')">Delete</button>
+            <button class="delete-btn" onclick="deleteEntry('${date}')">நீக்குக</button>
         `;
         historyList.appendChild(item);
     });
@@ -211,10 +248,18 @@ function loadHistory() {
 
 // ✅ Delete Entry
 function deleteEntry(date) {
-    if(confirm("Do you want to delete this record?")) {
+    if(confirm("இந்தப் பதிவை நீக்க வேண்டுமா?")) {
         let workoutHistory = JSON.parse(localStorage.getItem("workoutHistory")) || {};
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (date === todayStr) {
+            localStorage.setItem("todayWorkout", "Rest Day 😴");
+        }
+
         delete workoutHistory[date];
         localStorage.setItem("workoutHistory", JSON.stringify(workoutHistory));
+        
+        syncWithDashboard(); // சார்ட்டை அப்டேட் செய்ய
         loadHistory();
     }
 }
