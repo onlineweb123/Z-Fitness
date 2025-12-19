@@ -118,7 +118,6 @@ input{
 
   </div>
 </div>
-
 <script>
 const dateInput = document.getElementById("workoutDate");
 const infoText = document.getElementById("infoText");
@@ -131,24 +130,26 @@ function selectStatus(status){
   infoText.innerText = "Selected: " + status;
 }
 
-/* Load data when date changes (Edit mode) */
+/* Load workout using SAME KEY as first page */
 dateInput.addEventListener("change", () => {
   const date = dateInput.value;
-  let workouts = JSON.parse(localStorage.getItem("workouts")) || {};
+  if(!date) return;
 
-  if(workouts[date]){
-    selectedStatus = workouts[date];
-    infoText.innerText = "Saved workout: " + workouts[date];
+  const key = "workout_" + date;
+  const saved = localStorage.getItem(key);
+
+  if(saved){
+    selectedStatus = saved;
+    infoText.innerText = "Saved workout: " + saved;
   }else{
     selectedStatus = "";
     infoText.innerText = "No workout saved for this date";
   }
 });
 
-/* Save / Update workout */
+/* Save / Update */
 function saveWorkout(){
   const date = dateInput.value;
-
   if(!date){
     alert("📅 Date select பண்ணு");
     return;
@@ -158,14 +159,19 @@ function saveWorkout(){
     return;
   }
 
-  let workouts = JSON.parse(localStorage.getItem("workouts")) || {};
-  workouts[date] = selectedStatus;
+  const key = "workout_" + date;
+  localStorage.setItem(key, selectedStatus);
 
-  localStorage.setItem("workouts", JSON.stringify(workouts));
+  // also update todayWorkout if today
+  const today = new Date().toISOString().split("T")[0];
+  if(date === today){
+    localStorage.setItem("todayWorkout", selectedStatus);
+  }
+
   alert("✅ Workout saved for " + date);
 }
 
-/* Delete workout */
+/* Delete */
 function deleteWorkout(){
   const date = dateInput.value;
   if(!date){
@@ -173,20 +179,19 @@ function deleteWorkout(){
     return;
   }
 
-  let workouts = JSON.parse(localStorage.getItem("workouts")) || {};
+  const key = "workout_" + date;
 
-  if(!workouts[date]){
-    alert("❌ This date-ல data இல்லை");
+  if(!localStorage.getItem(key)){
+    alert("❌ Data இல்லை");
     return;
   }
 
-  delete workouts[date];
-  localStorage.setItem("workouts", JSON.stringify(workouts));
-
+  localStorage.removeItem(key);
   selectedStatus = "";
   infoText.innerText = "🗑️ Workout deleted for " + date;
 }
 </script>
+
 
 </body>
 </html>
