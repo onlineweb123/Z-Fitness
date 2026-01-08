@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
@@ -92,10 +93,7 @@ input,select{
   display:none;
   z-index:15;
 }
-
-.overlay.show{
-  display:block;
-}
+.overlay.show{display:block;}
 </style>
 </head>
 
@@ -124,7 +122,7 @@ input,select{
   <div class="card">
     <h3>👤 Profile Details</h3>
 
-    <input type="text" id="name" placeholder="Name">
+    <!-- ❌ Name Removed -->
     <input type="number" id="age" placeholder="Age">
     <select id="gender">
       <option value="">Select Gender</option>
@@ -188,8 +186,7 @@ function toggleMenu(){
   overlay.classList.toggle("show");
 }
 
-// ✅ Bind input elements
-const inputName = document.getElementById("name");
+// ✅ Bind inputs (Name removed)
 const inputAge = document.getElementById("age");
 const inputGender = document.getElementById("gender");
 const inputWeight = document.getElementById("weight");
@@ -199,9 +196,8 @@ const inputWorkout = document.getElementById("workout");
 const inputDiet = document.getElementById("diet");
 const inputCalorie = document.getElementById("calorie");
 
-// ✅ Load saved profile (இந்த பகுதி திருத்தப்பட்டுள்ளது)
+// ✅ Load saved profile
 window.onload = () => {
-  inputName.value = localStorage.getItem("name") || "";
   inputAge.value = localStorage.getItem("age") || "";
   inputGender.value = localStorage.getItem("gender") || "";
   inputWeight.value = localStorage.getItem("weight") || "";
@@ -209,14 +205,11 @@ window.onload = () => {
   inputGoal.value = localStorage.getItem("goal") || "Goal";
   inputWorkout.value = localStorage.getItem("workout-level") || "Workout Level";
   inputDiet.value = localStorage.getItem("diet") || "Diet Type";
-  
-  // ✅ இங்கே Calorie மதிப்பை localStorage-லிருந்து எடுத்து, அதை உள்ளீட்டுப் புலத்தில் நிரப்புகிறது.
-  inputCalorie.value = localStorage.getItem("calorie") || ""; 
+  inputCalorie.value = localStorage.getItem("calorie") || "";
 };
 
-// ✅ Save Profile
+// ✅ Save Profile (Name removed)
 function saveProfile(){
-  localStorage.setItem("name", inputName.value);
   localStorage.setItem("age", inputAge.value);
   localStorage.setItem("gender", inputGender.value);
   localStorage.setItem("weight", inputWeight.value);
@@ -224,90 +217,38 @@ function saveProfile(){
   localStorage.setItem("goal", inputGoal.value);
   localStorage.setItem("workout-level", inputWorkout.value);
   localStorage.setItem("diet", inputDiet.value);
-  // localStorage.setItem("diet", inputDiet.value); // இது தேவையற்ற நகல்
   localStorage.setItem("calorie", inputCalorie.value);
   alert("✅ Profile Saved!");
 }
 
-// ✅ Set Today workout temp
+// ✅ Workout status logic (unchanged)
 let todayStatus = "";
 
-function saveToday(val){
-  todayStatus = val;
-}
+function saveToday(val){ todayStatus = val; }
 
-// ✅ Final Save Today
 function saveTodayStatus(){
-  if(todayStatus === ""){ 
-    alert("Select today's workout first!"); 
-    return; 
-  }
+  if(todayStatus === ""){ alert("Select today's workout first!"); return; }
 
   let date = new Date();
-  let today = date.toISOString().split('T')[0];
-  let day = date.getDate();  // 1,2,3....
+  let day = date.getDate();
 
-  // Save single status
   localStorage.setItem("todayWorkout", todayStatus);
-  localStorage.setItem("workout_"+today, todayStatus);
+  localStorage.setItem("workout_"+day, todayStatus);
 
-  // Get existing arrays
   let doneDays = JSON.parse(localStorage.getItem("doneWorkoutDays")) || [];
   let mediumDays = JSON.parse(localStorage.getItem("mediumWorkoutDays")) || [];
 
-  // Remove day if previously saved to avoid duplicate
   doneDays = doneDays.filter(d => d !== day);
   mediumDays = mediumDays.filter(d => d !== day);
 
-  // Push to correct array
-  if(todayStatus.includes("✅")){
-    doneDays.push(day);
-  } 
-  else if(todayStatus.includes("🟡")){
-    mediumDays.push(day);
-  }
+  if(todayStatus.includes("✅")) doneDays.push(day);
+  else if(todayStatus.includes("🟡")) mediumDays.push(day);
 
-  // Save arrays back
   localStorage.setItem("doneWorkoutDays", JSON.stringify(doneDays));
   localStorage.setItem("mediumWorkoutDays", JSON.stringify(mediumDays));
 
   alert("🔥 Workout Saved: " + todayStatus);
 }
-
-// ✅ Monthly Reset System (Auto Archive & Reset)
-const currentDate = new Date();
-const currentMonth = currentDate.getMonth();
-const currentYear = currentDate.getFullYear();
-
-const savedMonth = localStorage.getItem("currentMonth");
-const savedYear = localStorage.getItem("currentYear");
-
-// First time setup
-if (savedMonth == null || savedYear == null) {
-    localStorage.setItem("currentMonth", currentMonth);
-    localStorage.setItem("currentYear", currentYear);
-} 
-// If month or year changed, archive and reset
-else if (parseInt(savedMonth) !== currentMonth || parseInt(savedYear) !== currentYear) {
-    const archiveKeyDone = `history_done_${savedYear}_${savedMonth}`;
-    const archiveKeyMedium = `history_medium_${savedYear}_${savedMonth}`;
-    
-    // Save previous month data
-    localStorage.setItem(archiveKeyDone, localStorage.getItem("doneWorkoutDays"));
-    localStorage.setItem(archiveKeyMedium, localStorage.getItem("mediumWorkoutDays"));
-
-    // Reset current data
-    localStorage.setItem("doneWorkoutDays", JSON.stringify([]));
-    localStorage.setItem("mediumWorkoutDays", JSON.stringify([]));
-
-    // Update to current month
-    localStorage.setItem("currentMonth", currentMonth);
-    localStorage.setItem("currentYear", currentYear);
-
-    console.log("✅ New Month Started! Previous month data archived successfully.");
-}
-
-
 </script>
 
 </body>
