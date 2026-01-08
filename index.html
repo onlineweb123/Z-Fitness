@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -95,15 +97,13 @@ header{
 .stat{background:#fff; padding:12px; flex:1; margin:4px; border-radius:12px; text-align:center; font-size:14px; border:1px solid var(--border);}
 .stat strong{font-size:18px; display:block; margin-bottom:4px;}
 
-/* Calorie Target Card க்கான ஸ்டைலிங் */
 #calorieTargetText {
-    font-size: 26px; /* Today Goal-ஐ விடச் சற்றுப் பெரியதாக */
+    font-size: 26px; 
     font-weight: 700;
-    color: var(--accent2); /* பச்சை நிறம் */
+    color: var(--accent2); 
     text-align: center;
     margin: 10px 0 5px 0;
 }
-
 
 .bottom{
   height:60px; position:fixed; bottom:0; left:0; right:0; 
@@ -116,6 +116,54 @@ header{
 }
 .bottom button.active{opacity:1; color:var(--accent);}
 .bottom button span{font-size:22px;}
+
+#loginOverlay {
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.9);
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    z-index: 9999; 
+    backdrop-filter: blur(10px);
+}
+
+.login-card {
+    background: white; 
+    padding: 30px; 
+    border-radius: 20px;
+    width: 85%; 
+    max-width: 350px; 
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.login-card input {
+    width: 100%; 
+    padding: 12px; 
+    margin: 10px 0;
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    box-sizing: border-box;
+}
+
+.login-card button {
+    width: 100%; 
+    padding: 12px; 
+    background: #007bff;
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.error-msg { 
+    color: red; 
+    font-size: 13px; 
+    margin-top: 10px; 
+    display: none; 
+}
 </style>
 
 </head>
@@ -131,9 +179,9 @@ header{
   <a href="workouts.html">🔥 Workouts</a>
   <a href="diet.html">🥗 Diet Plans</a>
   <a href="fit tools.html">📋 Fit Tools</a>
-<a href="habit traker.html">♾️ Habit Traker</a>
+  <a href="habit traker.html">♾️ Habit Traker</a>
   <a href="nutrition tracker.html">🍱 Nutrition Tracker</a>
-<a href="meditation.html">🎧 Meditation</a>
+  <a href="meditation.html">🎧 Meditation</a>
   <a href="progress.html">📊 Progress Tracker</a>
   <a href="profile.html">👤 Profile</a>
   <a href="settings.html">⚙️ Settings</a>
@@ -176,52 +224,62 @@ header{
   <button onclick="location.href='profile.html'"><span>👤</span>Profile</button>
 </div>
 
+<div id="loginOverlay">
+    <div class="login-card">
+        <h2>🔒 Z Fitness Login</h2>
+        <input type="text" id="uName" placeholder="User Name">
+        <input type="password" id="uPass" placeholder="Password">
+        <button onclick="checkLogin()">Login</button>
+        <p id="error" class="error-msg"></p>
+    </div>
+</div>
+
+<ul id="userDatabase" style="display: none;">
+    <li data-user="Mathu" data-pass="mathu123" data-expiry="2026-12-31"></li>
+    <li data-user="sathish" data-pass="gy153" data-expiry="2026-05-20"></li>
+    <li data-user="kumar" data-pass="rul124" data-expiry="2026-01-10"></li>
+    <li data-user="mgky" data-pass="ma125" data-expiry="2025-12-31"></li>
+    <li data-user="4657" data-pass="m78123" data-expiry="2026-08-15"></li>
+     <li data-user="Mathavan" data-pass="mathu123" data-expiry="2026-08-15"></li>
+</ul>
+
 <script>
 function toggleMenu(){
-  let side = document.getElementById("sidebar");
-  let over = document.getElementById("overlay");
-  let main = document.getElementById("main");
-  side.classList.toggle("open");
-  over.classList.toggle("show");
-  main.classList.toggle("blur");
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("show");
+  document.getElementById("main").classList.toggle("blur");
 }
 
 const get = k => localStorage.getItem(k) || "--";
-// Name fallback (name → username)
-document.getElementById("username").innerText = localStorage.getItem("name") 
-    || localStorage.getItem("username") 
-    || "--";
-    
-document.getElementById("weightShow").innerText = get("weight");
-document.getElementById("goalShow").innerText = get("goal");
-document.getElementById("levelShow").innerText = get("workout-level");
 
-// ✅ Calorie மதிப்பை எடுத்து பெரிய கார்டில் காண்பிக்கிறது
-const calorieValue = get("calorie");
-document.getElementById("calorieTargetText").innerText = 
-    calorieValue !== "--" ? `${calorieValue} kcal` : "Set your target in Profile";
+// Dashboard Data Loading
+function loadDashboard() {
+    document.getElementById("username").innerText = localStorage.getItem("name") || "--";
+    document.getElementById("weightShow").innerText = get("weight");
+    document.getElementById("goalShow").innerText = get("goal");
+    document.getElementById("levelShow").innerText = get("workout-level");
+    const calorieValue = get("calorie");
+    document.getElementById("calorieTargetText").innerText = calorieValue !== "--" ? `${calorieValue} kcal` : "Set your target in Profile";
+    document.getElementById("todayWorkoutText").innerText = get("todayWorkout") || "Rest Day 😴";
+}
 
-document.getElementById("todayWorkoutText").innerText = get("todayWorkout") || "Rest Day 😴";
-
+// Chart Logic
 const daysContainer = document.getElementById("daysChart");
 const today = new Date();
 const year = today.getFullYear();
 const month = today.getMonth();
 const totalDays = new Date(year, month+1, 0).getDate();
 const todayDate = today.getDate();
-
 let doneDays = JSON.parse(localStorage.getItem("doneWorkoutDays")) || [];
 let mediumDays = JSON.parse(localStorage.getItem("mediumWorkoutDays")) || [];
 
 for(let i = 1; i <= totalDays; i++){
   let bar = document.createElement("div");
   bar.classList.add("chart-bar");
-
   if(i > todayDate){ bar.classList.add("future"); bar.style.height="20%"; }
   else if(doneDays.includes(i)){ bar.classList.add("completed"); bar.style.height="100%"; }
   else if(mediumDays.includes(i)){ bar.classList.add("medium"); bar.style.height="60%"; }
   else{ bar.classList.add("missed"); bar.style.height="35%"; }
-
   daysContainer.appendChild(bar);
 }
 
@@ -231,13 +289,85 @@ function shareApp(){
             title: "Z Fitness",
             text: "Check out this Fitness App!",
             url: "https://onlineweb123.github.io/Z-Fitness/"
-        })
-        .catch(err => console.log("Share cancelled"));
+        }).catch(err => console.log("Share cancelled"));
     } else {
         alert("Your device does not support sharing.");
     }
 }
 
+// --- Login Logic with Expiry Check ---
+function checkLogin() {
+    const userIn = document.getElementById("uName").value;
+    const passIn = document.getElementById("uPass").value;
+    const error = document.getElementById("error");
+    const users = document.querySelectorAll("#userDatabase li");
+    const now = new Date();
+
+    let authenticated = false;
+    let expired = false;
+
+    users.forEach(u => {
+        const uName = u.getAttribute("data-user");
+        const uPass = u.getAttribute("data-pass");
+        const uExpiry = new Date(u.getAttribute("data-expiry"));
+
+        if (userIn === uName && passIn === uPass) {
+            if (now <= uExpiry) {
+                authenticated = true;
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("name", uName);
+            } else {
+                expired = true;
+            }
+        }
+    });
+
+    if (authenticated) {
+        document.getElementById("loginOverlay").style.display = "none";
+        loadDashboard();
+        error.style.display = "none";
+    } else if (expired) {
+        error.innerText = "Access Expired! Contact Admin.";
+        error.style.display = "block";
+    } else {
+        error.innerText = "Incorrect User Name or Password!";
+        error.style.display = "block";
+    }
+}
+
+// Check session and Expiry on load
+window.onload = function() {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const loggedName = localStorage.getItem("name");
+    const now = new Date();
+    let validSession = false;
+
+    if (isLoggedIn && loggedName) {
+        const users = document.querySelectorAll("#userDatabase li");
+        users.forEach(u => {
+            if (u.getAttribute("data-user") === loggedName) {
+                const uExpiry = new Date(u.getAttribute("data-expiry"));
+                if (now <= uExpiry) {
+                    validSession = true;
+                }
+            }
+        });
+    }
+
+    if (validSession) {
+        document.getElementById("loginOverlay").style.display = "none";
+        loadDashboard();
+    } else {
+        // If expired or not logged in, force show login
+        localStorage.removeItem("isLoggedIn");
+        document.getElementById("loginOverlay").style.display = "flex";
+    }
+};
+
+function logout() {
+    localStorage.removeItem("isLoggedIn");
+    location.reload();
+}
 </script>
 </body>
 </html>
