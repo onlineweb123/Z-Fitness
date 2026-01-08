@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
@@ -124,34 +125,21 @@ h3{margin:10px 0 5px;}
 }
 .bottom button span{font-size:22px;}
 
- .buttonpre {
-    color: white;
-    background: #005bf5;
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    padding: 15px;
-    margin: 1.5px;
-    width: 100%;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 91, 245, 0.3);
-    transition: all 0.3s ease;
+.buttonpre {
+  color: white;
+  background: #005bf5;
+  font-size: 16px;
+  padding: 15px;
+  margin: 1.5px;
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 91, 245, 0.3);
 }
-
-.buttonpre:hover {
-    background: #1d4ed8;
-    box-shadow: 0 6px 15px rgba(0, 91, 245, 0.4);
-    transform: translateY(-2px);
+.buttonpre:hover{
+  background:#1d4ed8;
 }
-
-.buttonpre:active {
-    transform: translateY(1px);
-    box-shadow: 0 3px 8px rgba(0, 91, 245, 0.3);
-}
-
-
-
 </style>
 </head>
 
@@ -166,14 +154,15 @@ h3{margin:10px 0 5px;}
   <a href="index.html">🏠 Dashboard</a>
   <a href="workouts.html">🔥 Workouts</a>
   <a href="diet.html">🥗 Diet Plans</a>
-<a href="fit tools.html">📋 Fit Tools</a>
-<a href="habit traker.html">♾️ Habit Traker</a>
-<a href="meditation.html">🎧 Meditation</a>
+  <a href="fit tools.html">📋 Fit Tools</a>
+  <a href="habit traker.html">♾️ Habit Traker</a>
+  <a href="meditation.html">🎧 Meditation</a>
   <a href="progress.html">📊 Progress Tracker</a>
   <a href="profile.html">👤 Profile</a>
   <a href="Recreat.html">⚙️ Settings</a>
-<a href="#" onclick="shareApp()">🔁 Share</a>
+  <a href="#" onclick="shareApp()">🔁 Share</a>
 </div>
+
 <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
 
 <div class="main">
@@ -189,36 +178,27 @@ h3{margin:10px 0 5px;}
     <div class="info-row"><b>Gender</b><span id="showGender">--</span></div>
   </div>
 
+  <div class="profile-card">
+    <h2>Premium Code</h2>
 
-
-<div class="profile-card">
-  <h2>Premium Code</h2>
-
-  <div class="premium">
     <button class="buttonpre" onclick="window.location.href='index.html'">
       Free Trial
     </button>
-  </div>
-  <br>
+    <br><br>
 
-  <div class="button">
-    <button class="buttonpre" onclick="window.location.href='index.html'">
-      Unlock
+    <!-- 🔓 UNLOCK PAYMENT BUTTON -->
+    <button class="buttonpre" onclick="payPremium()">
+      Unlock – ₹299
     </button>
   </div>
-  <br>
-</div>
-
 
 </div>
-
-
 
 <div class="bottom">
   <button onclick="location.href='index.html'"><span>🏠</span>Home</button>
   <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
   <button onclick="location.href='diet.html'"><span>🥗</span>Diet</button>
-  <button class="active" onclick="location.href='profile.html'"><span>👤</span>Profile</button>
+  <button class="active"><span>👤</span>Profile</button>
 </div>
 
 <script>
@@ -228,27 +208,29 @@ function toggleMenu(){
 }
 
 function loadData(){
-  document.getElementById("showName").innerText = localStorage.getItem("name") || "--";
-  document.getElementById("showHeight").innerText = localStorage.getItem("height") || "--";
-  document.getElementById("showWeight").innerText = localStorage.getItem("weight") || "--";
-  document.getElementById("showAge").innerText = localStorage.getItem("age") || "--";
-  document.getElementById("showGender").innerText = localStorage.getItem("gender") || "--";
+  showName.innerText = localStorage.getItem("name") || "--";
+  showHeight.innerText = localStorage.getItem("height") || "--";
+  showWeight.innerText = localStorage.getItem("weight") || "--";
+  showAge.innerText = localStorage.getItem("age") || "--";
+  showGender.innerText = localStorage.getItem("gender") || "--";
 }
 loadData();
 
-function shareApp(){
-    if (navigator.share) {
-        navigator.share({
-            title: "Z Fitness",
-            text: "Check out this Fitness App!",
-            url: "https://onlineweb123.github.io/Z-Fitness/"
-        })
-        .catch(err => console.log("Share cancelled"));
-    } else {
-        alert("Your device does not support sharing.");
-    }
+/* 💰 UPI PAYMENT FUNCTION */
+function payPremium(){
+  const upi = "upi://pay?pa=mm05270331@oksbi&pn=Z Fitness&am=299&cu=INR&tn=Premium Unlock";
+  window.location.href = upi;
 }
 
+function shareApp(){
+  if(navigator.share){
+    navigator.share({
+      title:"Z Fitness",
+      text:"Check out this Fitness App!",
+      url:"https://onlineweb123.github.io/Z-Fitness/"
+    });
+  }
+}
 </script>
 
 </body>
