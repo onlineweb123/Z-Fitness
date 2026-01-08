@@ -1,1 +1,187 @@
-terms and condition.html
+terms and condition.html"
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms & Conditions</title>
+
+<style>
+:root{
+  --bg:linear-gradient(135deg,#eaf2ff,#f7fbff);
+  --card:#ffffff;
+  --primary:#2563eb;
+  --primary-dark:#1e40af;
+  --soft-blue:#eff6ff;
+  --border:#dbeafe;
+  --text:#0f172a;
+  --muted:#64748b;
+}
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:18px;
+}
+
+.card{
+  background:var(--card);
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 20px 40px rgba(37,99,235,0.15);
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+  gap:10px;
+}
+
+h1{
+  margin:0;
+  font-size:1.6rem;
+  color:var(--primary-dark);
+}
+
+select{
+  padding:8px 14px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--primary-dark);
+  font-weight:600;
+}
+
+select:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(37,99,235,0.2);
+}
+
+.warning{
+  background:var(--soft-blue);
+  border:1px solid var(--border);
+  border-left:6px solid var(--primary);
+  padding:16px;
+  border-radius:14px;
+  margin-bottom:16px;
+}
+
+.warning h2{
+  margin:0 0 8px 0;
+  font-size:1.15rem;
+  color:var(--primary-dark);
+}
+
+.warning p{
+  font-size:0.95rem;
+  line-height:1.7;
+  margin:6px 0;
+  color:#1e293b;
+}
+
+.footer{
+  text-align:center;
+  font-size:0.8rem;
+  color:var(--muted);
+  margin-top:18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card">
+
+    <div class="header">
+      <h1 id="title">Terms & Conditions</h1>
+      <select onchange="changeLang(this.value)">
+        <option value="en" selected>English</option>
+        <option value="ta">தமிழ்</option>
+      </select>
+    </div>
+
+    <!-- ENGLISH -->
+    <div id="en">
+
+      <div class="warning">
+        <h2>Important Notice – Data & Usage</h2>
+        <p>• The data stored in this website may be deleted at any time without prior notice.</p>
+        <p>• This web app runs through the <b>Google Chrome browser</b>. Clearing browser cache, site data, or using “Clear All Data” will permanently delete all data related to this web app.</p>
+        <p>• This application works <b>only when an active internet connection is available</b>.</p>
+        <p>• If the Chrome browser is <b>uninstalled, logged out, or reset</b>, all stored data will be permanently deleted.</p>
+        <p>• The management is not responsible for any data loss caused by browser actions or device changes.</p>
+      </div>
+
+      <div class="warning">
+        <h2>Local Storage & Device Usage</h2>
+        <p>• All data saved in this web application is stored <b>locally on this device using the browser’s Local Storage</b>.</p>
+        <p>• The stored data is <b>device-specific and browser-specific</b>.</p>
+        <p>• When switching to a <b>different device or browser</b>, previously stored data will <b>not be available</b>.</p>
+        <p>• This application does <b>not provide cloud backup or cross-device data synchronization</b>.</p>
+        <p>• Changing devices or browsers will result in <b>permanent data loss</b>.</p>
+      </div>
+
+    </div>
+
+    <!-- TAMIL -->
+    <div id="ta" style="display:none">
+
+      <div class="warning">
+        <h2>முக்கிய அறிவிப்பு – தரவு & பயன்பாடு</h2>
+        <p>• இந்த Website / Web App-ல் சேமிக்கப்படும் தகவல்கள் <b>எந்த நேரத்திலும் நீக்கப்படலாம்</b>.</p>
+        <p>• இந்த Web App <b>Google Chrome Browser</b> மூலம் இயங்குகிறது.  
+        Clear Cache, Site Data Clear அல்லது Clear All Data செய்தால்,  
+        இதில் உள்ள <b>அனைத்து தரவுகளும் நிரந்தரமாக அழிக்கப்படும்</b>.</p>
+        <p>• இந்த Application <b>Internet இணைப்பு இருந்தால் மட்டுமே</b> செயல்படும்.</p>
+        <p>• Chrome Browser-ஐ <b>Delete</b> செய்தால், <b>Logout</b> செய்தால் அல்லது <b>Reset</b> செய்தால்,  
+        உங்கள் அனைத்து தரவுகளும் முழுமையாக நீக்கப்படும்.</p>
+        <p>• Browser நடவடிக்கைகள் அல்லது Device மாற்றங்களால் ஏற்படும் Data Loss-க்கு  
+        நிர்வாகம் எந்தவித பொறுப்பும் ஏற்காது.</p>
+      </div>
+
+      <div class="warning">
+        <h2>Local Storage & Device பயன்பாடு</h2>
+        <p>• இந்த Web App-ல் சேமிக்கப்படும் அனைத்து தரவுகளும்  
+        <b>இந்த Device-இல் உள்ள Browser-ன் Local Storage-ல் மட்டுமே</b> சேமிக்கப்படும்.</p>
+        <p>• இந்த தரவுகள் <b>Device மற்றும் Browser சார்ந்தவை</b>.</p>
+        <p>• நீங்கள் <b>வேறு Device</b> அல்லது <b>வேறு Browser</b>-க்கு மாறும் போது,  
+        முன்பு சேமிக்கப்பட்ட தரவுகள் <b>கிடைக்காது</b>.</p>
+        <p>• இந்த Application-ல் <b>Cloud Backup அல்லது Data Sync வசதி இல்லை</b>.</p>
+        <p>• Device அல்லது Browser மாற்றும் போது,  
+        தரவுகள் <b>நிரந்தரமாக இழக்கப்படும்</b>.</p>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      © 2025 Z Fitness . All Rights Reserved.
+    </div>
+
+  </div>
+</div>
+
+<script>
+function changeLang(lang){
+  document.getElementById("en").style.display = lang === "en" ? "block" : "none";
+  document.getElementById("ta").style.display = lang === "ta" ? "block" : "none";
+  document.getElementById("title").innerText =
+    lang === "ta" ? "விதிமுறைகள் & நிபந்தனைகள்" : "Terms & Conditions";
+}
+</script>
+
+</body>
+</html>
