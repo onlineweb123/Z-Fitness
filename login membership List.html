@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gym Payment Spreadsheet</title>
+
+<style>
+  :root {
+    --primary-color: #2563eb;
+    --danger-color: #dc2626;
+    --bg-color: #f3f4f6;
+    --border-color: #cbd5e1;
+  }
+
+  /* Login Popup Overlay */
+  #loginOverlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #1e293b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .login-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    width: 90%;
+    max-width: 350px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+
+  .login-card h3 { margin-top: 0; color: #1e293b; }
+
+  /* Main App Container (Hidden initially) */
+  #mainContent {
+    display: none;
+    padding: 10px;
+  }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg-color);
+    margin: 0;
+  }
+
+  h2 { text-align: center; color: #1e293b; font-size: 1.5rem; margin: 10px 0; }
+
+  /* Form & Table Styles */
+  form {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 600px;
+    margin: 0 auto 20px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+
+  input, select, button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  .add-btn {
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    grid-column: span 2;
+    margin-top: 10px;
+  }
+
+  .search-box {
+    max-width: 600px;
+    margin: 0 auto 15px;
+    display: flex;
+    gap: 5px;
+  }
+
+  .search-input { flex: 1; border: 2px solid var(--primary-color); }
+  .search-btn { width: 80px; background: var(--primary-color); color: white; border: none; }
+
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    max-height: 500px;
+  }
+
+  table { width: 100%; border-collapse: collapse; min-width: 1000px; font-size: 13px; }
+  th { background: #e2e8f0; color: #334155; padding: 12px 8px; border: 1px solid var(--border-color); position: sticky; top: 0; z-index: 10; }
+  td { border: 1px solid var(--border-color); padding: 10px 8px; text-align: center; white-space: nowrap; }
+  tr:nth-child(even) { background: #f8fafc; }
+  
+  .delete-btn { background: var(--danger-color); color: white; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; border: none; width: auto; }
+  .password-cell { background: #fff3cd; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-weight: bold; }
+</style>
+</head>
+
+<body>
+
+<div id="loginOverlay">
+  <div class="login-card">
+    <h3>🔒 Admin Login</h3>
+    <input type="password" id="adminPass" placeholder="Enter Admin Password" style="margin-bottom: 15px;">
+    <button onclick="checkLogin()" style="background: #2563eb; color:white;">Login</button>
+    <p id="errorMsg" style="color: red; font-size: 12px; margin-top: 10px; display: none;"> Wrong Password!</p>
+  </div>
+</div>
+
+<div id="mainContent">
+  <h2>💳 Gym Payment XL Sheet</h2>
+
+  <form id="payForm">
+    <div class="form-grid">
+      <input type="text" id="name" placeholder="Name" required>
+      <input type="text" id="username" placeholder="User Name" required>
+      <input type="text" id="password" placeholder="Password (Visible)" required>
+      <input type="tel" id="phone" placeholder="Phone Number" required>
+      <input type="number" id="amount" placeholder="Amount ₹" required>
+      <select id="method">
+        <option value="Hand Cash">Hand Cash</option>
+        <option value="GPay">GPay</option>
+      </select>
+      <div>
+        <label style="font-size: 11px;">Pay Date:</label>
+        <input type="datetime-local" id="dateTime" required>
+      </div>
+      <input type="text" id="gym" placeholder="Gym Name" required>
+      <div style="grid-column: span 2;">
+        <label style="font-size: 11px;">Expiry Date:</label>
+        <input type="datetime-local" id="expiry" required>
+      </div>
+    </div>
+    <button type="submit" class="add-btn">➕ Add to Sheet</button>
+  </form>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search by Name, Phone, Gym, User...">
+    <button onclick="searchData()" class="search-btn">🔍 Search</button>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Name</th>
+          <th>User Name</th>
+          <th>Password</th>
+          <th>Phone</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Gym</th>
+          <th>Pay Date</th>
+          <th>Expiry Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// --- Login Function ---
+function checkLogin() {
+  const passInput = document.getElementById("adminPass").value;
+  const errorMsg = document.getElementById("errorMsg");
+  const loginOverlay = document.getElementById("loginOverlay");
+  const mainContent = document.getElementById("mainContent");
+
+  if (passInput === "Admin12345") {
+    loginOverlay.style.display = "none";
+    mainContent.style.display = "block";
+  } else {
+    errorMsg.style.display = "block";
+    document.getElementById("adminPass").value = "";
+  }
+}
+
+// Enter Key அழுத்தினாலும் Login ஆகும் வசதி
+document.getElementById("adminPass").addEventListener("keyup", function(event) {
+  if (event.key === "Enter") {
+    checkLogin();
+  }
+});
+
+// --- Gym Data Script ---
+const form = document.getElementById("payForm");
+const tableBody = document.getElementById("tableBody");
+const searchInput = document.getElementById("searchInput");
+
+let gymData = JSON.parse(localStorage.getItem("gymPayments")) || [];
+
+function render(list = gymData) {
+  tableBody.innerHTML = "";
+  if(list.length === 0) {
+    tableBody.innerHTML = "<tr><td colspan='11'>தகவல்கள் எதுவும் இல்லை...</td></tr>";
+    return;
+  }
+  list.forEach((item, index) => {
+    const originalIndex = gymData.findIndex(d => d === item);
+    let row = `<tr>
+      <td style="font-weight:bold; background:#f1f5f9;">${index + 1}</td>
+      <td>${item.name}</td>
+      <td>${item.username}</td>
+      <td><span class="password-cell">${item.password}</span></td>
+      <td>${item.phone}</td>
+      <td>₹${item.amount}</td>
+      <td>${item.method}</td>
+      <td>${item.gym}</td>
+      <td>${item.dateTime.replace('T', ' ')}</td>
+      <td style="color:red; font-weight:bold;">${item.expiry.split('T')[0]}</td>
+      <td><button class="delete-btn" onclick="deleteRow(${originalIndex})">Delete</button></td>
+    </tr>`;
+    tableBody.innerHTML += row;
+  });
+}
+
+render();
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  let newEntry = {
+    name: document.getElementById("name").value,
+    username: document.getElementById("username").value,
+    password: document.getElementById("password").value,
+    phone: document.getElementById("phone").value,
+    amount: document.getElementById("amount").value,
+    method: document.getElementById("method").value,
+    dateTime: document.getElementById("dateTime").value,
+    gym: document.getElementById("gym").value,
+    expiry: document.getElementById("expiry").value
+  };
+  gymData.push(newEntry);
+  localStorage.setItem("gymPayments", JSON.stringify(gymData));
+  form.reset();
+  render();
+});
+
+function deleteRow(index) {
+  if (confirm("நிச்சயமாக நீக்க வேண்டுமா?")) {
+    gymData.splice(index, 1);
+    localStorage.setItem("gymPayments", JSON.stringify(gymData));
+    render();
+  }
+}
+
+function searchData() {
+  const query = searchInput.value.toLowerCase();
+  const filteredResult = gymData.filter(item => {
+    return (
+      item.name.toLowerCase().includes(query) ||
+      item.username.toLowerCase().includes(query) ||
+      item.phone.includes(query) ||
+      item.gym.toLowerCase().includes(query) ||
+      item.password.toLowerCase().includes(query)
+    );
+  });
+  render(filteredResult);
+}
+searchInput.addEventListener("input", searchData);
+</script>
+
+</body>
+</html>
