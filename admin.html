@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
@@ -22,7 +23,48 @@ body{
   background:var(--bg);
   color:var(--text);
 }
-*,button,a{transition:0.25s;}
+
+/* --- Login Styles --- */
+#loginOverlay {
+  position: fixed;
+  inset: 0;
+  background: #1e293b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.login-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  width: 85%;
+  max-width: 320px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+.login-card h2 { margin-bottom: 20px; font-size: 20px; color: #1e293b; }
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+.login-card button {
+  width: 100%;
+  padding: 12px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Initially hide main content */
+#mainApp { display: none; }
 
 header{
   height:60px;
@@ -93,7 +135,6 @@ header{
   padding:18px;
 }
 
-/* Workout Card */
 .work-card{
   background:var(--card);
   padding:18px;
@@ -107,24 +148,9 @@ header{
   transform:scale(1.02);
   border-color:var(--accent);
 }
-.work-card h3{
-  margin:0;
-  font-size:18px;
-  font-weight:700;
-}
-.work-card p{
-  margin:5px 0 0;
-  font-size:14px;
-  opacity:.7;
-}
+.work-card h3{ margin:0; font-size:18px; font-weight:700; }
+.work-card p{ margin:5px 0 0; font-size:14px; opacity:.7; }
 
-.section-title{
-  font-size:17px;
-  font-weight:700;
-  margin:16px 0 8px;
-}
-
-/* Bottom Nav */
 .bottom{
   height:60px;
   position:fixed;
@@ -150,75 +176,78 @@ header{
 .bottom button:hover{
   opacity:1;
   color:var(--accent);
-  transform:scale(1.1);
 }
-.bottom button span{
-  font-size:22px;
-}
+.bottom button span{ font-size:22px; }
 </style>
 </head>
 
-
 <body>
 
-<header>
-  <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  Admin Panel
-</header>
-
-<div id="sidebar" class="sidebar">
-  <a href="index.html">🏠 Dashboard</a>
-  <a href="workouts.html">🔥 Workouts</a>
-  <a href="diet.html">🥗 Diet Plans</a>
+<div id="loginOverlay">
+  <div class="login-card">
+    <h2>🔒 Admin Login</h2>
+    <input type="password" id="passInput" placeholder="Enter Password">
+    <button onclick="checkPass()">Login</button>
+    <p id="errMsg" style="color:red; font-size:12px; display:none; margin-top:10px;">தவறான கடவுச்சொல்!</p>
+  </div>
 </div>
 
-<div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+<div id="mainApp">
+  <header>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    Admin Panel
+  </header>
 
-<div class="main">
-
-
-  <div class="work-card" onclick="location.href='login membership List.html'">
-    <h3>Membership list </h3>
-    <p>login payment membership list </p>
+  <div id="sidebar" class="sidebar">
+    <a href="index.html">🏠 Dashboard</a>
+    <a href="workouts.html">🔥 Workouts</a>
+    <a href="diet.html">🥗 Diet Plans</a>
   </div>
 
-  <div class="work-card" onclick="location.href='ct.html'">
-    <h3> Extra Tools </h3>
-    <p>Extra Tools And Admin</p>
+  <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+
+  <div class="main">
+    <div class="work-card" onclick="location.href='login membership List.html'">
+      <h3>Membership list</h3>
+      <p>Login payment membership list</p>
+    </div>
+
+    <div class="work-card" onclick="location.href='ct.html'">
+      <h3>Extra Tools</h3>
+      <p>Extra Tools And Admin</p>
+    </div>
   </div>
 
-
+  <div class="bottom">
+    <button onclick="location.href='index.html'"><span>🏠</span>Home</button>
+    <button class="active" onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
+    <button onclick="location.href='diet.html'"><span>🥗</span>Diet</button>
   </div>
-
-</div>
-
-<div class="bottom">
-  <button onclick="location.href='index.html'"><span>🏠</span>Home</button>
-  <button class="active" onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
-  <button onclick="location.href='diet.html'"><span>🥗</span>Diet</button>
-
 </div>
 
 <script>
+// Password check logic
+function checkPass() {
+  const pass = document.getElementById("passInput").value;
+  if (pass === "Admin12345") {
+    document.getElementById("loginOverlay").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+  } else {
+    document.getElementById("errMsg").style.display = "block";
+    document.getElementById("passInput").value = "";
+  }
+}
+
+// Sidebar toggle
 function toggleMenu(){
   document.getElementById("sidebar").classList.toggle("open");
   document.getElementById("overlay").classList.toggle("show");
 }
 
-
-function shareApp(){
-    if (navigator.share) {
-        navigator.share({
-            title: "Z Fitness",
-            text: "Check out this Fitness App!",
-            url: "https://onlineweb123.github.io/Z-Fitness/"
-        })
-        .catch(err => console.log("Share cancelled"));
-    } else {
-        alert("Your device does not support sharing.");
-    }
-}
-
+// Enter Key support
+document.getElementById("passInput").addEventListener("keyup", function(e) {
+  if (e.key === "Enter") checkPass();
+});
 </script>
 
 </body>
