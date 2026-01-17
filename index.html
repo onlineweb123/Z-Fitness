@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -162,6 +163,58 @@ header{
     margin-top: 10px; 
     display: none; 
 }
+
+
+
+
+
+
+
+.water-container { 
+text-align: center;
+padding: 20px; 
+background: white; 
+border-radius: 20px; 
+}
+
+.water-glass {
+    width: 60px; 
+    height: 90px; 
+    border: 3px solid #333; 
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    margin: 15px auto; 
+    position: relative; 
+    overflow: hidden; 
+    background: #f0f0f0;
+}
+.water-fill {
+    position: absolute; 
+    bottom: 0; left: 0; 
+    right: 0; 
+    background: linear-gradient(to top, #00d2ff, #3a7bd5);
+    height: 0%; 
+    transition: 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
+.water-controls { 
+display: flex; 
+justify-content: center; 
+align-items: center; 
+gap: 15px; 
+font-weight: bold; 
+}
+.w-btn { 
+    background: #007bff; 
+    color: white; border: none; 
+    width: 35px; height: 35px; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    font-size: 20px;
+}
+
+
+
 </style>
 
 </head>
@@ -205,6 +258,24 @@ header{
     <p id="todayWorkoutText"></p>
   </div>
   
+    
+  <!-- தண்ணி குடிக்கணும் ஆரம்பம் -->
+  <div class="card water-container">
+    <h3>💧 Water Intake (Target: 3L)</h3>
+    <div class="water-glass">
+        <div id="waterFill" class="water-fill"></div>
+    </div>
+    <div class="water-controls">
+        <button class="w-btn" onclick="updateWater(-250)">-</button>
+        <span id="waterText">0 ml</span>
+        <button class="w-btn" onclick="updateWater(250)">+</button>
+    </div>
+</div>
+
+  
+  
+  <!-- தண்ணி குடிக்கணும் முடிவு -->
+
   <div class="card">
     <h3>🍽️ Calorie Target</h3>
     <p id="calorieTargetText"></p>
@@ -236,7 +307,7 @@ header{
 
 <ul id="userDatabase" style="display: none;">
     <li data-user="Mathavan" data-pass="Mathu12345m" data-expiry="2026-12-31"></li>
-    
+
      <li data-user="Srirajudeen" data-pass="Sriraju125" data-expiry="2026-01-19"></li>
 
 
@@ -255,6 +326,7 @@ header{
 </ul>
 
 <script>
+// --- பொதுவான செயல்பாடுகள் ---
 function toggleMenu(){
   document.getElementById("sidebar").classList.toggle("open");
   document.getElementById("overlay").classList.toggle("show");
@@ -263,7 +335,7 @@ function toggleMenu(){
 
 const get = k => localStorage.getItem(k) || "--";
 
-// Dashboard Data Loading
+// --- Dashboard டேட்டாவை லோடு செய்தல் ---
 function loadDashboard() {
     document.getElementById("username").innerText = localStorage.getItem("name") || "--";
     document.getElementById("weightShow").innerText = get("weight");
@@ -272,9 +344,12 @@ function loadDashboard() {
     const calorieValue = get("calorie");
     document.getElementById("calorieTargetText").innerText = calorieValue !== "--" ? `${calorieValue} kcal` : "Set your target in Profile";
     document.getElementById("todayWorkoutText").innerText = get("todayWorkout") || "Rest Day 😴";
+    
+    // தண்ணீர் அளவை அப்டேட் செய்தல்
+    renderWater();
 }
 
-// Chart Logic
+// --- Chart லாஜிக் (மாதாந்திர உடற்பயிற்சி வரைபடம்) ---
 const daysContainer = document.getElementById("daysChart");
 const today = new Date();
 const year = today.getFullYear();
@@ -294,6 +369,37 @@ for(let i = 1; i <= totalDays; i++){
   daysContainer.appendChild(bar);
 }
 
+// --- 💧 தண்ணீர் ட்ராக்கர் லாஜிக் (தினமும் காலை ரீசெட் ஆகும்) ---
+
+function checkAndResetWater() {
+    const todayStr = new Date().toDateString(); // இன்றைய தேதி
+    const lastDate = localStorage.getItem("lastWaterUpdateDate");
+
+    if (lastDate !== todayStr) {
+        // புதிய நாள் என்பதால் பூஜ்ஜியம் ஆக்குகிறது
+        localStorage.setItem("waterCount", 0);
+        localStorage.setItem("lastWaterUpdateDate", todayStr);
+    }
+}
+
+function updateWater(amt) {
+    checkAndResetWater(); // அப்டேட் செய்யும் முன் நாளை சரிபார்க்கிறது
+    let currentWater = parseInt(localStorage.getItem("waterCount")) || 0;
+    currentWater = Math.max(0, Math.min(3000, currentWater + amt)); // 0 முதல் 3000ml வரை
+    localStorage.setItem("waterCount", currentWater);
+    renderWater();
+}
+
+function renderWater() {
+    checkAndResetWater(); // லோடு ஆகும் முன் நாளை சரிபார்க்கிறது
+    let currentWater = parseInt(localStorage.getItem("waterCount")) || 0;
+    const percent = (currentWater / 3000) * 100;
+    
+    document.getElementById("waterFill").style.height = percent + "%";
+    document.getElementById("waterText").innerText = currentWater + " ml";
+}
+
+// --- பகிர்தல் (Share) ---
 function shareApp(){
     if (navigator.share) {
         navigator.share({
@@ -306,7 +412,7 @@ function shareApp(){
     }
 }
 
-// --- Login Logic with Expiry Check ---
+// --- Login லாஜிக் ---
 function checkLogin() {
     const userIn = document.getElementById("uName").value;
     const passIn = document.getElementById("uPass").value;
@@ -346,7 +452,7 @@ function checkLogin() {
     }
 }
 
-// Check session and Expiry on load
+// --- பக்கம் லோடு ஆகும்போது சரிபார்த்தல் ---
 window.onload = function() {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     const loggedName = localStorage.getItem("name");
@@ -369,7 +475,6 @@ window.onload = function() {
         document.getElementById("loginOverlay").style.display = "none";
         loadDashboard();
     } else {
-        // If expired or not logged in, force show login
         localStorage.removeItem("isLoggedIn");
         document.getElementById("loginOverlay").style.display = "flex";
     }
@@ -379,6 +484,7 @@ function logout() {
     localStorage.removeItem("isLoggedIn");
     location.reload();
 }
+
 </script>
 </body>
 </html>
