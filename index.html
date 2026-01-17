@@ -164,12 +164,6 @@ header{
     display: none; 
 }
 
-
-
-
-
-
-
 .water-container { 
 text-align: center;
 padding: 20px; 
@@ -212,9 +206,6 @@ font-weight: bold;
     cursor: pointer; 
     font-size: 20px;
 }
-
-
-
 </style>
 
 </head>
@@ -237,7 +228,6 @@ font-weight: bold;
   <a href="profile.html">👤 Profile</a>
   <a href="settings.html">⚙️ Settings</a>
   <a href="terms and condition.html">📃 terms & condi...</a>
-
   <a href="#" onclick="shareApp()">🔁 Share</a>
 </div>
 
@@ -258,8 +248,6 @@ font-weight: bold;
     <p id="todayWorkoutText"></p>
   </div>
   
-    
-  <!-- தண்ணி குடிக்கணும் ஆரம்பம் -->
   <div class="card water-container">
     <h3>💧 Water Intake (Target: 3L)</h3>
     <div class="water-glass">
@@ -272,9 +260,36 @@ font-weight: bold;
     </div>
 </div>
 
+<div class="card" style="background: #ebf8ff; border: 1px solid #bee3f8; padding: 18px; border-radius: 18px; margin-bottom: 16px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+    <h3 style="color: #2b6cb0; margin: 0; font-size: 18px;">🍱 Today's Nutrition</h3>
+    <span id="displayDate" style="font-size: 12px; color: #4299e1; font-weight: bold;"></span>
+  </div>
   
-  
-  <!-- தண்ணி குடிக்கணும் முடிவு -->
+  <div id="foodSummary">
+    <div style="text-align: center; padding: 10px 0;">
+        <p id="totalCalorieDisplay" style="font-size: 28px; font-weight: 700; color: #2c5282; margin: 0;">0 kcal</p>
+        <span style="font-size: 11px; color: #4a5568; text-transform: uppercase;">மொத்த கலோரிகள்</span>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px dashed #bee3f8; font-size: 14px; color: #4a5568;">
+      <div style="text-align: center; flex: 1;">
+          <span style="display: block; font-size: 11px; color: #718096;">Protein</span>
+          <b id="totalP" style="color:#2b6cb0; font-size: 16px;">0</b><small>g</small>
+      </div>
+      <div style="text-align: center; flex: 1; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+          <span style="display: block; font-size: 11px; color: #718096;">Carbs</span>
+          <b id="totalC" style="color:#2b6cb0; font-size: 16px;">0</b><small>g</small>
+      </div>
+      <div style="text-align: center; flex: 1;">
+          <span style="display: block; font-size: 11px; color: #718096;">Fat</span>
+          <b id="totalF" style="color:#2b6cb0; font-size: 16px;">0</b><small>g</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
   <div class="card">
     <h3>🍽️ Calorie Target</h3>
@@ -307,22 +322,12 @@ font-weight: bold;
 
 <ul id="userDatabase" style="display: none;">
     <li data-user="Mathavan" data-pass="Mathu12345m" data-expiry="2026-12-31"></li>
-
-     <li data-user="Srirajudeen" data-pass="Sriraju125" data-expiry="2026-01-19"></li>
-
-
-
+    <li data-user="Srirajudeen" data-pass="Sriraju125" data-expiry="2026-01-19"></li>
     <li data-user="Azarudheen" data-pass="Aza@5230" data-expiry="2026-02-13"></li>
-
-      <li data-user="Rhafiya" data-pass="Rhafiya25@ba" data-expiry="2026-02-13"></li>
-
-
+    <li data-user="Rhafiya" data-pass="Rhafiya25@ba" data-expiry="2026-02-13"></li>
     <li data-user="Syed" data-pass="Syed@moh12" data-expiry="2025-02-14"></li>
-
     <li data-user="4657" data-pass="m78123" data-expiry="2026-08-15"></li>
-
-     <li data-user="Ragul" data-pass="mu123" data-expiry="2026-08-07"></li>
-
+    <li data-user="Ragul" data-pass="mu123" data-expiry="2026-08-07"></li>
 </ul>
 
 <script>
@@ -335,21 +340,23 @@ function toggleMenu(){
 
 const get = k => localStorage.getItem(k) || "--";
 
-// --- Dashboard டேட்டாவை லோடு செய்தல் ---
+// --- Dashboard & Nutrition தரவை லோடு செய்தல் ---
 function loadDashboard() {
+    // Basic Profile Stats
     document.getElementById("username").innerText = localStorage.getItem("name") || "--";
     document.getElementById("weightShow").innerText = get("weight");
     document.getElementById("goalShow").innerText = get("goal");
     document.getElementById("levelShow").innerText = get("workout-level");
+    
     const calorieValue = get("calorie");
     document.getElementById("calorieTargetText").innerText = calorieValue !== "--" ? `${calorieValue} kcal` : "Set your target in Profile";
     document.getElementById("todayWorkoutText").innerText = get("todayWorkout") || "Rest Day 😴";
     
-    // தண்ணீர் அளவை அப்டேட் செய்தல்
-    renderWater();
+    renderWater();    // தண்ணீர் அப்டேட்
+    showTodayStats(); // நியூட்ரிஷன் அப்டேட்
 }
 
-// --- Chart லாஜிக் (மாதாந்திர உடற்பயிற்சி வரைபடம்) ---
+// --- Chart லாஜிக் ---
 const daysContainer = document.getElementById("daysChart");
 const today = new Date();
 const year = today.getFullYear();
@@ -369,34 +376,57 @@ for(let i = 1; i <= totalDays; i++){
   daysContainer.appendChild(bar);
 }
 
-// --- 💧 தண்ணீர் ட்ராக்கர் லாஜிக் (தினமும் காலை ரீசெட் ஆகும்) ---
-
+// --- 💧 தண்ணீர் ட்ராக்கர் லாஜிக் ---
 function checkAndResetWater() {
-    const todayStr = new Date().toDateString(); // இன்றைய தேதி
+    const todayStr = new Date().toDateString();
     const lastDate = localStorage.getItem("lastWaterUpdateDate");
-
     if (lastDate !== todayStr) {
-        // புதிய நாள் என்பதால் பூஜ்ஜியம் ஆக்குகிறது
         localStorage.setItem("waterCount", 0);
         localStorage.setItem("lastWaterUpdateDate", todayStr);
     }
 }
 
 function updateWater(amt) {
-    checkAndResetWater(); // அப்டேட் செய்யும் முன் நாளை சரிபார்க்கிறது
+    checkAndResetWater();
     let currentWater = parseInt(localStorage.getItem("waterCount")) || 0;
-    currentWater = Math.max(0, Math.min(3000, currentWater + amt)); // 0 முதல் 3000ml வரை
+    currentWater = Math.max(0, Math.min(3000, currentWater + amt));
     localStorage.setItem("waterCount", currentWater);
     renderWater();
 }
 
 function renderWater() {
-    checkAndResetWater(); // லோடு ஆகும் முன் நாளை சரிபார்க்கிறது
+    checkAndResetWater();
     let currentWater = parseInt(localStorage.getItem("waterCount")) || 0;
     const percent = (currentWater / 3000) * 100;
-    
     document.getElementById("waterFill").style.height = percent + "%";
     document.getElementById("waterText").innerText = currentWater + " ml";
+}
+
+// --- 🥗 Nutrition Tracker கணக்கீடு ---
+function showTodayStats() {
+    try {
+        const now = new Date();
+        const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'Asia/Kolkata' };
+        const dateParts = new Intl.DateTimeFormat('en-CA', dateOptions).formatToParts(now);
+        const todayKey = `${dateParts.find(p=>p.type==='year').value}-${dateParts.find(p=>p.type==='month').value}-${dateParts.find(p=>p.type==='day').value}`;
+
+        const savedData = localStorage.getItem(`FOODS_${todayKey}`);
+        const foods = savedData ? JSON.parse(savedData) : [];
+
+        let totalCal = 0, totalP = 0, totalC = 0, totalF = 0;
+        foods.forEach(f => {
+            totalCal += parseFloat(f.calorie) || 0;
+            totalP += parseFloat(f.protein) || 0;
+            totalC += parseFloat(f.carbs) || 0;
+            totalF += parseFloat(f.fat) || 0;
+        });
+
+        if(document.getElementById('displayDate')) document.getElementById('displayDate').innerText = todayKey;
+        if(document.getElementById('totalCalorieDisplay')) document.getElementById('totalCalorieDisplay').innerText = totalCal.toFixed(0) + " kcal";
+        if(document.getElementById('totalP')) document.getElementById('totalP').innerText = totalP.toFixed(1);
+        if(document.getElementById('totalC')) document.getElementById('totalC').innerText = totalC.toFixed(1);
+        if(document.getElementById('totalF')) document.getElementById('totalF').innerText = totalF.toFixed(1);
+    } catch (e) { console.log("Nutrition update error:", e); }
 }
 
 // --- பகிர்தல் (Share) ---
@@ -407,9 +437,7 @@ function shareApp(){
             text: "Check out this Fitness App!",
             url: "https://onlineweb123.github.io/Z-Fitness/"
         }).catch(err => console.log("Share cancelled"));
-    } else {
-        alert("Your device does not support sharing.");
-    }
+    } else { alert("Your device does not support sharing."); }
 }
 
 // --- Login லாஜிக் ---
@@ -419,7 +447,6 @@ function checkLogin() {
     const error = document.getElementById("error");
     const users = document.querySelectorAll("#userDatabase li");
     const now = new Date();
-
     let authenticated = false;
     let expired = false;
 
@@ -427,15 +454,12 @@ function checkLogin() {
         const uName = u.getAttribute("data-user");
         const uPass = u.getAttribute("data-pass");
         const uExpiry = new Date(u.getAttribute("data-expiry"));
-
         if (userIn === uName && passIn === uPass) {
             if (now <= uExpiry) {
                 authenticated = true;
                 localStorage.setItem("isLoggedIn", "true");
                 localStorage.setItem("name", uName);
-            } else {
-                expired = true;
-            }
+            } else { expired = true; }
         }
     });
 
@@ -464,13 +488,11 @@ window.onload = function() {
         users.forEach(u => {
             if (u.getAttribute("data-user") === loggedName) {
                 const uExpiry = new Date(u.getAttribute("data-expiry"));
-                if (now <= uExpiry) {
-                    validSession = true;
-                }
+                if (now <= uExpiry) { validSession = true; }
             }
         });
     }
-
+            
     if (validSession) {
         document.getElementById("loginOverlay").style.display = "none";
         loadDashboard();
@@ -484,7 +506,6 @@ function logout() {
     localStorage.removeItem("isLoggedIn");
     location.reload();
 }
-
 </script>
 </body>
 </html>
