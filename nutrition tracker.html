@@ -1,57 +1,174 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Maathu Fitness – Daily Food Tracker</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    /* Internal CSS - இணையம் இல்லாவிட்டாலும் வேலை செய்யும் */
+    :root {
+        --primary: #2563eb;
+        --secondary: #16a34a;
+        --danger: #dc2626;
+        --bg: #f3f4f6;
+        --card: #ffffff;
+        --text: #1f2937;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 16px;
+        line-height: 1.5;
+    }
+
+    h1 {
+        text-align: center;
+        color: var(--text);
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        background: var(--card);
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 24px;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+        margin-top: 0;
+        margin-bottom: 16px;
+        font-weight: 600;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-cols: 1fr;
+        gap: 12px;
+    }
+
+    @media (min-width: 768px) {
+        .grid { grid-template-cols: 1fr 1fr; }
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 14px;
+    }
+
+    button {
+        cursor: pointer;
+        border: none;
+        border-radius: 12px;
+        font-weight: bold;
+        transition: opacity 0.2s;
+    }
+
+    button:active { opacity: 0.8; }
+
+    .btn-add {
+        background-color: var(--primary);
+        color: white;
+        padding: 12px 24px;
+        margin-top: 16px;
+        width: 100%;
+    }
+
+    .btn-clear {
+        background-color: var(--danger);
+        color: white;
+        padding: 10px 20px;
+        margin-top: 20px;
+    }
+
+    #foodList {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .food-item {
+        border: 1px solid #e5e7eb;
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .food-info b { font-size: 16px; color: #111827; }
+    .food-info span { font-size: 13px; color: #6b7280; }
+
+    .btn-delete {
+        color: var(--danger);
+        background: none;
+        font-size: 18px;
+        padding: 5px 10px;
+    }
+
+    #totals {
+        background-color: #dcfce7;
+        color: #166534;
+        padding: 16px;
+        border-radius: 12px;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .date-section { width: 100%; }
+
+    .text-center { text-align: center; }
+</style>
 </head>
-<body class="bg-gray-100 p-4">
-    <h1 class="text-3xl font-bold text-center mb-4">🥗 Daily Food & Nutrition Tracker</h1>
+<body>
 
-    <div class="bg-white p-4 rounded-xl shadow-lg mb-6">
-        <h2 class="text-xl font-semibold mb-3">உணவு சேர்க்க</h2>
+    <h1>🥗 Daily Food & Nutrition Tracker</h1>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input id="foodTime" type="time" class="p-2 border rounded" />
-            <input id="foodName" class="p-2 border rounded" placeholder="உணவு பெயர் (Egg, Rice...)" />
-            <input id="calorie" type="number" class="p-2 border rounded" placeholder="Calories (kcal)" />
-            <input id="protein" type="number" class="p-2 border rounded" placeholder="Protein (g)" />
-            <input id="carbs" type="number" class="p-2 border rounded" placeholder="Carbs (g)" />
-            <input id="fat" type="number" class="p-2 border rounded" placeholder="Fat (g)" />
+    <div class="card">
+        <h2>உணவு சேர்க்க</h2>
+        <div class="grid">
+            <input id="foodTime" type="time" />
+            <input id="foodName" placeholder="உணவு பெயர் (Egg, Rice...)" />
+            <input id="calorie" type="number" placeholder="Calories (kcal)" />
+            <input id="protein" type="number" placeholder="Protein (g)" />
+            <input id="carbs" type="number" placeholder="Carbs (g)" />
+            <input id="fat" type="number" placeholder="Fat (g)" />
         </div>
-
-        <button onclick="addFood()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-xl">Add Food</button>
+        <button onclick="addFood()" class="btn-add">Add Food</button>
     </div>
 
-    <div id="foodList" class="bg-white p-4 rounded-xl shadow-lg mb-6 max-h-64 overflow-y-auto"></div>
+    <div id="foodList" class="card"></div>
 
-    <div id="totals" class="bg-green-100 p-4 rounded-xl shadow-lg font-bold"></div>
+    <div id="totals"></div>
+    <br>
     
-    <div class="bg-white p-4 rounded-xl shadow-lg mt-6 mb-6">
-        <h2 class="text-xl font-semibold mb-3">தேதியைத் தேர்ந்தெடுக்கவும்</h2>
-        <input id="datePicker" type="date" class="p-2 border rounded w-full md:w-1/2" onchange="loadDataForSelectedDate()"/>
+    <div class="card">
+        <h2>தேதியைத் தேர்ந்தெடுக்கவும்</h2>
+        <input id="datePicker" type="date" onchange="loadDataForSelectedDate()"/>
     </div>
 
-    <div class="text-center mt-6">
-        <button onclick="clearSelectedDay()" class="bg-red-600 text-white px-4 py-2 rounded-xl">தேர்ந்தெடுத்த நாளின் Data Clear</button>
+    <div class="text-center">
+        <button onclick="clearSelectedDay()" class="btn-clear">தேர்ந்தெடுத்த நாளின் Data Clear</button>
     </div>
 
 <script>
 // Global variable to hold the currently selected date key
 let selectedDateKey;
-
-// Load data array for the selected date
 let foods = [];
 
-// --- Date & Time Utilities ---
-
-/**
- * தற்போதைய தேதி மற்றும் நேரத்தை IST-ல் பெறுகிறது.
- */
 function getISTDateKey() {
     const now = new Date();
-    // Get the date string (YYYY-MM-DD) in IST
     const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'Asia/Kolkata' };
     const dateParts = new Intl.DateTimeFormat('en-CA', dateOptions).formatToParts(now);
     const year = dateParts.find(p => p.type === 'year').value;
@@ -60,82 +177,50 @@ function getISTDateKey() {
     return `${year}-${month}-${day}`;
 }
 
-/**
- * தற்போதைய இந்திய நேரத்தை (IST) HH:MM (24-மணி நேர) வடிவத்தில் திரும்ப அளிக்கிறது.
- */
 function getISTTime24Hr() {
     const now = new Date();
     const formatter = new Intl.DateTimeFormat('en-IN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false, 
-        timeZone: 'Asia/Kolkata'
+        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata'
     });
     return formatter.format(now);
 }
 
-/**
- * 24-மணி நேர நேரத்தை 12-மணி நேர AM/PM வடிவத்திற்கு மாற்றுகிறது.
- */
 function convertTo12HrIST(time24hr) {
     if (!time24hr || time24hr === 'N/A') return 'N/A';
-    
     const [hours, minutes] = time24hr.split(':');
     let h = parseInt(hours, 10);
-    const m = minutes;
     const ampm = h >= 12 ? 'PM' : 'AM';
-    h = h % 12;
-    h = h ? h : 12; 
+    h = h % 12; h = h ? h : 12; 
     const displayHour = h < 10 ? '0' + h : h;
-    
-    return `${displayHour}:${m} ${ampm}`;
+    return `${displayHour}:${minutes} ${ampm}`;
 }
 
-// --- Data Loading and Initialization ---
-
-// பக்கம் லோட் ஆனவுடன், Date Picker-ஐ இன்றைய IST தேதிக்கு அமைக்கவும்.
 document.addEventListener('DOMContentLoaded', () => {
     const todayIST = getISTDateKey();
     const datePicker = document.getElementById('datePicker');
-    
     datePicker.value = todayIST;
-    datePicker.max = todayIST; // எதிர்கால தேதியைத் தேர்ந்தெடுக்க முடியாது.
-    
-    // ஆரம்பிக்கும் போது இன்றைய தேதிக்கான தரவை ஏற்றவும்.
+    datePicker.max = todayIST;
     selectedDateKey = todayIST;
     loadDataForSelectedDate();
 });
 
 function loadDataForSelectedDate() {
     const datePickerValue = document.getElementById('datePicker').value;
-    
     if (!datePickerValue) return;
-
-    // தேர்ந்தெடுக்கப்பட்ட தேதியின் விசை (Key) ஐ புதுப்பிக்கவும்
     selectedDateKey = datePickerValue;
-    
-    // அந்த தேதிக்குரிய உணவுகளை Local Storage-ல் இருந்து ஏற்றவும்
     foods = JSON.parse(localStorage.getItem(`FOODS_${selectedDateKey}`)) || [];
     
-    // உணவு சேர்க்கும் நேர உள்ளீட்டை தற்போதைய IST நேரத்திற்கு மாற்றவும் (அன்றைய தேதியாக இருந்தால் மட்டும்)
     if (selectedDateKey === getISTDateKey()) {
         document.getElementById('foodTime').value = getISTTime24Hr();
     } else {
-         // முந்தைய தேதியாக இருந்தால், நேர உள்ளீட்டை காலியாக வைத்திருக்கவும்
          document.getElementById('foodTime').value = '';
     }
-
     render();
 }
 
-// --- Main Logic ---
-
 function addFood() {
-    const enteredTime24Hr = document.getElementById('foodTime').value;
-
     const food = {
-        // தேர்ந்தெடுக்கப்பட்ட தேதியில், உணவு சேர்க்கப்படும் நேரம்
-        time: enteredTime24Hr || getISTTime24Hr(), 
+        time: document.getElementById('foodTime').value || getISTTime24Hr(), 
         name: document.getElementById('foodName').value,
         calorie: parseFloat(document.getElementById('calorie').value) || 0,
         protein: parseFloat(document.getElementById('protein').value) || 0,
@@ -147,13 +232,9 @@ function addFood() {
 
     foods.push(food);
     foods.sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)); 
-    
-    // தேர்ந்தெடுக்கப்பட்ட தேதிக்குரிய உணவுகளை சேமிக்கவும்
     localStorage.setItem(`FOODS_${selectedDateKey}`, JSON.stringify(foods));
-    
     render();
 
-    // Input களை clear செய்து, time ஐ தற்போதைய IST நேரத்திற்கு மாற்ற
     if (selectedDateKey === getISTDateKey()) {
         document.getElementById('foodTime').value = getISTTime24Hr(); 
     }
@@ -166,10 +247,10 @@ function addFood() {
 
 function render() {
     const list = document.getElementById('foodList');
-    list.innerHTML = `<h2 class="text-xl font-semibold mb-3">${selectedDateKey} க்கான உணவுகள்</h2>`;
+    list.innerHTML = `<h2>${selectedDateKey} க்கான உணவுகள்</h2>`;
 
     if (foods.length === 0) {
-        list.innerHTML += '<p class="text-gray-500">இன்னும் Food Add செய்யவில்லை.</p>';
+        list.innerHTML += '<p style="color:gray;">இன்னும் Food Add செய்யவில்லை.</p>';
         document.getElementById('totals').innerHTML = '';
         return;
     }
@@ -181,37 +262,29 @@ function render() {
         totalP += f.protein;
         totalC += f.carbs;
         totalF += f.fat;
-        
         const displayTime = convertTo12HrIST(f.time);
 
         list.innerHTML += `
-            <div class="border p-2 rounded-lg mb-2 flex justify-between">
-                <div class="flex-1 min-w-0 mr-2"> 
-                    <b class="break-words">${f.name}</b> <span class="text-sm text-gray-500">(${displayTime})</span><br>
-                    <span class="text-sm">Cal: ${f.calorie} | P: ${f.protein} | C: ${f.carbs} | F: ${f.fat}</span>
+            <div class="food-item">
+                <div class="food-info"> 
+                    <b style="display:block;">${f.name}</b>
+                    <span>(${displayTime}) | Cal: ${f.calorie} | P: ${f.protein} | C: ${f.carbs} | F: ${f.fat}</span>
                 </div>
-                <button onclick="deleteFoodConfirmation(${i}, '${f.name}')" class="text-red-600 font-bold flex-shrink-0">X</button>
+                <button onclick="deleteFoodConfirmation(${i}, '${f.name}')" class="btn-delete">✕</button>
             </div>
         `;
     });
 
-    // மொத்த மதிப்புகளைப் புதுப்பிக்கவும்
-    document.getElementById('totals').innerHTML = `மொத்தம்: 🍽️ Calories: ${totalCal.toFixed(0)} | Protein: ${totalP.toFixed(1)}g | Carbs: ${totalC.toFixed(1)}g | Fat: ${totalF.toFixed(1)}g`;
+    document.getElementById('totals').innerHTML = `மொத்தம்: 🍽️ Cal: ${totalCal.toFixed(0)} | P: ${totalP.toFixed(1)}g | C: ${totalC.toFixed(1)}g | F: ${totalF.toFixed(1)}g`;
 }
 
-// --- Delete/Clear Logic ---
-
-// தனிப்பட்ட உணவை நீக்குவதற்கு முன் உறுதிப்படுத்தல் கேட்கும் புதிய ஃபங்ஷன்
 function deleteFoodConfirmation(i, foodName) {
     if (confirm(`உறுதியாகவா, ${foodName} ஐ நீக்க வேண்டுமா?`)) {
-        // பயனர் 'Yes' கொடுத்தால், deleteFood ஃபங்ஷனை அழைக்கிறது
         deleteFood(i);
     }
-    // பயனர் 'No' கொடுத்தால், எதுவும் நடக்காது (ஃபங்ஷன் முடிவடையும்)
 }
 
 function deleteFood(i) {
-    // உணவை நீக்கும் லாஜிக்
     foods.splice(i, 1);
     localStorage.setItem(`FOODS_${selectedDateKey}`, JSON.stringify(foods));
     render();
@@ -219,13 +292,11 @@ function deleteFood(i) {
 
 function clearSelectedDay() {
     if (confirm(`நீங்கள் தேர்ந்தெடுத்த நாளின் (${selectedDateKey}) Data எல்லாம் delete ஆகும். உறுதியாகவா?`)) {
-        // உணவுகளை நீக்க
         localStorage.removeItem(`FOODS_${selectedDateKey}`);
         foods = [];
         render();
     }
 }
 </script>
-
 </body>
 </html>
