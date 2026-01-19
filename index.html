@@ -317,6 +317,11 @@ font-weight: bold;
         <input type="password" id="uPass" placeholder="Password">
         <button onclick="checkLogin()">Login</button>
         <p id="error" class="error-msg"></p>
+
+ <p id="contactBtn" style="cursor:pointer;color:#2563eb;">
+  Contact
+</p>
+
     </div>
 </div>
 
@@ -517,6 +522,21 @@ function logout() {
     localStorage.removeItem("isLoggedIn");
     location.reload();
 }
+
+
+
+
+
+document.getElementById("contactBtn").onclick = function () {
+    const phone = "+919344165879"; // UI-ல காட்டப்படாது
+    const message = encodeURIComponent(
+      "Z Fitness\nUser name & Password"
+    );
+
+    window.location.href = `sms:${phone}?body=${message}`;
+  };
+
+
 </script>
 </body>
 </html>
