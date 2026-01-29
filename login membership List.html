@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
@@ -9,6 +10,7 @@
   :root {
     --primary-color: #2563eb;
     --danger-color: #dc2626;
+    --success-color: #16a34a; /* Green color for active status */
     --bg-color: #f3f4f6;
     --border-color: #cbd5e1;
   }
@@ -36,7 +38,7 @@
 
   .login-card h3 { margin-top: 0; color: #1e293b; }
 
-  /* Main App Container (Hidden initially) */
+  /* Main App Container */
   #mainContent {
     display: none;
     padding: 10px;
@@ -110,9 +112,13 @@
   th { background: #e2e8f0; color: #334155; padding: 12px 8px; border: 1px solid var(--border-color); position: sticky; top: 0; z-index: 10; }
   td { border: 1px solid var(--border-color); padding: 10px 8px; text-align: center; white-space: nowrap; }
   tr:nth-child(even) { background: #f8fafc; }
-  
+
   .delete-btn { background: var(--danger-color); color: white; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; border: none; width: auto; }
   .password-cell { background: #fff3cd; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-weight: bold; }
+  
+  /* Status Colors */
+  .expiry-active { color: var(--success-color); font-weight: bold; }
+  .expiry-expired { color: var(--danger-color); font-weight: bold; }
 </style>
 </head>
 
@@ -198,7 +204,6 @@ function checkLogin() {
   }
 }
 
-// Enter Key அழுத்தினாலும் Login ஆகும் வசதி
 document.getElementById("adminPass").addEventListener("keyup", function(event) {
   if (event.key === "Enter") {
     checkLogin();
@@ -218,8 +223,21 @@ function render(list = gymData) {
     tableBody.innerHTML = "<tr><td colspan='11'>தகவல்கள் எதுவும் இல்லை...</td></tr>";
     return;
   }
+
+  // தற்போதைய நேரத்தை எடுக்கவும்
+  const now = new Date();
+
   list.forEach((item, index) => {
     const originalIndex = gymData.findIndex(d => d === item);
+    
+    // Expiry Date-ஐ ஒப்பிடுதல்
+    const expiryDate = new Date(item.expiry);
+    let statusClass = "expiry-active"; // Default Green
+
+    if (expiryDate < now) {
+      statusClass = "expiry-expired"; // Expired என்றால் Red
+    }
+
     let row = `<tr>
       <td style="font-weight:bold; background:#f1f5f9;">${index + 1}</td>
       <td>${item.name}</td>
@@ -230,7 +248,7 @@ function render(list = gymData) {
       <td>${item.method}</td>
       <td>${item.gym}</td>
       <td>${item.dateTime.replace('T', ' ')}</td>
-      <td style="color:red; font-weight:bold;">${item.expiry.split('T')[0]}</td>
+      <td class="${statusClass}">${item.expiry.replace('T', ' ')}</td>
       <td><button class="delete-btn" onclick="deleteRow(${originalIndex})">Delete</button></td>
     </tr>`;
     tableBody.innerHTML += row;
