@@ -207,15 +207,7 @@ font-weight: bold;
     font-size: 20px;
 }
 
-
-
-
-
-
-
-
 /* Calculator ஆரம்பம் */
-
 #calcButton {
   position: fixed;
   bottom: 100px;
@@ -231,13 +223,10 @@ font-weight: bold;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   cursor: pointer;
 }
-
 #calcButton img {
   width: 28px;
   height: 28px;
 }
-
-/* கால்குலேட்டர் பாக்ஸ் ஸ்டைல் */
 #calculator {
   position: fixed;
   bottom: 180px;
@@ -247,10 +236,9 @@ font-weight: bold;
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  display: none; /* ஆரம்பத்தில் மறைந்திருக்கும் */
+  display: none; 
   z-index: 2000;
 }
-
 #calcScreen {
   width: 100%;
   min-height: 40px;
@@ -266,13 +254,11 @@ font-weight: bold;
   white-space: pre-wrap;
   word-break: break-word;
 }
-
 .calc-buttons {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 5px;
 }
-
 .calc-buttons button {
   padding: 10px;
   font-size: 16px;
@@ -283,17 +269,14 @@ font-weight: bold;
   color: white;
   transition: 0.2s;
 }
-
 .calc-buttons button:hover {
   background: #023e8a;
 }
-
 .calc-bottom {
   display: flex;
   gap: 5px;
   margin-top: 5px;
 }
-
 .calc-bottom button {
   flex: 1;
   padding: 10px;
@@ -303,14 +286,9 @@ font-weight: bold;
   cursor: pointer;
   color: #fff;
 }
-
 .btn-clear { background: #ff4d4d; }
 .btn-back  { background: #f39c12; }
-
-
 /* Calculator முடிவு */
-
-
 
 </style>
 
@@ -395,8 +373,6 @@ font-weight: bold;
   </div>
 </div>
 
-
-
   <div class="card">
     <h3>🍽️ Calorie Target</h3>
     <p id="calorieTargetText"></p>
@@ -416,9 +392,6 @@ font-weight: bold;
   <button onclick="location.href='profile.html'"><span>👤</span>Profile</button>
 </div>
 
-<!-- Calculator ஆரம்பம் -->
-
-
 <div id="calcButton">
   <img src="https://img.icons8.com/ios-filled/50/ffffff/calculator.png" alt="Calculator">
 </div>
@@ -436,18 +409,6 @@ font-weight: bold;
     <button class="btn-back">⌫</button>
   </div>
 </div>
-
-
-
-
-
-
-<!-- Calculator முடிவு    -->
-
-
-
-
-
 <div id="loginOverlay">
     <div class="login-card">
         <h2>🔒 Z Fitness Login</h2>
@@ -456,8 +417,8 @@ font-weight: bold;
         <button onclick="checkLogin()">Login</button>
         <p id="error" class="error-msg"></p>
 
- <p id="contactBtn" style="cursor:pointer;color:#2563eb;">
-  Contact
+ <p id="contactBtn" style="cursor:pointer;color:#2563eb;margin-top:15px;font-weight:bold;">
+  Contact Admin
 </p>
 
     </div>
@@ -465,24 +426,23 @@ font-weight: bold;
 
 <ul id="userDatabase" style="display: none;">
     <li data-user="Mathavan" data-pass="Mathu12345m" data-expiry="2026-12-31"></li>
-
+    
     <li data-user="Srirajudeen" data-pass="Sriraju125" data-expiry="2026-01-19"></li>
-
+    
     <li data-user="Azarudheen" data-pass="Aza@5230" data-expiry="2026-02-13"></li>
-
+    
     <li data-user="Rhafiya" data-pass="Rhafiya25@ba" data-expiry="2026-02-13"></li>
-
+    
     <li data-user="Syed" data-pass="Syed@moh12" data-expiry="2025-02-14"></li>
-
-      <li data-user="Jey" data-pass="Jey@123j" data-expiry="2026-02-18"></li>
-
-      <li data-user="Deepika" data-pass="Deepika@987" data-expiry="2026-02-19"></li>
-
-      <li data-user="Logesh" data-pass="Logesh@78s" data-expiry="2026-02-22"></li>
-
-
+    
+    <li data-user="Jey" data-pass="Jey@123j" data-expiry="2026-02-18"></li>
+    
+    <li data-user="Deepika" data-pass="Deepika@987" data-expiry="2026-02-19"></li>
+    
+    <li data-user="Logesh" data-pass="Logesh@78s" data-expiry="2026-02-22"></li>
+    
     <li data-user="4657" data-pass="m78123" data-expiry="2026-08-15"></li>
-
+    
     <li data-user="Ragul" data-pass="mu123" data-expiry="2026-08-07"></li>
 </ul>
 
@@ -498,7 +458,6 @@ const get = k => localStorage.getItem(k) || "--";
 
 // --- Dashboard & Nutrition தரவை லோடு செய்தல் ---
 function loadDashboard() {
-    // Basic Profile Stats
     document.getElementById("username").innerText = localStorage.getItem("name") || "--";
     document.getElementById("weightShow").innerText = get("weight");
     document.getElementById("goalShow").innerText = get("goal");
@@ -508,8 +467,8 @@ function loadDashboard() {
     document.getElementById("calorieTargetText").innerText = calorieValue !== "--" ? `${calorieValue} kcal` : "Set your target in Profile";
     document.getElementById("todayWorkoutText").innerText = get("todayWorkout") || "Rest Day 😴";
 
-    renderWater();    // தண்ணீர் அப்டேட்
-    showTodayStats(); // நியூட்ரிஷன் அப்டேட்
+    renderWater();    
+    showTodayStats(); 
 }
 
 // --- Chart லாஜிக் ---
@@ -658,29 +617,13 @@ window.onload = function() {
     }
 };
 
-function logout() {
-    localStorage.removeItem("isLoggedIn");
-    location.reload();
-}
-
-
-
-
-
+// --- Contact Admin Logic (Direct WhatsApp Only) ---
 document.getElementById("contactBtn").onclick = function () {
-    const phone = "+919344165879"; // UI-ல காட்டப்படாது
-    const message = encodeURIComponent(
-      "Z Fitness\nUser name & Password"
-    );
-
-    window.location.href = `sms:${phone}?body=${message}`;
-  };
-
-
-
-
-
-
+    const phone = "919344165879"; 
+    const message = encodeURIComponent("Z Fitness\nUser name & Password Help");
+    // Directly opening WhatsApp
+    window.location.href = `https://wa.me/${phone}?text=${message}`;
+};
 
 const button = document.getElementById("calcButton");
 const calculator = document.getElementById("calculator");
@@ -689,14 +632,12 @@ const calcButtons = document.querySelectorAll(".calc-buttons button");
 const clearBtn = document.querySelector(".btn-clear");
 const backBtn = document.querySelector(".btn-back");
 
-// கால்குலேட்டரை காட்ட/மறைக்க
 button.addEventListener("click", () => {
   calculator.style.display = calculator.style.display === "block" ? "none" : "block";
 });
 
 let expression = "";
 
-// எண்கள் மற்றும் கணித குறியீடுகள் வேலை செய்ய
 calcButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     let value = btn.textContent;
@@ -717,19 +658,16 @@ calcButtons.forEach(btn => {
   });
 });
 
-// Clear பட்டன்
 clearBtn.addEventListener("click", () => {
   expression = "";
   screen.value = "";
 });
 
-// Backspace பட்டன்
 backBtn.addEventListener("click", () => {
   expression = expression.slice(0, -1);
   screen.value = expression;
 });
 
-// நகர்த்தும் வசதி (Draggable Function)
 function makeDraggable(el) {
   let isDragging = false;
   let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
@@ -763,11 +701,8 @@ function makeDraggable(el) {
   }
 }
 
-// கால்குலேட்டர் மற்றும் பட்டன் இரண்டிற்கும் நகர்த்தும் வசதியை அளித்தல்
 makeDraggable(calculator);
 makeDraggable(button);
-
-
 
 </script>
 </body>
