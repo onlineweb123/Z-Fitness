@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html>
 <head>
     <meta charset="UTF-8">
+    <title>Z Fitness</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z Fitness - Dashboard</title>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -27,51 +27,53 @@
   window.dbRef = ref;
   window.dbOnValue = onValue;
 
-  // லாகின் செக் செய்த பிறகு டேட்டாவை லோடு செய்வோம்
-  checkAuthAndLoad();
+  // லாகின் செக் செய்த பின் டேட்டா லோடு ஆகும்
+  initPage();
 </script>
 
 <style>
+/* உங்கள் அசல் CSS அப்படியே இங்கே... */
 :root{
-  --bg:#eef3f8; --card:#ffffff; --border:#d7e0ea;
+  --bg:#eef3f8; --card:#ffffffcc; --border:#d7e0ea;
   --accent:#007bff; --accent2:#009f7b; --text:#1c1c1c;
 }
-
-body{ margin:0; font-family:'Poppins',sans-serif; background:var(--bg); color:var(--text); overflow-x: hidden; }
-header{ height:60px; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; position:fixed; top:0; left:0; right:0; background:blue; color:white; z-index:100; }
-.menu-btn{ position:absolute; left:14px; font-size:26px; background:none; border:none; color:white; cursor:pointer; }
-
-.sidebar{ width:250px; background:#fff; position:fixed; top:0; bottom:0; left:-260px; padding-top:75px; border-right:1px solid var(--border); transition:.35s; z-index:110; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
-.sidebar.open{ left:0; }
-.sidebar a{ display:block; padding:15px 22px; text-decoration:none; color:var(--text); border-bottom:1px solid #f1f4f6; }
-
-.main{ padding:75px 15px 80px 15px; }
-.card{ background:var(--card); padding:18px; border-radius:18px; box-shadow:0 6px 14px rgba(0,0,0,.06); margin-bottom:16px; border:1px solid var(--border); }
-
-#greet{ font-size:22px; font-weight:700; margin-bottom:12px; }
-.chart-box{ height:150px; display:flex; align-items:flex-end; gap:3px; padding:10px; background: #f9fbff; border-radius: 12px; }
-.chart-bar{ flex:1; border-radius:4px; transition:.3s; min-width: 5px; }
-.completed{ background:var(--accent); } .medium{ background:orange; } .missed{ background:red; } .future{ background:#ddd; }
-
-.stats{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
-.stat{ background:#fff; padding:12px; border-radius:12px; text-align:center; border:1px solid var(--border); }
-.stat strong{ font-size:18px; display:block; color: var(--accent); }
-
-.nutrition-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 10px; }
-.nut-item { text-align: center; }
-.nut-item span { font-size: 11px; color: #666; display: block; }
-.nut-item b { font-size: 16px; color: var(--accent); }
-
-.bottom{ height:60px; position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; align-items:center; background:#fff; border-top:1px solid var(--border); z-index:100; }
-.bottom button{ background:none; border:none; font-size:12px; display:flex; flex-direction:column; align-items:center; opacity:.5; color: #333; }
-.bottom button.active{ opacity:1; color:var(--accent); font-weight: bold; }
-
-#loginOverlay { position:fixed; inset:0; background:rgba(255,255,255,0.95); display:flex; align-items:center; justify-content:center; z-index:999; backdrop-filter:blur(10px); }
-.login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-.login-card input { width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing: border-box; }
-.login-card button { width:100%; padding:12px; background:blue; color:white; border:none; border-radius:10px; font-weight:bold; }
+body{ margin:0; font-family:'Poppins',Arial,sans-serif; background:var(--bg); color:var(--text); }
+*,button,a{transition:0.25s;}
+header{ height:60px; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; position:fixed; top:0; left:0; right:0; background:blue; color:white; z-index:10; }
+.menu-btn{position:absolute; left:14px; font-size:26px; background:none; border:none; color:white; cursor:pointer;}
+.sidebar{ width:250px; background:#ffffffee; position:fixed; top:0; bottom:0; left:-260px; padding-top:75px; border-right:1px solid var(--border); transition:.35s; backdrop-filter:blur(10px); z-index:20; }
+.sidebar.open{left:0;}
+.sidebar a{ display:flex; align-items:center; padding:16px 22px; font-size:17px; text-decoration:none; color:var(--text); border-bottom:1px solid #f1f4f6; }
+.overlay{ position:fixed; inset:0; background:#0008; display:none; backdrop-filter:blur(4px); z-index:15; }
+.overlay.show{display:block;}
+.main{position:absolute; top:65px; bottom:65px; left:0; right:0; overflow-y:auto; padding:18px; transition:.3s;}
+.main.blur{filter:blur(6px);}
+.card{ padding:18px; background:var(--card); border-radius:18px; box-shadow:0 6px 14px rgba(0,0,0,.08); margin-bottom:16px; border:1px solid var(--border); }
+#greet{font-size:22px; font-weight:700; margin-bottom:12px;}  
+.chart-box{ height:170px; background:#fff; border-radius:12px; border:1px solid var(--border); padding:8px; }
+.chart-days{display:flex; gap:4px; height:100%; align-items:flex-end;}
+.chart-bar{width:10px;border-radius:4px;transition:.3s;}
+.future{background:#cfcfcf;} .completed{background:#007bff;} .medium{background:orange;} .missed{background:red;}
+.stats{display:flex; justify-content:space-between; margin-top:12px;}
+.stat{background:#fff; padding:12px; flex:1; margin:4px; border-radius:12px; text-align:center; font-size:14px; border:1px solid var(--border);}
+.stat strong{font-size:18px; display:block; margin-bottom:4px;}
+#calorieTargetText { font-size: 26px; font-weight: 700; color: var(--accent2); text-align: center; margin: 10px 0 5px 0; }
+.bottom{ height:60px; position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; align-items:center; background:#ffffffcc; border-top:1px solid var(--border); z-index:10; }
+.bottom button{ background:none; border:none; font-size:13px; display:flex; flex-direction:column; align-items:center; opacity:.6; }
+.bottom button.active{opacity:1; color:var(--accent);}
+.bottom button span{font-size:22px;}
+#loginOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(10px); }
+.login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
+.login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+.login-card button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; }
+.water-container { text-align: center; padding: 20px; background: white; border-radius: 20px; }
+.water-glass { width: 60px; height: 90px; border: 3px solid #333; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; }
+.water-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #00d2ff, #3a7bd5); height: 0%; transition: 0.6s; }
+.water-controls { display: flex; justify-content: center; align-items: center; gap: 15px; font-weight: bold; }
+.w-btn { background: #007bff; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; }
 </style>
 </head>
+
 <body>
 
 <header>
@@ -89,51 +91,69 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
   <a href="profile.html">👤 Profile</a>
 </div>
 
-<div class="main" id="main">
-  <div id="greet">Hi 👋, <span id="username">Guest</span></div>
+<div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+
+<div id="main" class="main">
+  <div id="greet">Hi 👋, <span id="username">Loading...</span></div>
 
   <div class="card">
-    <h3 style="margin-top:0;">📈 Monthly Workout</h3>
-    <div class="chart-box" id="daysChart"></div>
-  </div>
-
-  <div class="card" style="background: #f0f7ff;">
-    <h3 style="margin-top:0; color: #0056b3;">🍱 Today's Nutrition</h3>
-    <div style="text-align: center;">
-        <span id="totalCal" style="font-size: 32px; font-weight: 800; color: #1e40af;">0</span>
-        <small style="color: #60a5fa;"> kcal</small>
-    </div>
-    <div class="nutrition-grid">
-        <div class="nut-item"><span>Protein</span><b id="totalP">0</b>g</div>
-        <div class="nut-item"><span>Carbs</span><b id="totalC">0</b>g</div>
-        <div class="nut-item"><span>Fat</span><b id="totalF">0</b>g</div>
+    <h3>📈 Monthly Workout</h3>
+    <div class="chart-box">
+      <div class="chart-days" id="daysChart"></div>
     </div>
   </div>
 
   <div class="card">
-    <h3 style="margin-top:0;">🎯 Profile & Goals</h3>
-    <div class="stats">
-      <div class="stat"><strong id="weightShow">--</strong>kg<br><small>Weight</small></div>
-      <div class="stat"><strong id="goalShow">--</strong><br><small>Goal</small></div>
-      <div class="stat"><strong id="levelShow">--</strong><br><small>Level</small></div>
+    <h3>🔥 Today Goals</h3>
+    <p id="todayWorkoutText">Connecting...</p>
+  </div>
+  
+  <div class="card water-container">
+    <h3>💧 Water Intake (Target: 3L)</h3>
+    <div class="water-glass"><div id="waterFill" class="water-fill"></div></div>
+    <div class="water-controls">
+        <button class="w-btn" onclick="updateWater(-250)">-</button>
+        <span id="waterText">0 ml</span>
+        <button class="w-btn" onclick="updateWater(250)">+</button>
     </div>
-    <div style="margin-top:15px; text-align: center; border-top: 1px solid #eee; padding-top: 10px;">
-        <span style="font-size: 12px; color: #666;">Calorie Target:</span>
-        <b id="calTarget" style="color: var(--accent2); font-size: 18px;">-- kcal</b>
+</div>
+
+<div class="card" style="background: #ebf8ff; border: 1px solid #bee3f8; padding: 18px; border-radius: 18px; margin-bottom: 16px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+    <h3 style="color: #2b6cb0; margin: 0; font-size: 18px;">🍱 Today's Nutrition</h3>
+    <span id="displayDate" style="font-size: 12px; color: #4299e1; font-weight: bold;"></span>
+  </div>
+  
+  <div id="foodSummary">
+    <div style="text-align: center; padding: 10px 0;">
+        <p id="totalCalorieDisplay" style="font-size: 28px; font-weight: 700; color: #2c5282; margin: 0;">0 kcal</p>
+        <span style="font-size: 11px; color: #4a5568; text-transform: uppercase;">மொத்த கலோரிகள்</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px dashed #bee3f8; font-size: 14px; color: #4a5568;">
+      <div style="text-align: center; flex: 1;"><span>Protein</span><br><b id="totalP">0</b>g</div>
+      <div style="text-align: center; flex: 1; border-left: 1px solid #eee; border-right: 1px solid #eee;"><span>Carbs</span><br><b id="totalC">0</b>g</div>
+      <div style="text-align: center; flex: 1;"><span>Fat</span><br><b id="totalF">0</b>g</div>
     </div>
   </div>
+</div>
 
   <div class="card">
-    <h3 style="margin-top:0;">🔥 Today Status</h3>
-    <p id="todayWorkoutText" style="font-weight: bold; color: var(--accent); margin-bottom: 0;">Loading...</p>
+    <h3>🍽️ Calorie Target</h3>
+    <p id="calorieTargetText">--</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><strong id="weightShow">--</strong>kg<br>Weight</div>
+    <div class="stat"><strong id="goalShow">--</strong><br>Goal</div>
+    <div class="stat"><strong id="levelShow">--</strong><br>Level</div>
   </div>
 </div>
 
 <div class="bottom">
   <button class="active"><span>🏠</span>Home</button>
   <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
-  <button onclick="location.href='nutrition tracker.html'"><span>🥗</span>Nutrition</button>
-  <button onclick="location.href='save-data.html'"><span>📥</span>Save</button>
+  <button onclick="location.href='nutrition tracker.html'"><span>🥗</span>Diet</button>
+  <button onclick="location.href='profile.html'"><span>👤</span>Profile</button>
 </div>
 
 <div id="loginOverlay" style="display:none;">
@@ -146,40 +166,49 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
     </div>
 </div>
 
+<ul id="userDatabase" style="display: none;">
+    <li data-user="Mathavan" data-pass="Mathu12345m" data-expiry="2026-12-31"></li>
+    <li data-user="Azarudheen" data-pass="Aza@5230" data-expiry="2026-02-13"></li>
+    <li data-user="Ragul" data-pass="mu123" data-expiry="2026-08-07"></li>
+</ul>
+
 <script>
 let userName = localStorage.getItem("name") || "";
 
 function toggleMenu(){
   document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("show");
+  document.getElementById("main").classList.toggle("blur");
 }
 
-function checkAuthAndLoad() {
+function initPage() {
     if (!localStorage.getItem("isLoggedIn")) {
         document.getElementById("loginOverlay").style.display = "flex";
     } else {
         userName = localStorage.getItem("name");
+        document.getElementById("username").innerText = userName;
         loadCloudData();
     }
 }
 
+// --- 🔥 Firebase Cloud-லிருந்து தரவுகளைப் பெறுதல் ---
 function loadCloudData() {
-    document.getElementById("username").innerText = userName;
     const now = new Date();
-    const todayKey = now.toLocaleDateString('en-CA', {timeZone: 'Asia/Kolkata'}); // YYYY-MM-DD
+    const todayKey = now.toLocaleDateString('en-CA', {timeZone: 'Asia/Kolkata'});
     const monthYear = (now.getMonth() + 1) + "_" + now.getFullYear();
 
-    // 1. Profile Data ரீட் செய்தல்
+    // 1. Profile Stats
     window.dbOnValue(window.dbRef(window.db, `users/${userName}/profile`), (snapshot) => {
         const d = snapshot.val();
         if(d) {
             document.getElementById("weightShow").innerText = d.weight || "--";
             document.getElementById("goalShow").innerText = d.goal || "--";
             document.getElementById("levelShow").innerText = d.workoutLevel || "--";
-            document.getElementById("calTarget").innerText = (d.calorie || "--") + " kcal";
+            document.getElementById("calorieTargetText").innerText = (d.calorie || "--") + " kcal";
         }
     });
 
-    // 2. Nutrition Data ரீட் செய்தல்
+    // 2. Nutrition
     window.dbOnValue(window.dbRef(window.db, `users/${userName}/nutrition/${todayKey}`), (snapshot) => {
         const foods = snapshot.val() || [];
         let tCal = 0, tP = 0, tC = 0, tF = 0;
@@ -189,27 +218,26 @@ function loadCloudData() {
             tC += parseFloat(f.carbs) || 0;
             tF += parseFloat(f.fat) || 0;
         });
-        document.getElementById("totalCal").innerText = tCal.toFixed(0);
+        document.getElementById("displayDate").innerText = todayKey;
+        document.getElementById("totalCalorieDisplay").innerText = tCal.toFixed(0) + " kcal";
         document.getElementById("totalP").innerText = tP.toFixed(1);
         document.getElementById("totalC").innerText = tC.toFixed(1);
         document.getElementById("totalF").innerText = tF.toFixed(1);
     });
 
-    // 3. Workout Logs & Chart
+    // 3. Workout Chart & Today Goal
     window.dbOnValue(window.dbRef(window.db, `users/${userName}/logs/${monthYear}`), (snapshot) => {
         const logs = snapshot.val() || {};
-        renderWorkoutChart(logs);
-        
-        const todayDay = now.getDate();
-        if(logs[todayDay]) {
-            document.getElementById("todayWorkoutText").innerText = "இன்று: " + logs[todayDay].status;
-        } else {
-            document.getElementById("todayWorkoutText").innerText = "இன்று இன்னும் அப்டேட் செய்யவில்லை 😴";
-        }
+        renderChart(logs);
+        const day = now.getDate();
+        document.getElementById("todayWorkoutText").innerText = logs[day] ? logs[day].status : "Rest Day 😴";
     });
+
+    renderWater();
 }
 
-function renderWorkoutChart(logs) {
+// --- 📈 Chart Drawing ---
+function renderChart(logs) {
     const container = document.getElementById("daysChart");
     container.innerHTML = "";
     const now = new Date();
@@ -217,36 +245,53 @@ function renderWorkoutChart(logs) {
     const todayDate = now.getDate();
 
     for(let i = 1; i <= totalDays; i++) {
-        const bar = document.createElement("div");
+        let bar = document.createElement("div");
         bar.className = "chart-bar";
-        
         if(i > todayDate) {
-            bar.classList.add("future");
-            bar.style.height = "20%";
+            bar.classList.add("future"); bar.style.height="20%";
         } else if(logs[i]) {
-            const status = logs[i].status;
-            if(status.includes("✅")) { bar.classList.add("completed"); bar.style.height = "100%"; }
-            else if(status.includes("🟡")) { bar.classList.add("medium"); bar.style.height = "60%"; }
-            else { bar.classList.add("missed"); bar.style.height = "35%"; }
+            const s = logs[i].status;
+            if(s.includes("✅")) { bar.classList.add("completed"); bar.style.height="100%"; }
+            else if(s.includes("🟡")) { bar.classList.add("medium"); bar.style.height="60%"; }
+            else { bar.classList.add("missed"); bar.style.height="35%"; }
         } else {
-            bar.classList.add("missed"); bar.style.height = "35%";
+            bar.classList.add("missed"); bar.style.height="35%";
         }
         container.appendChild(bar);
     }
 }
 
+// --- 💧 Water Logic (LocalStorage used for quick UI, but you can sync to DB too) ---
+function updateWater(amt) {
+    let count = parseInt(localStorage.getItem("waterCount") || 0);
+    count = Math.max(0, Math.min(3000, count + amt));
+    localStorage.setItem("waterCount", count);
+    renderWater();
+}
+function renderWater() {
+    let count = parseInt(localStorage.getItem("waterCount") || 0);
+    document.getElementById("waterFill").style.height = (count / 3000 * 100) + "%";
+    document.getElementById("waterText").innerText = count + " ml";
+}
+
+// --- 🔑 Login Logic ---
 function checkLogin() {
     const u = document.getElementById("uName").value;
     const p = document.getElementById("uPass").value;
-    // எளிமைக்காக இங்கு சில யூசர்களை மட்டும் வைத்துள்ளேன், நீங்கள் உங்கள் லிஸ்டை இங்கு சேர்க்கலாம்
-    if((u === "Mathavan" && p === "Mathu12345m") || (u === "Ragul" && p === "mu123")) {
+    const users = document.querySelectorAll("#userDatabase li");
+    let auth = false;
+
+    users.forEach(li => {
+        if(u === li.getAttribute("data-user") && p === li.getAttribute("data-pass")) auth = true;
+    });
+
+    if(auth) {
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("name", u);
         location.reload();
     } else {
-        const err = document.getElementById("error");
-        err.innerText = "தவறான பாஸ்வேர்ட்!";
-        err.style.display = "block";
+        document.getElementById("error").innerText = "Invalid credentials!";
+        document.getElementById("error").style.display = "block";
     }
 }
 </script>
