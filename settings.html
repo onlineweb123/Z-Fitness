@@ -4,34 +4,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Save Data - Maathu Fitness</title>
+<title>Save Data - Z Fitness</title>
 
-
-
-
-
-<!-- Google tag (gtag.js) ஆரம்பம் -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-P0JBRSCYFF"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-P0JBRSCYFF');
 </script>
 
-<!-- Google tag (gtag.js) முடிவு -->
-
-
 <script type="module">
-  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getDatabase, ref, set, update } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
     authDomain: "z-fitness-a.firebaseapp.com",
@@ -39,16 +25,19 @@
     storageBucket: "z-fitness-a.firebasestorage.app",
     messagingSenderId: "289896498711",
     appId: "1:289896498711:web:6bc6943dcfb06cca2d7e52",
-    measurementId: "G-G8BVVRSCXH"
+    measurementId: "G-G8BVVRSCXH",
+    databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  const database = getDatabase(app);
+
+  // எக்ஸ்போர்ட் செய்கிறோம் تاکہ மற்ற பங்க்ஷன்களில் பயன்படுத்த முடியும்
+  window.db = database;
+  window.dbRef = ref;
+  window.dbSet = set;
+  window.dbUpdate = update;
 </script>
-
-
-
 
 <style>
 :root{
@@ -131,11 +120,8 @@ input,select{
 .bottom button span{font-size:22px;}
 
 .overlay{
-  position:fixed;
-  top:0; left:0; right:0; bottom:0;
-  background:rgba(0,0,0,0.4);
-  display:none;
-  z-index:15;
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.4); display:none; z-index:15;
 }
 .overlay.show{display:block;}
 </style>
@@ -156,18 +142,14 @@ input,select{
   <a href="habit traker.html">♾️ Habit Traker</a>
   <a href="progress.html">📊 Progress Tracker</a>
   <a href="profile.html">👤 Profile</a>
- <a href="admin.html">🔒 Admin</a>
   <a href="settings.html">⚙️ Settings</a>
 </div>
 
 <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
 
 <div class="main">
-
   <div class="card">
     <h3>👤 Profile Details</h3>
-
-    <!-- ❌ Name Removed -->
     <input type="number" id="age" placeholder="Age">
     <select id="gender">
       <option value="">Select Gender</option>
@@ -177,45 +159,37 @@ input,select{
     </select>
     <input type="number" id="weight" placeholder="Weight (kg)">
     <input type="number" id="height" placeholder="Height (cm)">
-
     <select id="goal">
       <option>Goal</option>
       <option>Weight Loss</option>
       <option>Muscle Gain</option>
       <option>Fitness</option>
     </select>
-
     <select id="workout">
       <option>Workout Level</option>
       <option>Beginner</option>
       <option>Intermediate</option>
       <option>Advanced</option>
     </select>
-
     <select id="diet">
       <option>Diet Type</option>
       <option>Veg</option>
       <option>Non-Veg</option>
       <option>Mixed</option>
     </select>
-    
     <input type="number" id="calorie" placeholder="Your Calorie (kcal)">
-
     <button class="save-btn" onclick="saveProfile()">💾 Save / Edit Profile</button>
   </div>
 
   <div class="card">
     <h3>🏋️ Today Workout?</h3>
-
     <div class="status-box">
-      <button class="yes" onclick="saveToday('✅ Done')">✅</button>
-      <button class="medium" onclick="saveToday('🟡 Medium')">🟡</button>
-      <button class="no" onclick="saveToday('❌ Missed')">❌</button>
+      <button class="yes" id="btnYes" onclick="setTempStatus('✅ Done')">✅</button>
+      <button class="medium" id="btnMed" onclick="setTempStatus('🟡 Medium')">🟡</button>
+      <button class="no" id="btnNo" onclick="setTempStatus('❌ Missed')">❌</button>
     </div>
-
     <button class="save-btn" onclick="saveTodayStatus()">💾 Save Today</button>
   </div>
-
 </div>
 
 <div class="bottom">
@@ -226,12 +200,14 @@ input,select{
 </div>
 
 <script>
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+
 function toggleMenu(){
   sidebar.classList.toggle("open");
   overlay.classList.toggle("show");
 }
 
-// ✅ Bind inputs (Name removed)
 const inputAge = document.getElementById("age");
 const inputGender = document.getElementById("gender");
 const inputWeight = document.getElementById("weight");
@@ -241,7 +217,8 @@ const inputWorkout = document.getElementById("workout");
 const inputDiet = document.getElementById("diet");
 const inputCalorie = document.getElementById("calorie");
 
-// ✅ Load saved profile
+const userName = localStorage.getItem("name") || "Guest";
+
 window.onload = () => {
   inputAge.value = localStorage.getItem("age") || "";
   inputGender.value = localStorage.getItem("gender") || "";
@@ -253,8 +230,9 @@ window.onload = () => {
   inputCalorie.value = localStorage.getItem("calorie") || "";
 };
 
-// ✅ Save Profile (Name removed)
-function saveProfile(){
+// ✅ Firebase-க்கு டேட்டாவை அனுப்பும் மற்றும் Local-ல் சேமிக்கும் பங்க்ஷன்
+async function saveProfile(){
+  // LocalStorage சேமிப்பு
   localStorage.setItem("age", inputAge.value);
   localStorage.setItem("gender", inputGender.value);
   localStorage.setItem("weight", inputWeight.value);
@@ -263,20 +241,47 @@ function saveProfile(){
   localStorage.setItem("workout-level", inputWorkout.value);
   localStorage.setItem("diet", inputDiet.value);
   localStorage.setItem("calorie", inputCalorie.value);
-  alert("✅ Profile Saved!");
+
+  // Firebase சேமிப்பு
+  if(window.db) {
+    try {
+      await window.dbUpdate(window.dbRef(window.db, 'users/' + userName + '/profile'), {
+        age: inputAge.value,
+        gender: inputGender.value,
+        weight: inputWeight.value,
+        height: inputHeight.value,
+        goal: inputGoal.value,
+        workoutLevel: inputWorkout.value,
+        dietType: inputDiet.value,
+        calorie: inputCalorie.value,
+        lastUpdated: new Date().toISOString()
+      });
+      alert("✅ Profile Synced Online!");
+    } catch (e) {
+      console.error(e);
+      alert("Local Saved. Sync Failed!");
+    }
+  }
 }
 
-// ✅ Workout status logic (unchanged)
 let todayStatus = "";
+function setTempStatus(val){ 
+    todayStatus = val;
+    // பொத்தான்களுக்கு இடையில் சின்ன விசுவல் எஃபெக்ட்
+    document.querySelectorAll('.status-box button').forEach(b => b.style.opacity = '0.5');
+    if(val.includes('✅')) document.getElementById('btnYes').style.opacity = '1';
+    if(val.includes('🟡')) document.getElementById('btnMed').style.opacity = '1';
+    if(val.includes('❌')) document.getElementById('btnNo').style.opacity = '1';
+}
 
-function saveToday(val){ todayStatus = val; }
-
-function saveTodayStatus(){
+async function saveTodayStatus(){
   if(todayStatus === ""){ alert("Select today's workout first!"); return; }
 
   let date = new Date();
   let day = date.getDate();
+  let monthYear = (date.getMonth() + 1) + "_" + date.getFullYear();
 
+  // Local Storage
   localStorage.setItem("todayWorkout", todayStatus);
   localStorage.setItem("workout_"+day, todayStatus);
 
@@ -292,9 +297,20 @@ function saveTodayStatus(){
   localStorage.setItem("doneWorkoutDays", JSON.stringify(doneDays));
   localStorage.setItem("mediumWorkoutDays", JSON.stringify(mediumDays));
 
-  alert("🔥 Workout Saved: " + todayStatus);
+  // Firebase Sync
+  if(window.db) {
+      try {
+          const workoutRef = window.dbRef(window.db, 'users/' + userName + '/logs/' + monthYear + '/' + day);
+          await window.dbSet(workoutRef, {
+              status: todayStatus,
+              timestamp: new Date().toISOString()
+          });
+          alert("🔥 Workout Saved & Synced!");
+      } catch (e) {
+          alert("Saved Locally!");
+      }
+  }
 }
 </script>
-
 </body>
 </html>
