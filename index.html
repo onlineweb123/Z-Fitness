@@ -1,222 +1,358 @@
 <!DOCTYPE html>
-<html>
+<html lang="ta">
 <head>
     <meta charset="UTF-8">
-    <title>Z Fitness</title>
+    <title>Z Fitness - Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
+            authDomain: "z-fitness-a.firebaseapp.com",
+            projectId: "z-fitness-a",
+            storageBucket: "z-fitness-a.firebasestorage.app",
+            messagingSenderId: "289896498711",
+            appId: "1:289896498711:web:6bc6943dcfb06cca2d7e52",
+            measurementId: "G-G8BVVRSCXH",
+            databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
+        };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
-    authDomain: "z-fitness-a.firebaseapp.com",
-    projectId: "z-fitness-a",
-    storageBucket: "z-fitness-a.firebasestorage.app",
-    messagingSenderId: "289896498711",
-    appId: "1:289896498711:web:6bc6943dcfb06cca2d7e52",
-    measurementId: "G-G8BVVRSCXH",
-    databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
-  };
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
+        window.db = database;
+        window.dbRef = ref;
+        window.dbOnValue = onValue;
 
-  // Global variables for other functions
-  window.db = database;
-  window.dbRef = ref;
-  window.dbOnValue = onValue;
+        checkLoginStatus();
+    </script>
 
-  // --- Google Login Function ---
-  window.loginWithGoogle = function() {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-            console.log("Logged in!");
-        }).catch((error) => {
-            alert("Login Failed: " + error.message);
-        });
-  }
-
-  // --- Logout Function ---
-  window.logout = function() {
-      signOut(auth).then(() => {
-          location.reload();
-      });
-  }
-
-  // --- Auth State Change (Check if logged in) ---
-  onAuthStateChanged(auth, (user) => {
-      if (user) {
-          document.getElementById("loginOverlay").style.display = "none";
-          document.getElementById("username").innerText = user.displayName;
-          window.userName = user.displayName; // Using name as key
-          loadCloudData();
-      } else {
-          document.getElementById("loginOverlay").style.display = "flex";
-      }
-  });
-
-</script>
-
-<style>
-:root{
-  --bg:#eef3f8; --card:#ffffffcc; --border:#d7e0ea;
-  --accent:#007bff; --accent2:#009f7b; --text:#1c1c1c;
+    <style>
+        :root{ --bg:#eef3f8; --card:#ffffffcc; --border:#d7e0ea; --accent:#007bff; --accent2:#009f7b; --text:#1c1c1c; }
+        body{ margin:0; font-family:'Poppins',Arial,sans-serif; background:var(--bg); color:var(--text); }
+        header{ height:60px; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; position:fixed; top:0; left:0; right:0; background:blue; color:white; z-index:10; }
+        .menu-btn{ position:absolute; left:14px; font-size:26px; background:none; border:none; color:white; cursor:pointer; }
+        .sidebar{ width:250px; background:#ffffffee; position:fixed; top:0; bottom:0; left:-260px; padding-top:75px; border-right:1px solid var(--border); transition:.35s; backdrop-filter:blur(10px); z-index:20; }
+        .sidebar.open{ left:0; }
+        .sidebar a{ display:flex; align-items:center; padding:16px 22px; font-size:17px; text-decoration:none; color:var(--text); border-bottom:1px solid #f1f4f6; }
+        .overlay{ position:fixed; inset:0; background:#0008; display:none; backdrop-filter:blur(4px); z-index:15; }
+        .overlay.show{ display:block; }
+        .main{ position:absolute; top:65px; bottom:65px; left:0; right:0; overflow-y:auto; padding:18px; transition:.3s; }
+        .main.blur{ filter:blur(6px); }
+        .card{ padding:18px; background:var(--card); border-radius:18px; box-shadow:0 6px 14px rgba(0,0,0,.08); margin-bottom:16px; border:1px solid var(--border); }
+        #greet{ font-size:22px; font-weight:700; margin-bottom:12px; }  
+        .chart-box{ height:170px; background:#fff; border-radius:12px; border:1px solid var(--border); padding:8px; }
+        .chart-days{ display:flex; gap:4px; height:100%; align-items:flex-end; }
+        .chart-bar{ width:10px; border-radius:4px; transition:.3s; }
+        .future{ background:#cfcfcf; } .completed{ background:#007bff; } .medium{ background:orange; } .missed{ background:red; }
+        .stats{ display:flex; justify-content:space-between; margin-top:12px; }
+        .stat{ background:#fff; padding:12px; flex:1; margin:4px; border-radius:12px; text-align:center; font-size:14px; border:1px solid var(--border); }
+        .stat strong{ font-size:18px; display:block; margin-bottom:4px; }
+        #calorieTargetText { font-size: 26px; font-weight: 700; color: var(--accent2); text-align: center; margin: 10px 0 5px 0; }
+     .bottom{
+  height:60px; position:fixed; bottom:0; left:0; right:0; 
+  display:flex; justify-content:space-around; align-items:center; 
+  background:#ffffffcc; border-top:1px solid var(--border); z-index:10;
 }
-body{ margin:0; font-family:'Poppins',Arial,sans-serif; background:var(--bg); color:var(--text); }
-*,button,a{transition:0.25s;}
-header{ height:60px; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; position:fixed; top:0; left:0; right:0; background:blue; color:white; z-index:10; }
-.menu-btn{position:absolute; left:14px; font-size:26px; background:none; border:none; color:white; cursor:pointer;}
-.sidebar{ width:250px; background:#ffffffee; position:fixed; top:0; bottom:0; left:-260px; padding-top:75px; border-right:1px solid var(--border); transition:.35s; backdrop-filter:blur(10px); z-index:20; }
-.sidebar.open{left:0;}
-.sidebar a{ display:flex; align-items:center; padding:16px 22px; font-size:17px; text-decoration:none; color:var(--text); border-bottom:1px solid #f1f4f6; }
-.main{position:absolute; top:65px; bottom:65px; left:0; right:0; overflow-y:auto; padding:18px; transition:.3s;}
-.card{ padding:18px; background:var(--card); border-radius:18px; box-shadow:0 6px 14px rgba(0,0,0,.08); margin-bottom:16px; border:1px solid var(--border); }
-#greet{font-size:22px; font-weight:700; margin-bottom:12px;}  
-.chart-box{ height:170px; background:#fff; border-radius:12px; border:1px solid var(--border); padding:8px; }
-.chart-days{display:flex; gap:4px; height:100%; align-items:flex-end;}
-.chart-bar{width:10px;border-radius:4px;transition:.3s;}
-.future{background:#cfcfcf;} .completed{background:#007bff;} .medium{background:orange;} .missed{background:red;}
-.stats{display:flex; justify-content:space-between; margin-top:12px;}
-.stat{background:#fff; padding:12px; flex:1; margin:4px; border-radius:12px; text-align:center; font-size:14px; border:1px solid var(--border);}
-.stat strong{font-size:18px; display:block; margin-bottom:4px;}
-#calorieTargetText { font-size: 26px; font-weight: 700; color: var(--accent2); text-align: center; margin: 10px 0 5px 0; }
-.bottom{ height:60px; position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; align-items:center; background:#ffffffcc; border-top:1px solid var(--border); z-index:10; }
-.bottom button{ background:none; border:none; font-size:13px; display:flex; flex-direction:column; align-items:center; opacity:.6; }
+.bottom button{
+  background:none; border:none; font-size:13px; 
+  display:flex; flex-direction:column; align-items:center; opacity:.6;
+}
 .bottom button.active{opacity:1; color:var(--accent);}
-#loginOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(10px); }
-.login-card { background: white; padding: 40px 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
-.google-btn { width: 100%; padding: 12px; background: white; color: #444; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
-.google-btn img { width: 20px; }
-.water-container { text-align: center; padding: 20px; background: white; border-radius: 20px; }
-.water-glass { width: 60px; height: 90px; border: 3px solid #333; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; }
-.water-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #00d2ff, #3a7bd5); height: 0%; transition: 0.6s; }
-.water-controls { display: flex; justify-content: center; align-items: center; gap: 15px; }
-.w-btn { background: #007bff; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
-</style>
-</head>
+.bottom button span{font-size:22px;}
+        
+        /* Water Glass Design */
+        .water-container { text-align: center; padding: 20px; background: white; border-radius: 20px; }
+        .water-glass { width: 60px; height: 90px; border: 3px solid #333; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; }
+        .water-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #00d2ff, #3a7bd5); height: 0%; transition: 0.6s; }
 
+        /* Login Overlay */
+        #loginOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(10px); }
+        .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
+        .login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .login-card button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        /* --- Calculator Design --- */
+        #calcButton {
+            position: fixed; bottom: 100px; right: 20px; z-index: 1000;
+            background: #0077b6; width: 55px; height: 55px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer;
+        }
+        #calcButton img { width: 28px; height: 28px; }
+        #calculator {
+            position: fixed; bottom: 180px; right: 20px; width: 200px;
+            background: #ffffff; padding: 10px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none; z-index: 2000;
+        }
+        #calcScreen {
+            width: 100%; min-height: 40px; max-height: 100px; padding: 5px;
+            margin-bottom: 8px; text-align: right; font-size: 16px; border: 1px solid #ddd;
+            box-sizing: border-box; resize: none; overflow-y: auto;
+        }
+        .calc-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .calc-buttons button {
+            padding: 10px; font-size: 16px; border: none; border-radius: 6px;
+            cursor: pointer; background: #0077b6; color: white;
+        }
+        .calc-bottom { display: flex; gap: 5px; margin-top: 5px; }
+        .calc-bottom button { flex: 1; padding: 10px; border: none; border-radius: 6px; color: #fff; cursor: pointer; }
+        .btn-clear { background: #ff4d4d; }
+        .btn-back { background: #f39c12; }
+    </style>
+</head>
 <body>
 
 <header>
-  <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  💪 Z Fitness
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    💪 Z Fitness
 </header>
 
 <div id="sidebar" class="sidebar">
-  <a href="index.html">🏠 Dashboard</a>
-  <a href="profile.html">👤 Profile</a>
-  <a href="#" onclick="logout()" style="color: red;">🚪 Logout</a>
+    <a href="index.html">🏠 Dashboard</a>
+    <a href="workouts.html">🔥 Workouts</a>
+    <a href="diet.html">🥗 Diet Plans</a>
+    <a href="nutrition tracker.html">🍱 Nutrition Tracker</a>
+    <a href="profile.html">👤 Profile</a>
+    <a href="settings.html">⚙️ Settings</a>
 </div>
 
+<div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+
 <div id="main" class="main">
-  <div id="greet">Hi 👋, <span id="username">Guest</span></div>
+    <div id="greet">Hi 👋, <span id="usernameDisplay">--</span></div>
 
-  <div class="card">
-    <h3>📈 Monthly Workout</h3>
-    <div class="chart-box"><div class="chart-days" id="daysChart"></div></div>
-  </div>
-
-  <div class="card">
-    <h3>🔥 Today Goals</h3>
-    <p id="todayWorkoutText">Connecting...</p>
-  </div>
-
-  <div class="card water-container">
-    <h3>💧 Water Intake</h3>
-    <div class="water-glass"><div id="waterFill" class="water-fill"></div></div>
-    <div class="water-controls">
-        <button class="w-btn" onclick="updateWater(-250)">-</button>
-        <span id="waterText">0 ml</span>
-        <button class="w-btn" onclick="updateWater(250)">+</button>
+    <div class="card">
+        <h3>📈 Monthly Workout</h3>
+        <div class="chart-box">
+            <div class="chart-days" id="daysChart"></div>
+        </div>
     </div>
-  </div>
 
-  <div class="stats">
-    <div class="stat"><strong id="weightShow">--</strong>kg<br>Weight</div>
-    <div class="stat"><strong id="goalShow">--</strong><br>Goal</div>
-    <div class="stat"><strong id="levelShow">--</strong><br>Level</div>
-  </div>
+    <div class="card">
+        <h3>🔥 Today Goals</h3>
+        <p id="todayWorkoutText">Loading...</p>
+    </div>
+    
+    <div class="card water-container">
+        <h3>💧 Water Intake (Target: 3L)</h3>
+        <div class="water-glass"><div id="waterFill" class="water-fill"></div></div>
+        <div style="display:flex; justify-content:center; gap:15px; font-weight:bold;">
+            <button onclick="updateWater(-250)" style="width:35px; height:35px; border-radius:50%; border:none; background:#007bff; color:white; cursor:pointer;">-</button>
+            <span id="waterText">0 ml</span>
+            <button onclick="updateWater(250)" style="width:35px; height:35px; border-radius:50%; border:none; background:#007bff; color:white; cursor:pointer;">+</button>
+        </div>
+    </div>
+
+    <div class="card" style="background: #ebf8ff;">
+        <h3 style="color: #2b6cb0;">🍱 Today's Nutrition</h3>
+        <div id="foodSummary">
+            <p id="totalCalorieDisplay" style="font-size: 28px; font-weight: 700; text-align: center;">0 kcal</p>
+            <div style="display: flex; justify-content: space-around; text-align: center; border-top: 1px dashed #bee3f8; padding-top: 10px;">
+                <div><small>P</small><br><b id="totalP">0</b>g</div>
+                <div><small>C</small><br><b id="totalC">0</b>g</div>
+                <div><small>F</small><br><b id="totalF">0</b>g</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🍽️ Calorie Target</h3>
+        <p id="calorieTargetText">--</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat"><strong id="weightShow">--</strong>kg<br>Weight</div>
+        <div class="stat"><strong id="goalShow">--</strong><br>Goal</div>
+        <div class="stat"><strong id="levelShow">--</strong><br>Level</div>
+    </div>
+</div>
+
+<div id="calcButton">
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/calculator.png" alt="Calc">
+</div>
+
+<div id="calculator">
+    <textarea id="calcScreen" readonly></textarea>
+    <div class="calc-buttons">
+        <button>7</button><button>8</button><button>9</button><button>÷</button>
+        <button>4</button><button>5</button><button>6</button><button>×</button>
+        <button>1</button><button>2</button><button>3</button><button>-</button>
+        <button>0</button><button>.</button><button>=</button><button>+</button>
+    </div>
+    <div class="calc-bottom">
+        <button class="btn-clear">C</button>
+        <button class="btn-back">⌫</button>
+    </div>
 </div>
 
 <div class="bottom">
-  <button class="active"><span>🏠</span>Home</button>
-  <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
-  <button onclick="location.href='nutrition tracker.html'"><span>🥗</span>Diet</button>
-  <button onclick="location.href='profile.html'"><span>👤</span>Profile</button>
+    <button class="active" onclick="location.href='index.html'"><span>🏠</span>Home</button>
+    <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
+    <button onclick="location.href='diet.html'"><span>🥗</span>Diet</button>
+    <button onclick="location.href='profile.html'"><span>👤</span>Profile</button>
 </div>
 
-<div id="loginOverlay">
+<div id="loginOverlay" style="display:none;">
     <div class="login-card">
-        <h2 style="margin-bottom: 30px;">💪 Z Fitness</h2>
-        <p>தொடர உங்கள் கூகுள் கணக்கு மூலம் லாகின் செய்யவும்</p>
-        <button class="google-btn" onclick="loginWithGoogle()">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="google">
-            Sign in with Google
-        </button>
+        <h2>🔒 Z Fitness Login</h2>
+        <input type="text" id="uName" placeholder="User Name">
+        <input type="password" id="uPass" placeholder="Password">
+        <button onclick="handleLogin()">Login</button>
+        <p id="loginError" style="color:red; display:none;"></p>
     </div>
 </div>
 
+<ul id="userDatabase" style="display: none;">
+    <li data-user="Mathavan" data-pass="Mathu12345m" data-expiry="2026-12-31"></li>
+    <li data-user="Azarudheen" data-pass="Aza@5230" data-expiry="2026-02-13"></li>
+</ul>
+
 <script>
-function toggleMenu(){
-  document.getElementById("sidebar").classList.toggle("open");
-}
-
-function loadCloudData() {
-    const now = new Date();
-    const todayKey = now.toLocaleDateString('en-CA', {timeZone: 'Asia/Kolkata'});
-    const monthYear = (now.getMonth() + 1) + "_" + now.getFullYear();
-    const u = window.userName;
-
-    // Profile
-    window.dbOnValue(window.dbRef(window.db, `users/${u}/profile`), (snapshot) => {
-        const d = snapshot.val();
-        if(d) {
-            document.getElementById("weightShow").innerText = d.weight || "--";
-            document.getElementById("goalShow").innerText = d.goal || "--";
-            document.getElementById("levelShow").innerText = d.workoutLevel || "--";
-        }
-    });
-
-    // Workout Chart
-    window.dbOnValue(window.dbRef(window.db, `users/${u}/logs/${monthYear}`), (snapshot) => {
-        const logs = snapshot.val() || {};
-        renderChart(logs);
-        document.getElementById("todayWorkoutText").innerText = logs[now.getDate()] ? logs[now.getDate()].status : "Rest Day 😴";
-    });
-    
-    renderWater();
-}
-
-function renderChart(logs) {
-    const container = document.getElementById("daysChart");
-    container.innerHTML = "";
-    const totalDays = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-    for(let i = 1; i <= totalDays; i++) {
-        let bar = document.createElement("div");
-        bar.className = "chart-bar";
-        if(logs[i]) bar.classList.add("completed");
-        else bar.classList.add("future");
-        bar.style.height = "50%";
-        container.appendChild(bar);
+    function toggleMenu(){
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("overlay").classList.toggle("show");
     }
-}
 
-function updateWater(amt) {
-    let count = parseInt(localStorage.getItem("waterCount") || 0);
-    count = Math.max(0, Math.min(3000, count + amt));
-    localStorage.setItem("waterCount", count);
+    // Calculator Logic
+    const calcBtn = document.getElementById("calcButton");
+    const calculator = document.getElementById("calculator");
+    const screen = document.getElementById("calcScreen");
+    const buttons = document.querySelectorAll(".calc-buttons button");
+    const clearBtn = document.querySelector(".btn-clear");
+    const backBtn = document.querySelector(".btn-back");
+
+    calcBtn.onclick = () => {
+        calculator.style.display = calculator.style.display === "block" ? "none" : "block";
+    };
+
+    let expression = "";
+    buttons.forEach(btn => {
+        btn.onclick = () => {
+            let val = btn.innerText;
+            if(val === "="){
+                try {
+                    let res = eval(expression.replace(/×/g, "*").replace(/÷/g, "/"));
+                    expression = res.toString();
+                    screen.value = expression;
+                } catch { screen.value = "Error"; expression = ""; }
+            } else {
+                expression += val;
+                screen.value = expression;
+            }
+        };
+    });
+    clearBtn.onclick = () => { expression = ""; screen.value = ""; };
+    backBtn.onclick = () => { expression = expression.slice(0,-1); screen.value = expression; };
+
+    // Login & Data Sync
+    function checkLoginStatus() {
+        const name = localStorage.getItem("name");
+        if (localStorage.getItem("isLoggedIn") === "true" && name) {
+            document.getElementById("loginOverlay").style.display = "none";
+            startDataSync(name);
+        } else {
+            document.getElementById("loginOverlay").style.display = "flex";
+        }
+    }
+
+    function handleLogin() {
+        const u = document.getElementById("uName").value;
+        const p = document.getElementById("uPass").value;
+        const users = document.querySelectorAll("#userDatabase li");
+        let found = false;
+        users.forEach(li => {
+            if(li.getAttribute("data-user") === u && li.getAttribute("data-pass") === p) {
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("name", u);
+                found = true;
+                location.reload();
+            }
+        });
+        if(!found) alert("தவறான விவரங்கள்!");
+    }
+
+    function startDataSync(userName) {
+        document.getElementById("usernameDisplay").innerText = userName;
+        
+        const profileRef = window.dbRef(window.db, `users/${userName}/profile`);
+        window.dbOnValue(profileRef, (snap) => {
+            const data = snap.val();
+            if(data) {
+                document.getElementById("weightShow").innerText = data.weight || "--";
+                document.getElementById("goalShow").innerText = data.goal || "--";
+                document.getElementById("levelShow").innerText = data.workoutLevel || "--";
+                document.getElementById("calorieTargetText").innerText = (data.calorie || "--") + " kcal";
+            }
+        });
+
+        const now = new Date();
+        const monthYear = (now.getMonth() + 1) + "_" + now.getFullYear();
+        const day = now.getDate();
+        const workoutRef = window.dbRef(window.db, `users/${userName}/logs/${monthYear}/${day}`);
+        window.dbOnValue(workoutRef, (snap) => {
+            const data = snap.val();
+            document.getElementById("todayWorkoutText").innerText = data ? data.status : "இன்னும் அப்டேட் செய்யவில்லை 😴";
+        });
+
+        const todayKey = now.toLocaleDateString('en-CA', {timeZone: 'Asia/Kolkata'});
+        const nutritionRef = window.dbRef(window.db, `users/${userName}/nutrition/${todayKey}`);
+        window.dbOnValue(nutritionRef, (snap) => {
+            const foods = snap.val() || [];
+            let tCal = 0, tP = 0, tC = 0, tF = 0;
+            foods.forEach(f => {
+                tCal += parseFloat(f.calorie) || 0;
+                tP += parseFloat(f.protein) || 0;
+                tC += parseFloat(f.carbs) || 0;
+                tF += parseFloat(f.fat) || 0;
+            });
+            document.getElementById("totalCalorieDisplay").innerText = tCal.toFixed(0) + " kcal";
+            document.getElementById("totalP").innerText = tP.toFixed(1);
+            document.getElementById("totalC").innerText = tC.toFixed(1);
+            document.getElementById("totalF").innerText = tF.toFixed(1);
+        });
+
+        renderChart(userName, monthYear);
+    }
+
+    function renderChart(userName, monthYear) {
+        const logRef = window.dbRef(window.db, `users/${userName}/logs/${monthYear}`);
+        window.dbOnValue(logRef, (snap) => {
+            const monthData = snap.val() || {};
+            const container = document.getElementById("daysChart");
+            container.innerHTML = "";
+            const totalDays = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+            const todayDate = new Date().getDate();
+
+            for(let i = 1; i <= totalDays; i++) {
+                let bar = document.createElement("div");
+                bar.classList.add("chart-bar");
+                const dayStatus = monthData[i] ? monthData[i].status : "";
+                if(i > todayDate) bar.classList.add("future");
+                else if(dayStatus.includes("✅")) { bar.classList.add("completed"); bar.style.height="100%"; }
+                else if(dayStatus.includes("🟡")) { bar.classList.add("medium"); bar.style.height="60%"; }
+                else if(dayStatus.includes("❌")) { bar.classList.add("missed"); bar.style.height="35%"; }
+                else { bar.classList.add("future"); bar.style.height="10%"; }
+                container.appendChild(bar);
+            }
+        });
+    }
+
+    function updateWater(amt) {
+        let current = parseInt(localStorage.getItem("waterCount")) || 0;
+        current = Math.max(0, Math.min(3000, current + amt));
+        localStorage.setItem("waterCount", current);
+        renderWater();
+    }
+    function renderWater() {
+        let current = parseInt(localStorage.getItem("waterCount")) || 0;
+        document.getElementById("waterFill").style.height = (current/3000*100) + "%";
+        document.getElementById("waterText").innerText = current + " ml";
+    }
     renderWater();
-}
-function renderWater() {
-    let count = parseInt(localStorage.getItem("waterCount") || 0);
-    document.getElementById("waterFill").style.height = (count / 3000 * 100) + "%";
-    document.getElementById("waterText").innerText = count + " ml";
-}
 </script>
 </body>
 </html>
