@@ -6,8 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+  // Firebase SDK-க்களை இறக்குமதி செய்தல்
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
@@ -20,19 +22,49 @@
     databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
   };
 
+  // Firebase-ஐ தொடங்குதல்
   const app = initializeApp(firebaseConfig);
   const database = getDatabase(app);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
+  // உலகளாவிய பயன்பாட்டிற்கு மாற்றுதல்
   window.db = database;
   window.dbRef = ref;
   window.dbOnValue = onValue;
 
-  // லாகின் செக் செய்த பின் டேட்டா லோடு ஆகும்
-  initPage();
+  // லாகின் செயல்பாடு
+  window.loginWithGoogle = () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+            console.log("Logged in:", result.user);
+            location.reload();
+        }).catch((error) => {
+            alert("Login failed: " + error.message);
+        });
+  };
+
+  // லாக் அவுட் செயல்பாடு
+  window.logout = () => {
+      signOut(auth).then(() => location.reload());
+  };
+
+  // பயனர் லாகின் செய்துள்ளாரா என சரிபார்த்தல்
+  onAuthStateChanged(auth, (user) => {
+      if (user) {
+          document.getElementById("loginOverlay").style.display = "none";
+          document.getElementById("username").innerText = user.displayName;
+          // பயனரின் பெயரை லோக்கல் மெமரியில் சேமித்தல் (Data Fetch செய்ய)
+          localStorage.setItem("name", user.displayName);
+          loadCloudData(user.displayName);
+      } else {
+          document.getElementById("loginOverlay").style.display = "flex";
+      }
+  });
+
 </script>
 
 <style>
-/* உங்கள் அசல் CSS அப்படியே இங்கே... */
 :root{
   --bg:#eef3f8; --card:#ffffffcc; --border:#d7e0ea;
   --accent:#007bff; --accent2:#009f7b; --text:#1c1c1c;
@@ -44,10 +76,7 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
 .sidebar{ width:250px; background:#ffffffee; position:fixed; top:0; bottom:0; left:-260px; padding-top:75px; border-right:1px solid var(--border); transition:.35s; backdrop-filter:blur(10px); z-index:20; }
 .sidebar.open{left:0;}
 .sidebar a{ display:flex; align-items:center; padding:16px 22px; font-size:17px; text-decoration:none; color:var(--text); border-bottom:1px solid #f1f4f6; }
-.overlay{ position:fixed; inset:0; background:#0008; display:none; backdrop-filter:blur(4px); z-index:15; }
-.overlay.show{display:block;}
 .main{position:absolute; top:65px; bottom:65px; left:0; right:0; overflow-y:auto; padding:18px; transition:.3s;}
-.main.blur{filter:blur(6px);}
 .card{ padding:18px; background:var(--card); border-radius:18px; box-shadow:0 6px 14px rgba(0,0,0,.08); margin-bottom:16px; border:1px solid var(--border); }
 #greet{font-size:22px; font-weight:700; margin-bottom:12px;}  
 .chart-box{ height:170px; background:#fff; border-radius:12px; border:1px solid var(--border); padding:8px; }
@@ -57,19 +86,22 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
 .stats{display:flex; justify-content:space-between; margin-top:12px;}
 .stat{background:#fff; padding:12px; flex:1; margin:4px; border-radius:12px; text-align:center; font-size:14px; border:1px solid var(--border);}
 .stat strong{font-size:18px; display:block; margin-bottom:4px;}
-#calorieTargetText { font-size: 26px; font-weight: 700; color: var(--accent2); text-align: center; margin: 10px 0 5px 0; }
 .bottom{ height:60px; position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; align-items:center; background:#ffffffcc; border-top:1px solid var(--border); z-index:10; }
 .bottom button{ background:none; border:none; font-size:13px; display:flex; flex-direction:column; align-items:center; opacity:.6; }
 .bottom button.active{opacity:1; color:var(--accent);}
-.bottom button span{font-size:22px;}
-#loginOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(10px); }
-.login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
-.login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-.login-card button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; }
-.water-container { text-align: center; padding: 20px; background: white; border-radius: 20px; }
+
+/* Google Login Style */
+#loginOverlay { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.login-card { text-align: center; padding: 20px; }
+.google-btn { 
+    background: white; color: #444; border: 1px solid #ddd; padding: 12px 24px; 
+    border-radius: 5px; font-weight: bold; display: flex; align-items: center; 
+    gap: 10px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+}
+.google-btn:hover { background: #f1f1f1; }
+
 .water-glass { width: 60px; height: 90px; border: 3px solid #333; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; }
 .water-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #00d2ff, #3a7bd5); height: 0%; transition: 0.6s; }
-.water-controls { display: flex; justify-content: center; align-items: center; gap: 15px; font-weight: bold; }
 .w-btn { background: #007bff; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; }
 </style>
 </head>
@@ -81,23 +113,10 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
   💪 Z Fitness
 </header>
 
-
 <div id="sidebar" class="sidebar">
-  <a href="index.html">🏠 Dashboard</a>
-  <a href="workouts.html">🔥 Workouts</a>
-  <a href="diet.html">🥗 Diet Plans</a>
-  <a href="fit tools.html">📋 Fit Tools</a>
-  <a href="habit traker.html">♾️ Habit Traker</a>
-  <a href="nutrition tracker.html">🍱 Nutrition Tracker</a>
-  <a href="meditation.html">🎧 Meditation</a>
-  <a href="progress.html">📊 Progress Tracker</a>
-  <a href="profile.html">👤 Profile</a>
-  <a href="settings.html">⚙️ Settings</a>
-  <a href="terms and condition.html">📃 terms & condi...</a>
-  <a href="#" onclick="shareApp()">🔁 Share</a>
+  <a href="#">🏠 Dashboard</a>
+  <a href="#" onclick="logout()" style="color: red;">🚪 Logout</a>
 </div>
-
-
 
 <div id="main" class="main">
   <div id="greet">Hi 👋, <span id="username">Loading...</span></div>
@@ -113,39 +132,15 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
     <h3>🔥 Today Goals</h3>
     <p id="todayWorkoutText">Connecting...</p>
   </div>
-  
-  <div class="card water-container">
-    <h3>💧 Water Intake (Target: 3L)</h3>
+
+  <div class="card" style="text-align: center;">
+    <h3>💧 Water Intake (3L)</h3>
     <div class="water-glass"><div id="waterFill" class="water-fill"></div></div>
-    <div class="water-controls">
+    <div>
         <button class="w-btn" onclick="updateWater(-250)">-</button>
-        <span id="waterText">0 ml</span>
+        <span id="waterText" style="margin: 0 15px; font-weight: bold;">0 ml</span>
         <button class="w-btn" onclick="updateWater(250)">+</button>
     </div>
-</div>
-
-<div class="card" style="background: #ebf8ff; border: 1px solid #bee3f8; padding: 18px; border-radius: 18px; margin-bottom: 16px;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-    <h3 style="color: #2b6cb0; margin: 0; font-size: 18px;">🍱 Today's Nutrition</h3>
-    <span id="displayDate" style="font-size: 12px; color: #4299e1; font-weight: bold;"></span>
-  </div>
-  
-  <div id="foodSummary">
-    <div style="text-align: center; padding: 10px 0;">
-        <p id="totalCalorieDisplay" style="font-size: 28px; font-weight: 700; color: #2c5282; margin: 0;">0 kcal</p>
-        <span style="font-size: 11px; color: #4a5568; text-transform: uppercase;">மொத்த கலோரிகள்</span>
-    </div>
-    <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px dashed #bee3f8; font-size: 14px; color: #4a5568;">
-      <div style="text-align: center; flex: 1;"><span>Protein</span><br><b id="totalP">0</b>g</div>
-      <div style="text-align: center; flex: 1; border-left: 1px solid #eee; border-right: 1px solid #eee;"><span>Carbs</span><br><b id="totalC">0</b>g</div>
-      <div style="text-align: center; flex: 1;"><span>Fat</span><br><b id="totalF">0</b>g</div>
-    </div>
-  </div>
-</div>
-
-  <div class="card">
-    <h3>🍽️ Calorie Target</h3>
-    <p id="calorieTargetText">--</p>
   </div>
 
   <div class="stats">
@@ -157,82 +152,45 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
 
 <div class="bottom">
   <button class="active"><span>🏠</span>Home</button>
-  <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
-  <button onclick="location.href='nutrition tracker.html'"><span>🥗</span>Diet</button>
-  <button onclick="location.href='profile.html'"><span>👤</span>Profile</button>
+  <button><span>🔥</span>Workout</button>
+  <button><span>🥗</span>Diet</button>
+  <button><span>👤</span>Profile</button>
 </div>
 
-<div id="loginOverlay" style="display:none;">
+<div id="loginOverlay">
     <div class="login-card">
-        <h2>🔒 Z Fitness Login</h2>
-        <input type="text" id="uName" placeholder="User Name">
-        <input type="password" id="uPass" placeholder="Password">
-        <button onclick="checkLogin()">Login</button>
-        <p id="error" style="color:red; font-size:13px; display:none;"></p>
+        <img src="https://firebase.google.com/static/images/brand-guidelines/logo-built_white.png" width="150" alt="Logo"><br><br>
+        <h2>Welcome to Z Fitness</h2>
+        <p>Please login to continue</p>
+        <button class="google-btn" onclick="loginWithGoogle()">
+            <img src="https://lh3.googleusercontent.com/COxitqgJr1sICpeqCu7IFHIC6vDC-p99MdhYn8p0A_BclYvS669Y5sh3n9Yf9M08CnQ" width="20" alt="G">
+            Sign in with Google
+        </button>
     </div>
 </div>
 
-<ul id="userDatabase" style="display: none;">
-    <li data-user="Mathavan" data-pass="Mathu12345m" data-expiry="2026-12-31"></li>
-    <li data-user="Azarudheen" data-pass="Aza@5230" data-expiry="2026-02-13"></li>
-    <li data-user="Ragul" data-pass="mu123" data-expiry="2026-08-07"></li>
-</ul>
-
 <script>
-let userName = localStorage.getItem("name") || "";
-
 function toggleMenu(){
   document.getElementById("sidebar").classList.toggle("open");
-  document.getElementById("overlay").classList.toggle("show");
-  document.getElementById("main").classList.toggle("blur");
 }
 
-function initPage() {
-    if (!localStorage.getItem("isLoggedIn")) {
-        document.getElementById("loginOverlay").style.display = "flex";
-    } else {
-        userName = localStorage.getItem("name");
-        document.getElementById("username").innerText = userName;
-        loadCloudData();
-    }
-}
-
-// --- 🔥 Firebase Cloud-லிருந்து தரவுகளைப் பெறுதல் ---
-function loadCloudData() {
+function loadCloudData(name) {
     const now = new Date();
     const todayKey = now.toLocaleDateString('en-CA', {timeZone: 'Asia/Kolkata'});
     const monthYear = (now.getMonth() + 1) + "_" + now.getFullYear();
 
-    // 1. Profile Stats
-    window.dbOnValue(window.dbRef(window.db, `users/${userName}/profile`), (snapshot) => {
+    // Profile Data
+    window.dbOnValue(window.dbRef(window.db, `users/${name}/profile`), (snapshot) => {
         const d = snapshot.val();
         if(d) {
             document.getElementById("weightShow").innerText = d.weight || "--";
             document.getElementById("goalShow").innerText = d.goal || "--";
             document.getElementById("levelShow").innerText = d.workoutLevel || "--";
-            document.getElementById("calorieTargetText").innerText = (d.calorie || "--") + " kcal";
         }
     });
 
-    // 2. Nutrition
-    window.dbOnValue(window.dbRef(window.db, `users/${userName}/nutrition/${todayKey}`), (snapshot) => {
-        const foods = snapshot.val() || [];
-        let tCal = 0, tP = 0, tC = 0, tF = 0;
-        foods.forEach(f => {
-            tCal += parseFloat(f.calorie) || 0;
-            tP += parseFloat(f.protein) || 0;
-            tC += parseFloat(f.carbs) || 0;
-            tF += parseFloat(f.fat) || 0;
-        });
-        document.getElementById("displayDate").innerText = todayKey;
-        document.getElementById("totalCalorieDisplay").innerText = tCal.toFixed(0) + " kcal";
-        document.getElementById("totalP").innerText = tP.toFixed(1);
-        document.getElementById("totalC").innerText = tC.toFixed(1);
-        document.getElementById("totalF").innerText = tF.toFixed(1);
-    });
-
-    // 3. Workout Chart & Today Goal
-    window.dbOnValue(window.dbRef(window.db, `users/${userName}/logs/${monthYear}`), (snapshot) => {
+    // Workout Log
+    window.dbOnValue(window.dbRef(window.db, `users/${name}/logs/${monthYear}`), (snapshot) => {
         const logs = snapshot.val() || {};
         renderChart(logs);
         const day = now.getDate();
@@ -242,7 +200,6 @@ function loadCloudData() {
     renderWater();
 }
 
-// --- 📈 Chart Drawing ---
 function renderChart(logs) {
     const container = document.getElementById("daysChart");
     container.innerHTML = "";
@@ -253,53 +210,26 @@ function renderChart(logs) {
     for(let i = 1; i <= totalDays; i++) {
         let bar = document.createElement("div");
         bar.className = "chart-bar";
-        if(i > todayDate) {
-            bar.classList.add("future"); bar.style.height="20%";
-        } else if(logs[i]) {
-            const s = logs[i].status;
-            if(s.includes("✅")) { bar.classList.add("completed"); bar.style.height="100%"; }
-            else if(s.includes("🟡")) { bar.classList.add("medium"); bar.style.height="60%"; }
-            else { bar.classList.add("missed"); bar.style.height="35%"; }
-        } else {
-            bar.classList.add("missed"); bar.style.height="35%";
-        }
+        if(i > todayDate) { bar.classList.add("future"); bar.style.height="20%"; }
+        else if(logs[i]) { bar.classList.add("completed"); bar.style.height="100%"; }
+        else { bar.classList.add("missed"); bar.style.height="35%"; }
         container.appendChild(bar);
     }
 }
 
-// --- 💧 Water Logic (LocalStorage used for quick UI, but you can sync to DB too) ---
 function updateWater(amt) {
     let count = parseInt(localStorage.getItem("waterCount") || 0);
     count = Math.max(0, Math.min(3000, count + amt));
     localStorage.setItem("waterCount", count);
     renderWater();
 }
+
 function renderWater() {
     let count = parseInt(localStorage.getItem("waterCount") || 0);
     document.getElementById("waterFill").style.height = (count / 3000 * 100) + "%";
     document.getElementById("waterText").innerText = count + " ml";
 }
-
-// --- 🔑 Login Logic ---
-function checkLogin() {
-    const u = document.getElementById("uName").value;
-    const p = document.getElementById("uPass").value;
-    const users = document.querySelectorAll("#userDatabase li");
-    let auth = false;
-
-    users.forEach(li => {
-        if(u === li.getAttribute("data-user") && p === li.getAttribute("data-pass")) auth = true;
-    });
-
-    if(auth) {
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("name", u);
-        location.reload();
-    } else {
-        document.getElementById("error").innerText = "Invalid credentials!";
-        document.getElementById("error").style.display = "block";
-    }
-}
 </script>
+
 </body>
 </html>
