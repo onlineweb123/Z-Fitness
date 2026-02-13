@@ -3,15 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Personal Diet - Firebase Only</title>
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-P0JBRSCYFF"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-P0JBRSCYFF');
-</script>
+<title>Personal Diet - Z Fitness</title>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -36,7 +28,6 @@
   window.dbSet = set;
   window.dbOnValue = onValue;
 
-  // பக்கம் திறந்தவுடன் டேட்டாவை எடுக்கும் பங்க்ஷன்
   initApp();
 </script>
 
@@ -44,12 +35,25 @@
   body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; background-color: #f0f4f8; }
   header { background-color: #086584; color: white; text-align: center; padding: 20px; }
   main { padding: 20px; text-align: center; max-width: 700px; margin: auto; }
+
   .control-panel { background: white; border-radius: 12px; padding: 15px; margin-top: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
   .input-box, textarea { width: 90%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-top: 10px; font-size: 15px; }
   textarea { height: 100px; }
-  #addBtn { background:#007bf4; color: white; border: none; border-radius: 8px; padding: 12px 25px; cursor: pointer; margin-top: 15px; font-weight: bold; }
+
+  /* Button Styles */
+  #addBtn { 
+    background:#007bf4; color: white; border: none; border-radius: 8px; 
+    padding: 12px 25px; cursor: pointer; margin-top: 15px; 
+    font-weight: bold; width: 100%; transition: 0.3s;
+  }
+  
+  /* Loading status for button */
+  #addBtn.loading { background: #555 !important; cursor: not-allowed; }
+  #addBtn.error { background: #ff4757 !important; }
+  #addBtn.success { background: #2ed573 !important; }
+
   .toggle-button { width: 100%; padding: 15px; font-size: 18px; color: white; background-color: #FF0000; border: none; border-radius: 10px; cursor: pointer; margin: 10px 0; }
-  .content-box { padding: 18px; border: 1px solid #ccc; border-radius: 12px; background: white; text-align: left; display: none; }
+  .content-box { padding: 18px; border: 1px solid #ccc; border-radius: 12px; background: white; text-align: left; display: none; margin-bottom: 10px; }
   .delete-btn { background: #ff4b4b; color: #fff; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; float: right; }
   #loadingTxt { color: #086584; font-weight: bold; margin: 20px; }
 </style>
@@ -58,7 +62,7 @@
 
 <header>
   <h1> My Personal Diet Plan </h1>
-  <p> (Online Sync Only) </p>
+  <p> (Online Sync) </p>
 </header>
 
 <main>
@@ -66,7 +70,7 @@
   <div id="dietContainer"></div>
 
   <div class="control-panel">
-    <h2>🎯 புதிய Diet Plan சேர்க்க</h2>
+    <h3>🎯 புதிய Diet Plan சேர்க்க</h3>
     <input type="text" id="dietName" class="input-box" placeholder="Diet பெயர்">
     <textarea id="dietDetails" placeholder="Diet விவரங்கள்..."></textarea>
     <button id="addBtn" onclick="addDiet()">சேர்</button>
@@ -74,56 +78,83 @@
 </main>
 
 <script>
-let diets = []; // இனி இது Local Storage-ல் இருந்து வராது
+let diets = [];
 const userName = localStorage.getItem("name") || "Guest";
+const addBtn = document.getElementById("addBtn");
 
-// 1. Firebase-ல் இருந்து டேட்டாவை வாங்குதல்
 function initApp() {
-    // Firebase முழுமையாக ரெடி ஆனதும் இது இயங்கும்
-    setTimeout(() => {
-        if(window.db && userName !== "Guest") {
-            const userDietRef = window.dbRef(window.db, 'users/' + userName + '/personalDiets');
-            window.dbOnValue(userDietRef, (snapshot) => {
-                const data = snapshot.val();
-                diets = data || []; // டேட்டா இல்லையென்றால் வெறும் Array
-                document.getElementById("loadingTxt").style.display = "none";
-                renderDiets();
-            });
-        } else {
-            document.getElementById("loadingTxt").innerText = "Login Error! தயவுசெய்து லாகின் செய்யவும்.";
-        }
-    }, 1500);
-}
-
-// 2. Firebase-க்கு டேட்டாவை அனுப்புதல்
-async function updateFirebase() {
     if(window.db && userName !== "Guest") {
-        try {
-            await window.dbSet(window.dbRef(window.db, 'users/' + userName + '/personalDiets'), diets);
-        } catch (e) {
-            alert("ஆன்லைனில் சேமிக்க முடியவில்லை!");
-        }
+        const userDietRef = window.dbRef(window.db, 'users/' + userName + '/personalDiets');
+        window.dbOnValue(userDietRef, (snapshot) => {
+            diets = snapshot.val() || [];
+            document.getElementById("loadingTxt").style.display = "none";
+            renderDiets();
+        });
     }
 }
 
-function addDiet(){
+async function addDiet(){
   const name = document.getElementById("dietName").value.trim();
   const details = document.getElementById("dietDetails").value.trim();
 
   if(!name || !details){ alert("விவரங்களை நிரப்பவும்!"); return; }
 
+  // புதிய டயட்டை தற்காலிகமாக லிஸ்டில் சேர்த்தல்
+  const originalDiets = [...diets]; // பேக்கப்
   diets.unshift({name, details});
-  document.getElementById("dietName").value = "";
-  document.getElementById("dietDetails").value = "";
-  
-  updateFirebase(); // டேட்டாபேஸிற்கு அனுப்பு
+
+  // பட்டனை 'Saving' நிலைக்கு மாற்றுதல்
+  addBtn.disabled = true;
+  addBtn.innerText = "⏳ Saving...";
+  addBtn.className = "loading";
+
+  // நெட்வொர்க் டைம்-அவுட் செட் செய்தல் (10 வினாடிகள்)
+  const timeout = setTimeout(() => {
+    addBtn.innerText = "❌ Not Stored (No Network)";
+    addBtn.className = "error";
+    diets = originalDiets; // சேமிக்காததால் பழைய டேட்டாவுக்கே திரும்புதல்
+    setTimeout(resetBtn, 3000);
+  }, 10000);
+
+  if(window.db && userName !== "Guest") {
+    try {
+        await window.dbSet(window.dbRef(window.db, 'users/' + userName + '/personalDiets'), diets);
+        clearTimeout(timeout);
+        
+        // வெற்றிகரமாக சேமிக்கப்பட்டால்
+        addBtn.innerText = "✅ Saved!";
+        addBtn.className = "success";
+        document.getElementById("dietName").value = "";
+        document.getElementById("dietDetails").value = "";
+        
+        setTimeout(resetBtn, 2000);
+    } catch (e) {
+        clearTimeout(timeout);
+        addBtn.innerText = "❌ Not Stored";
+        addBtn.className = "error";
+        diets = originalDiets;
+        setTimeout(resetBtn, 3000);
+    }
+  }
+}
+
+function resetBtn() {
+    addBtn.disabled = false;
+    addBtn.innerText = "சேர்";
+    addBtn.className = "";
 }
 
 function deleteDiet(index){
   if(confirm("இதை நீக்கவா?")){
     diets.splice(index,1);
-    updateFirebase(); // டேட்டாபேஸிற்கு அனுப்பு
+    updateFirebaseOnly(); // நீக்குவதற்கு பழைய முறையே போதும்
   }
+}
+
+async function updateFirebaseOnly() {
+    if(window.db && userName !== "Guest") {
+        await window.dbSet(window.dbRef(window.db, 'users/' + userName + '/personalDiets'), diets);
+    }
 }
 
 function toggleContent(i){
@@ -138,7 +169,7 @@ function renderDiets(){
   const container = document.getElementById("dietContainer");
   container.innerHTML = "";
   if(diets.length === 0) {
-      container.innerHTML = "<p>டயட் எதுவும் இல்லை. புதிதாக சேர்க்கவும்.</p>";
+      container.innerHTML = "<p>டயட் எதுவும் இல்லை.</p>";
       return;
   }
   diets.forEach((diet, i) => {
