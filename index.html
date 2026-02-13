@@ -5,31 +5,19 @@
     <meta charset="UTF-8">
     <title>Z Fitness</title>
 
-
-
-<!-- Google tag (gtag.js) ஆரம்பம் -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-P0JBRSCYFF"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-P0JBRSCYFF');
 </script>
-
-<!-- Google tag (gtag.js) முடிவு -->
-
-
-
 <script type="module">
-  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  // Realtime Database-க்கு தேவையான SDK
+  import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
     authDomain: "z-fitness-a.firebaseapp.com",
@@ -37,18 +25,20 @@
     storageBucket: "z-fitness-a.firebasestorage.app",
     messagingSenderId: "289896498711",
     appId: "1:289896498711:web:6bc6943dcfb06cca2d7e52",
-    measurementId: "G-G8BVVRSCXH"
+    measurementId: "G-G8BVVRSCXH",
+    // உங்கள் டேட்டாபேஸ் லிங்க் இங்கே சேர்க்கப்பட்டுள்ளது
+    databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
   };
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
+  const database = getDatabase(app);
+
+  // மற்ற பக்கங்களில் பயன்படுத்த ஏதுவாக window object-ல் வைக்கிறோம்
+  window.db = database;
 </script>
-
-
-
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="./manifest.json">
     <link rel='stylesheet' href='./style.css'>
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
@@ -63,26 +53,6 @@
     <link rel="apple-touch-icon" href="icon-152x152.png">
     <meta name="msapplication-TileImage" content="icon-144x144.png">
     <meta name="msapplication-TileColor" content="#ffffff">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     <style>
 :root{
@@ -150,7 +120,6 @@ header{
 .chart-days{display:flex; gap:4px; height:100%; align-items:flex-end;}
 .chart-bar{width:10px;border-radius:4px;transition:.3s;}
 
-/* Colors */
 .future{background:#cfcfcf;}
 .completed{background:#007bff;}
 .medium{background:orange;}
@@ -271,7 +240,6 @@ font-weight: bold;
     font-size: 20px;
 }
 
-/* Calculator ஆரம்பம் */
 #calcButton {
   position: fixed;
   bottom: 100px;
@@ -352,8 +320,6 @@ font-weight: bold;
 }
 .btn-clear { background: #ff4d4d; }
 .btn-back  { background: #f39c12; }
-/* Calculator முடிவு */
-
 </style>
 
 </head>
@@ -473,6 +439,7 @@ font-weight: bold;
     <button class="btn-back">⌫</button>
   </div>
 </div>
+
 <div id="loginOverlay">
     <div class="login-card">
         <h2>🔒 Z Fitness Login</h2>
@@ -480,43 +447,16 @@ font-weight: bold;
         <input type="password" id="uPass" placeholder="Password">
         <button onclick="checkLogin()">Login</button>
         <p id="error" class="error-msg"></p>
-
- <p id="contactBtn" style="cursor:pointer;color:#2563eb;margin-top:15px;font-weight:bold;">
-  Contact Admin
-</p>
-
+        <p id="contactBtn" style="cursor:pointer;color:#2563eb;margin-top:15px;font-weight:bold;">Contact Admin</p>
     </div>
 </div>
 
 <ul id="userDatabase" style="display: none;">
     <li data-user="Mathavan" data-pass="Mathu12345m" data-expiry="2026-12-31"></li>
-    
-    <li data-user="Srirajudeen" data-pass="Sriraju125" data-expiry="2026-01-19"></li>
-    
-    <li data-user="Azarudheen" data-pass="Aza@5230" data-expiry="2026-02-13"></li>
-    
-    <li data-user="Rhafiya" data-pass="Rhafiya25@ba" data-expiry="2026-02-13"></li>
-    
-    <li data-user="Syed" data-pass="Syed@moh12" data-expiry="2025-02-14"></li>
-    
-    <li data-user="Jey" data-pass="Jey@123j" data-expiry="2026-02-18"></li>
-    
-    <li data-user="Deepika" data-pass="Deepika@987" data-expiry="2026-02-19"></li>
-    
-    <li data-user="Logesh" data-pass="Logesh@78s" data-expiry="2026-02-22"></li>
-
-    <li data-user="Friend" data-pass="Friend123" data-expiry="2026-011-25"></li>
-
-  <li data-user="Suppu" data-pass="suppu@1234s" data-expiry="2026-02-19"></li>
-
-    
-    <li data-user="4657" data-pass="m78123" data-expiry="2026-08-15"></li>
-    
     <li data-user="Ragul" data-pass="mu123" data-expiry="2026-08-07"></li>
 </ul>
 
 <script>
-// --- பொதுவான செயல்பாடுகள் ---
 function toggleMenu(){
   document.getElementById("sidebar").classList.toggle("open");
   document.getElementById("overlay").classList.toggle("show");
@@ -525,7 +465,6 @@ function toggleMenu(){
 
 const get = k => localStorage.getItem(k) || "--";
 
-// --- Dashboard & Nutrition தரவை லோடு செய்தல் ---
 function loadDashboard() {
     document.getElementById("username").innerText = localStorage.getItem("name") || "--";
     document.getElementById("weightShow").innerText = get("weight");
@@ -540,7 +479,6 @@ function loadDashboard() {
     showTodayStats(); 
 }
 
-// --- Chart லாஜிக் ---
 const daysContainer = document.getElementById("daysChart");
 const today = new Date();
 const year = today.getFullYear();
@@ -560,7 +498,6 @@ for(let i = 1; i <= totalDays; i++){
   daysContainer.appendChild(bar);
 }
 
-// --- 💧 தண்ணீர் ட்ராக்கர் லாஜிக் ---
 function checkAndResetWater() {
     const todayStr = new Date().toDateString();
     const lastDate = localStorage.getItem("lastWaterUpdateDate");
@@ -586,7 +523,6 @@ function renderWater() {
     document.getElementById("waterText").innerText = currentWater + " ml";
 }
 
-// --- 🥗 Nutrition Tracker கணக்கீடு ---
 function showTodayStats() {
     try {
         const now = new Date();
@@ -613,7 +549,6 @@ function showTodayStats() {
     } catch (e) { console.log("Nutrition update error:", e); }
 }
 
-// --- பகிர்தல் (Share) ---
 function shareApp(){
     if (navigator.share) {
         navigator.share({
@@ -624,7 +559,6 @@ function shareApp(){
     } else { alert("Your device does not support sharing."); }
 }
 
-// --- Login லாஜிக் ---
 function checkLogin() {
     const userIn = document.getElementById("uName").value;
     const passIn = document.getElementById("uPass").value;
@@ -660,7 +594,6 @@ function checkLogin() {
     }
 }
 
-// --- பக்கம் லோடு ஆகும்போது சரிபார்த்தல் ---
 window.onload = function() {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     const loggedName = localStorage.getItem("name");
@@ -686,14 +619,13 @@ window.onload = function() {
     }
 };
 
-// --- Contact Admin Logic (Direct WhatsApp Only) ---
 document.getElementById("contactBtn").onclick = function () {
     const phone = "919344165879"; 
     const message = encodeURIComponent("Z Fitness\nUser name & Password Help");
-    // Directly opening WhatsApp
     window.location.href = `https://wa.me/${phone}?text=${message}`;
 };
 
+// Calculator Logic
 const button = document.getElementById("calcButton");
 const calculator = document.getElementById("calculator");
 const screen = document.getElementById("calcScreen");
@@ -706,7 +638,6 @@ button.addEventListener("click", () => {
 });
 
 let expression = "";
-
 calcButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     let value = btn.textContent;
@@ -723,56 +654,11 @@ calcButtons.forEach(btn => {
       expression += value;
       screen.value = expression;
     }
-    screen.scrollTop = screen.scrollHeight;
   });
 });
 
-clearBtn.addEventListener("click", () => {
-  expression = "";
-  screen.value = "";
-});
-
-backBtn.addEventListener("click", () => {
-  expression = expression.slice(0, -1);
-  screen.value = expression;
-});
-
-function makeDraggable(el) {
-  let isDragging = false;
-  let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
-
-  el.addEventListener("mousedown", dragStart);
-  el.addEventListener("mouseup", dragEnd);
-  el.addEventListener("mousemove", drag);
-  el.addEventListener("touchstart", dragStart, { passive: false });
-  el.addEventListener("touchend", dragEnd);
-  el.addEventListener("touchmove", drag, { passive: false });
-
-  function dragStart(e) {
-    if (e.target.id === "calcScreen") return;
-    isDragging = true;
-    initialX = (e.type === "touchstart" ? e.touches[0].clientX : e.clientX) - xOffset;
-    initialY = (e.type === "touchstart" ? e.touches[0].clientY : e.clientY) - yOffset;
-  }
-
-  function dragEnd() {
-    isDragging = false;
-    xOffset = currentX;
-    yOffset = currentY;
-  }
-
-  function drag(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - initialX;
-    currentY = (e.type === "touchmove" ? e.touches[0].clientY : e.clientY) - initialY;
-    el.style.transform = `translate(${currentX}px, ${currentY}px)`;
-  }
-}
-
-makeDraggable(calculator);
-makeDraggable(button);
-
+clearBtn.addEventListener("click", () => { expression = ""; screen.value = ""; });
+backBtn.addEventListener("click", () => { expression = expression.slice(0, -1); screen.value = expression; });
 </script>
 </body>
 </html>
