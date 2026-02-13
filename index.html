@@ -6,10 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script type="module">
-  // Firebase SDK-க்களை இறக்குமதி செய்தல்
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
@@ -22,41 +21,40 @@
     databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
   };
 
-  // Firebase-ஐ தொடங்குதல்
   const app = initializeApp(firebaseConfig);
   const database = getDatabase(app);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // உலகளாவிய பயன்பாட்டிற்கு மாற்றுதல்
+  // Global variables for other functions
   window.db = database;
   window.dbRef = ref;
   window.dbOnValue = onValue;
 
-  // லாகின் செயல்பாடு
-  window.loginWithGoogle = () => {
+  // --- Google Login Function ---
+  window.loginWithGoogle = function() {
       signInWithPopup(auth, provider)
         .then((result) => {
-            console.log("Logged in:", result.user);
-            location.reload();
+            console.log("Logged in!");
         }).catch((error) => {
-            alert("Login failed: " + error.message);
+            alert("Login Failed: " + error.message);
         });
-  };
+  }
 
-  // லாக் அவுட் செயல்பாடு
-  window.logout = () => {
-      signOut(auth).then(() => location.reload());
-  };
+  // --- Logout Function ---
+  window.logout = function() {
+      signOut(auth).then(() => {
+          location.reload();
+      });
+  }
 
-  // பயனர் லாகின் செய்துள்ளாரா என சரிபார்த்தல்
+  // --- Auth State Change (Check if logged in) ---
   onAuthStateChanged(auth, (user) => {
       if (user) {
           document.getElementById("loginOverlay").style.display = "none";
           document.getElementById("username").innerText = user.displayName;
-          // பயனரின் பெயரை லோக்கல் மெமரியில் சேமித்தல் (Data Fetch செய்ய)
-          localStorage.setItem("name", user.displayName);
-          loadCloudData(user.displayName);
+          window.userName = user.displayName; // Using name as key
+          loadCloudData();
       } else {
           document.getElementById("loginOverlay").style.display = "flex";
       }
@@ -86,23 +84,19 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
 .stats{display:flex; justify-content:space-between; margin-top:12px;}
 .stat{background:#fff; padding:12px; flex:1; margin:4px; border-radius:12px; text-align:center; font-size:14px; border:1px solid var(--border);}
 .stat strong{font-size:18px; display:block; margin-bottom:4px;}
+#calorieTargetText { font-size: 26px; font-weight: 700; color: var(--accent2); text-align: center; margin: 10px 0 5px 0; }
 .bottom{ height:60px; position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; align-items:center; background:#ffffffcc; border-top:1px solid var(--border); z-index:10; }
 .bottom button{ background:none; border:none; font-size:13px; display:flex; flex-direction:column; align-items:center; opacity:.6; }
 .bottom button.active{opacity:1; color:var(--accent);}
-
-/* Google Login Style */
-#loginOverlay { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.login-card { text-align: center; padding: 20px; }
-.google-btn { 
-    background: white; color: #444; border: 1px solid #ddd; padding: 12px 24px; 
-    border-radius: 5px; font-weight: bold; display: flex; align-items: center; 
-    gap: 10px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-}
-.google-btn:hover { background: #f1f1f1; }
-
+#loginOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(10px); }
+.login-card { background: white; padding: 40px 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
+.google-btn { width: 100%; padding: 12px; background: white; color: #444; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
+.google-btn img { width: 20px; }
+.water-container { text-align: center; padding: 20px; background: white; border-radius: 20px; }
 .water-glass { width: 60px; height: 90px; border: 3px solid #333; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; margin: 15px auto; position: relative; overflow: hidden; background: #f0f0f0; }
 .water-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #00d2ff, #3a7bd5); height: 0%; transition: 0.6s; }
-.w-btn { background: #007bff; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+.water-controls { display: flex; justify-content: center; align-items: center; gap: 15px; }
+.w-btn { background: #007bff; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
 </style>
 </head>
 
@@ -114,18 +108,17 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
 </header>
 
 <div id="sidebar" class="sidebar">
-  <a href="#">🏠 Dashboard</a>
+  <a href="index.html">🏠 Dashboard</a>
+  <a href="profile.html">👤 Profile</a>
   <a href="#" onclick="logout()" style="color: red;">🚪 Logout</a>
 </div>
 
 <div id="main" class="main">
-  <div id="greet">Hi 👋, <span id="username">Loading...</span></div>
+  <div id="greet">Hi 👋, <span id="username">Guest</span></div>
 
   <div class="card">
     <h3>📈 Monthly Workout</h3>
-    <div class="chart-box">
-      <div class="chart-days" id="daysChart"></div>
-    </div>
+    <div class="chart-box"><div class="chart-days" id="daysChart"></div></div>
   </div>
 
   <div class="card">
@@ -133,12 +126,12 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
     <p id="todayWorkoutText">Connecting...</p>
   </div>
 
-  <div class="card" style="text-align: center;">
-    <h3>💧 Water Intake (3L)</h3>
+  <div class="card water-container">
+    <h3>💧 Water Intake</h3>
     <div class="water-glass"><div id="waterFill" class="water-fill"></div></div>
-    <div>
+    <div class="water-controls">
         <button class="w-btn" onclick="updateWater(-250)">-</button>
-        <span id="waterText" style="margin: 0 15px; font-weight: bold;">0 ml</span>
+        <span id="waterText">0 ml</span>
         <button class="w-btn" onclick="updateWater(250)">+</button>
     </div>
   </div>
@@ -152,18 +145,17 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
 
 <div class="bottom">
   <button class="active"><span>🏠</span>Home</button>
-  <button><span>🔥</span>Workout</button>
-  <button><span>🥗</span>Diet</button>
-  <button><span>👤</span>Profile</button>
+  <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
+  <button onclick="location.href='nutrition tracker.html'"><span>🥗</span>Diet</button>
+  <button onclick="location.href='profile.html'"><span>👤</span>Profile</button>
 </div>
 
 <div id="loginOverlay">
     <div class="login-card">
-        <img src="https://firebase.google.com/static/images/brand-guidelines/logo-built_white.png" width="150" alt="Logo"><br><br>
-        <h2>Welcome to Z Fitness</h2>
-        <p>Please login to continue</p>
+        <h2 style="margin-bottom: 30px;">💪 Z Fitness</h2>
+        <p>தொடர உங்கள் கூகுள் கணக்கு மூலம் லாகின் செய்யவும்</p>
         <button class="google-btn" onclick="loginWithGoogle()">
-            <img src="https://lh3.googleusercontent.com/COxitqgJr1sICpeqCu7IFHIC6vDC-p99MdhYn8p0A_BclYvS669Y5sh3n9Yf9M08CnQ" width="20" alt="G">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="google">
             Sign in with Google
         </button>
     </div>
@@ -174,13 +166,14 @@ function toggleMenu(){
   document.getElementById("sidebar").classList.toggle("open");
 }
 
-function loadCloudData(name) {
+function loadCloudData() {
     const now = new Date();
     const todayKey = now.toLocaleDateString('en-CA', {timeZone: 'Asia/Kolkata'});
     const monthYear = (now.getMonth() + 1) + "_" + now.getFullYear();
+    const u = window.userName;
 
-    // Profile Data
-    window.dbOnValue(window.dbRef(window.db, `users/${name}/profile`), (snapshot) => {
+    // Profile
+    window.dbOnValue(window.dbRef(window.db, `users/${u}/profile`), (snapshot) => {
         const d = snapshot.val();
         if(d) {
             document.getElementById("weightShow").innerText = d.weight || "--";
@@ -189,30 +182,26 @@ function loadCloudData(name) {
         }
     });
 
-    // Workout Log
-    window.dbOnValue(window.dbRef(window.db, `users/${name}/logs/${monthYear}`), (snapshot) => {
+    // Workout Chart
+    window.dbOnValue(window.dbRef(window.db, `users/${u}/logs/${monthYear}`), (snapshot) => {
         const logs = snapshot.val() || {};
         renderChart(logs);
-        const day = now.getDate();
-        document.getElementById("todayWorkoutText").innerText = logs[day] ? logs[day].status : "Rest Day 😴";
+        document.getElementById("todayWorkoutText").innerText = logs[now.getDate()] ? logs[now.getDate()].status : "Rest Day 😴";
     });
-
+    
     renderWater();
 }
 
 function renderChart(logs) {
     const container = document.getElementById("daysChart");
     container.innerHTML = "";
-    const now = new Date();
-    const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    const todayDate = now.getDate();
-
+    const totalDays = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
     for(let i = 1; i <= totalDays; i++) {
         let bar = document.createElement("div");
         bar.className = "chart-bar";
-        if(i > todayDate) { bar.classList.add("future"); bar.style.height="20%"; }
-        else if(logs[i]) { bar.classList.add("completed"); bar.style.height="100%"; }
-        else { bar.classList.add("missed"); bar.style.height="35%"; }
+        if(logs[i]) bar.classList.add("completed");
+        else bar.classList.add("future");
+        bar.style.height = "50%";
         container.appendChild(bar);
     }
 }
@@ -223,13 +212,11 @@ function updateWater(amt) {
     localStorage.setItem("waterCount", count);
     renderWater();
 }
-
 function renderWater() {
     let count = parseInt(localStorage.getItem("waterCount") || 0);
     document.getElementById("waterFill").style.height = (count / 3000 * 100) + "%";
     document.getElementById("waterText").innerText = count + " ml";
 }
 </script>
-
 </body>
 </html>
