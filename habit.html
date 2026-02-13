@@ -71,7 +71,7 @@ button{ border:none; border-radius:10px; cursor:pointer; font-weight:600; transi
 .day.partial{ background:var(--yellow); color:#333; }
 .day.missed{ background:var(--red); color:#fff; }
 
-#loadingStatus { text-align: center; font-weight: bold; color: var(--accent); margin-bottom: 10px; }
+#syncStatus { text-align: center; font-size: 14px; font-weight: bold; color: var(--accent); margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -79,16 +79,18 @@ button{ border:none; border-radius:10px; cursor:pointer; font-weight:600; transi
 <div class="container">
   <h1>🗓️ Habit Tracker</h1>
 
-  <div id="loadingStatus">Cloud-டன் இணைக்கப்படுகிறது...</div>
+  <div id="syncStatus">☁️ Cloud-டன் இணைக்கப்படுகிறது...</div>
 
   <div class="control-panel">
-    <div style="display:flex; gap:10px;">
-      <input type="text" id="habitInput" placeholder="புதிய Habit...">
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <input type="text" id="habitInput" placeholder="புதிய Habit எழுதுங்கள்">
       <button id="addBtn" onclick="addHabit()">சேர்</button>
     </div>
-    <div id="dateLabel" style="margin:10px 0; font-size:14px; text-align:center;"></div>
+    <div id="dateLabel" style="text-align:center; margin:10px 0; color:var(--accent);"></div>
+
     <div id="habitList"></div>
-    <button id="saveBtn" onclick="saveDayData()">💾 Save</button>
+
+    <button id="saveBtn" onclick="saveDayData()">💾 Save to Cloud</button>
   </div>
 
   <div class="months" id="calendar"></div>
@@ -104,22 +106,22 @@ const userName = localStorage.getItem("name") || "Guest";
 let habits = [];
 let dayData = {};
 
-// 1. Firebase-ல் இருந்து தகவல்களை எடுத்தல்
+// 1. Receive Data (Cloud-லிருந்து பெறுதல்)
 function initApp() {
     const dateLabel = document.getElementById("dateLabel");
     dateLabel.textContent = `இன்று: ${today.getDate()}/${today.getMonth()+1}/${currentYear}`;
 
     if(window.db) {
-        // Habits பெயர்களை எடுத்தல்
+        // Habits பட்டியலை பெறுதல்
         window.dbOnValue(window.dbRef(window.db, `users/${userName}/habitsList`), (snapshot) => {
             habits = snapshot.val() || [];
             renderHabits();
         });
 
-        // Calendar டேட்டாவை எடுத்தல்
+        // காலண்டர் தகவல்களை பெறுதல்
         window.dbOnValue(window.dbRef(window.db, `users/${userName}/habitCalendar/${currentYear}`), (snapshot) => {
             dayData = snapshot.val() || {};
-            document.getElementById("loadingStatus").style.display = "none";
+            document.getElementById("syncStatus").innerText = "✅ Cloud Sync Active";
             createCalendar();
         });
     }
@@ -128,7 +130,6 @@ function initApp() {
 async function addHabit(){
   const val = document.getElementById("habitInput").value.trim();
   if(!val) return;
-  
   habits.push(val);
   document.getElementById("habitInput").value="";
   await window.dbSet(window.dbRef(window.db, `users/${userName}/habitsList`), habits);
@@ -141,7 +142,7 @@ function renderHabits(){
     list.innerHTML += `
       <div class="habit-item">
         <div class="habit-name">${h}</div>
-        <div class="color-buttons" data-index="${i}">
+        <div class="color-buttons">
           <button class="green" onclick="setColor(${i},'green')"></button>
           <button class="yellow" onclick="setColor(${i},'yellow')"></button>
           <button class="red" onclick="setColor(${i},'red')"></button>
@@ -156,42 +157,42 @@ function setColor(index, color){
   document.querySelector(`.habit-item:nth-child(${index+1}) .color-buttons .${color}`).classList.add("active");
 }
 
-// 2. சேமிக்கும் போது டவர் செக்கிங்
+// 2. Save Data (Cloud-ல் சேமித்தல்)
 async function saveDayData(){
   const saveBtn = document.getElementById("saveBtn");
   const dateKey = `${today.getMonth()+1}-${today.getDate()}`;
   
-  let currentSelection = [];
+  let currentDaySelection = [];
   const items = document.querySelectorAll(".habit-item");
   items.forEach((item, i) => {
     let color = "none";
     if(item.querySelector(".green.active")) color="green";
     else if(item.querySelector(".yellow.active")) color="yellow";
     else if(item.querySelector(".red.active")) color="red";
-    currentSelection.push({ name: habits[i], color });
+    currentDaySelection.push({ name: habits[i], color });
   });
 
-  // பட்டன் மாற்றம்
+  // பட்டன் மாற்றம் (Saving Status)
   saveBtn.disabled = true;
   saveBtn.innerText = "⏳ Saving...";
   saveBtn.className = "loading";
 
-  // நெட்வொர்க் டைம்-அவுட் (10 வினாடி)
+  // நெட்வொர்க் டைம்-அவுட் செக்கிங்
   const timer = setTimeout(() => {
-    saveBtn.innerText = "❌ Not Stored (No Tower)";
+    saveBtn.innerText = "❌ Not Stored (Check Tower)";
     saveBtn.className = "error";
     setTimeout(resetBtn, 3000);
   }, 10000);
 
   try {
-    await window.dbSet(window.dbRef(window.db, `users/${userName}/habitCalendar/${currentYear}/${dateKey}`), currentSelection);
+    await window.dbSet(window.dbRef(window.db, `users/${userName}/habitCalendar/${currentYear}/${dateKey}`), currentDaySelection);
     clearTimeout(timer);
-    saveBtn.innerText = "✅ Saved!";
+    saveBtn.innerText = "✅ Saved Successfully!";
     saveBtn.className = "success";
     setTimeout(resetBtn, 2000);
   } catch (e) {
     clearTimeout(timer);
-    saveBtn.innerText = "❌ Error Occurred";
+    saveBtn.innerText = "❌ Error Saving";
     saveBtn.className = "error";
     setTimeout(resetBtn, 3000);
   }
@@ -200,7 +201,7 @@ async function saveDayData(){
 function resetBtn() {
     const saveBtn = document.getElementById("saveBtn");
     saveBtn.disabled = false;
-    saveBtn.innerText = "💾 Save";
+    saveBtn.innerText = "💾 Save to Cloud";
     saveBtn.className = "";
 }
 
@@ -242,10 +243,10 @@ function openDay(month, day){
   const entry = dayData[key] || [];
   if(entry.length === 0) return alert(`${day}/${month} - தகவல் இல்லை`);
   
-  let msg = `நாள்: ${day}/${month}/${currentYear}\n\n`;
+  let msg = `தேதி: ${day}/${month}/${currentYear}\n\n`;
   entry.forEach(e => {
-    let status = e.color === "green" ? "முடிக்கப்பட்டது" : e.color === "yellow" ? "பாதி" : e.color === "red" ? "செய்யவில்லை" : "No Data";
-    msg += `${e.name}: ${status}\n`;
+    let st = e.color === "green" ? "முழுமை" : e.color === "yellow" ? "பாதி" : e.color === "red" ? "செய்யவில்லை" : "-";
+    msg += `• ${e.name}: ${st}\n`;
   });
   alert(msg);
 }
