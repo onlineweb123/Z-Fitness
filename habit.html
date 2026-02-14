@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Habit Tracker - Z Fitness</title>
+<title>Habit Tracker - Z Fitness Cloud</title>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -49,11 +49,8 @@ h1{ text-align:center; color:var(--accent); }
 button{ border:none; border-radius:10px; cursor:pointer; font-weight:600; transition: 0.3s; }
 #addBtn{ background:var(--accent); color:#fff; padding:10px 15px; }
 
-/* Save Button Status */
 #saveBtn{ background:var(--accent2); color:#fff; margin-top:10px; width:100%; padding:15px; font-size:16px; }
 #saveBtn.loading { background: #6c757d !important; cursor: not-allowed; }
-#saveBtn.error { background: var(--red) !important; }
-#saveBtn.success { background: #28a745 !important; }
 
 .habit-item{ display:flex; align-items:center; justify-content:space-between; border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:10px; background:#fff; }
 .color-buttons button{ width:30px; height:30px; margin:0 5px; border-radius:50%; border:2px solid #ddd; }
@@ -71,33 +68,38 @@ button{ border:none; border-radius:10px; cursor:pointer; font-weight:600; transi
 .day.partial{ background:var(--yellow); color:#333; }
 .day.missed{ background:var(--red); color:#fff; }
 
-#syncStatus { text-align: center; font-size: 14px; font-weight: bold; color: var(--accent); margin-bottom: 10px; }
+.delete-section-btn { background: #555; color: white; padding: 10px 20px; display: block; margin: 20px auto; width: fit-content; }
 </style>
 </head>
 <body>
 
-<div class="container">
+<div id="mainPage" class="container">
   <h1>🗓️ Habit Tracker</h1>
-
-  <div id="syncStatus">☁️ Cloud-டன் இணைக்கப்படுகிறது...</div>
+  <div id="syncStatus" style="text-align: center; font-weight: bold; color: var(--accent2);">☁️ Connecting...</div>
 
   <div class="control-panel">
     <div style="display:flex; gap:10px; justify-content:center;">
-      <input type="text" id="habitInput" placeholder="புதிய Habit எழுதுங்கள்">
-      <button id="addBtn" onclick="addHabit()">சேர்</button>
+      <input type="text" id="habitInput" placeholder="Enter new habit">
+      <button id="addBtn" onclick="addHabit()">ADD</button>
     </div>
     <div id="dateLabel" style="text-align:center; margin:10px 0; color:var(--accent);"></div>
-
     <div id="habitList"></div>
-
     <button id="saveBtn" onclick="saveDayData()">💾 Save to Cloud</button>
   </div>
 
   <div class="months" id="calendar"></div>
+  
+  <button class="delete-section-btn" style="background:var(--red);" onclick="toggleDeletePage(true)">🗑️ Manage / Delete Habits</button>
+</div>
+
+<div id="deletePage" class="container" style="display:none;">
+  <h2 style="text-align:center; color:var(--red);">🗑️ Manage Habits</h2>
+  <div id="deleteList"></div>
+  <button class="delete-section-btn" onclick="toggleDeletePage(false)">🔙 Back to Tracker</button>
 </div>
 
 <script>
-const months = ["ஜனவரி","பிப்ரவரி","மார்ச்","ஏப்ரல்","மே","ஜூன்","ஜூலை","ஆகஸ்ட்","செப்டம்பர்","அக்டோபர்","நவம்பர்","டிசம்பர்"];
+const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
 const today = new Date();
 const currentYear = today.getFullYear();
@@ -106,25 +108,27 @@ const userName = localStorage.getItem("name") || "Guest";
 let habits = [];
 let dayData = {};
 
-// 1. Receive Data (Cloud-லிருந்து பெறுதல்)
 function initApp() {
-    const dateLabel = document.getElementById("dateLabel");
-    dateLabel.textContent = `இன்று: ${today.getDate()}/${today.getMonth()+1}/${currentYear}`;
+    document.getElementById("dateLabel").textContent = `Today: ${today.getDate()} ${months[today.getMonth()]} ${currentYear}`;
 
     if(window.db) {
-        // Habits பட்டியலை பெறுதல்
         window.dbOnValue(window.dbRef(window.db, `users/${userName}/habitsList`), (snapshot) => {
             habits = snapshot.val() || [];
             renderHabits();
+            renderDeleteList();
         });
 
-        // காலண்டர் தகவல்களை பெறுதல்
         window.dbOnValue(window.dbRef(window.db, `users/${userName}/habitCalendar/${currentYear}`), (snapshot) => {
             dayData = snapshot.val() || {};
             document.getElementById("syncStatus").innerText = "✅ Cloud Sync Active";
             createCalendar();
         });
     }
+}
+
+function toggleDeletePage(show) {
+    document.getElementById("mainPage").style.display = show ? "none" : "block";
+    document.getElementById("deletePage").style.display = show ? "block" : "none";
 }
 
 async function addHabit(){
@@ -151,19 +155,55 @@ function renderHabits(){
   });
 }
 
+function renderDeleteList(){
+  const div = document.getElementById("deleteList");
+  div.innerHTML = "";
+  if(habits.length === 0){
+    div.innerHTML = `<p style="text-align:center;color:gray;">No habits found!</p>`;
+    return;
+  }
+  habits.forEach((h,i)=>{
+    const item = document.createElement("div");
+    item.className = "habit-item";
+    item.innerHTML = `
+      <span>${h}</span>
+      <div>
+        <button style="background:var(--red);color:#fff;padding:8px;margin-right:5px;" onclick="deleteHabitName(${i})">Delete Habit</button>
+        <button style="background:var(--yellow);padding:8px;" onclick="deleteHabitData('${h}')">Clear Data</button>
+      </div>`;
+    div.appendChild(item);
+  });
+}
+
+async function deleteHabitName(index) {
+    if(confirm(`Are you sure you want to remove "${habits[index]}" from the list?`)) {
+        habits.splice(index, 1);
+        await window.dbSet(window.dbRef(window.db, `users/${userName}/habitsList`), habits);
+    }
+}
+
+async function deleteHabitData(name) {
+    if(confirm(`This will delete all calendar records for "${name}". Continue?`)) {
+        for(let key in dayData) {
+            dayData[key] = dayData[key].filter(h => h.name !== name);
+        }
+        await window.dbSet(window.dbRef(window.db, `users/${userName}/habitCalendar/${currentYear}`), dayData);
+        alert("Data cleared successfully!");
+    }
+}
+
 function setColor(index, color){
   const btns = document.querySelectorAll(`.habit-item:nth-child(${index+1}) .color-buttons button`);
   btns.forEach(b => b.classList.remove("active"));
   document.querySelector(`.habit-item:nth-child(${index+1}) .color-buttons .${color}`).classList.add("active");
 }
 
-// 2. Save Data (Cloud-ல் சேமித்தல்)
 async function saveDayData(){
   const saveBtn = document.getElementById("saveBtn");
   const dateKey = `${today.getMonth()+1}-${today.getDate()}`;
-  
   let currentDaySelection = [];
-  const items = document.querySelectorAll(".habit-item");
+  const items = document.querySelectorAll("#habitList .habit-item");
+  
   items.forEach((item, i) => {
     let color = "none";
     if(item.querySelector(".green.active")) color="green";
@@ -172,37 +212,16 @@ async function saveDayData(){
     currentDaySelection.push({ name: habits[i], color });
   });
 
-  // பட்டன் மாற்றம் (Saving Status)
   saveBtn.disabled = true;
   saveBtn.innerText = "⏳ Saving...";
-  saveBtn.className = "loading";
-
-  // நெட்வொர்க் டைம்-அவுட் செக்கிங்
-  const timer = setTimeout(() => {
-    saveBtn.innerText = "❌ Not Stored (Check Tower)";
-    saveBtn.className = "error";
-    setTimeout(resetBtn, 3000);
-  }, 10000);
-
   try {
     await window.dbSet(window.dbRef(window.db, `users/${userName}/habitCalendar/${currentYear}/${dateKey}`), currentDaySelection);
-    clearTimeout(timer);
-    saveBtn.innerText = "✅ Saved Successfully!";
-    saveBtn.className = "success";
-    setTimeout(resetBtn, 2000);
+    saveBtn.innerText = "✅ Saved!";
+    setTimeout(() => { saveBtn.disabled = false; saveBtn.innerText = "💾 Save to Cloud"; }, 2000);
   } catch (e) {
-    clearTimeout(timer);
-    saveBtn.innerText = "❌ Error Saving";
-    saveBtn.className = "error";
-    setTimeout(resetBtn, 3000);
-  }
-}
-
-function resetBtn() {
-    const saveBtn = document.getElementById("saveBtn");
+    alert("Error connecting to cloud!");
     saveBtn.disabled = false;
-    saveBtn.innerText = "💾 Save to Cloud";
-    saveBtn.className = "";
+  }
 }
 
 function createCalendar(){
@@ -214,14 +233,12 @@ function createCalendar(){
     monthDiv.innerHTML=`<h3 style="text-align:center; color:var(--accent);">${m}</h3>`;
     const daysDiv=document.createElement("div");
     daysDiv.className="days";
-
     for(let d=1;d<=daysInMonth[mi];d++){
       const box=document.createElement("div");
       box.className="day";
       box.textContent=d;
       const key=`${mi+1}-${d}`;
       const entry = dayData[key];
-
       if(entry){
         const g = entry.filter(e => e.color === 'green').length;
         const y = entry.filter(e => e.color === 'yellow').length;
@@ -241,11 +258,10 @@ function createCalendar(){
 function openDay(month, day){
   const key = `${month}-${day}`;
   const entry = dayData[key] || [];
-  if(entry.length === 0) return alert(`${day}/${month} - தகவல் இல்லை`);
-  
-  let msg = `தேதி: ${day}/${month}/${currentYear}\n\n`;
+  if(entry.length === 0) return alert(`No data available for ${day} ${months[month-1]}`);
+  let msg = `Date: ${day}/${month}/${currentYear}\n\n`;
   entry.forEach(e => {
-    let st = e.color === "green" ? "முழுமை" : e.color === "yellow" ? "பாதி" : e.color === "red" ? "செய்யவில்லை" : "-";
+    let st = e.color === "green" ? "Completed" : e.color === "yellow" ? "Partial" : e.color === "red" ? "Not Done" : "None";
     msg += `• ${e.name}: ${st}\n`;
   });
   alert(msg);
