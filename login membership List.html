@@ -1,142 +1,77 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gym Payment Spreadsheet</title>
+<title>Gym Payment Spreadsheet - Admin</title>
 
-
-
-
-<!-- Google tag (gtag.js) ஆரம்பம் -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-P0JBRSCYFF"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-P0JBRSCYFF');
 </script>
-
-<!-- Google tag (gtag.js) முடிவு -->
-
-
-
 
 <style>
   :root {
     --primary-color: #2563eb;
     --danger-color: #dc2626;
-    --success-color: #16a34a; /* Green color for active status */
+    --success-color: #16a34a;
     --bg-color: #f3f4f6;
     --border-color: #cbd5e1;
   }
 
-  /* Login Popup Overlay */
+  body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); margin: 0; }
+  
+  /* Login Popup */
   #loginOverlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: #1e293b;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    position: fixed; inset: 0; background: #1e293b;
+    display: flex; justify-content: center; align-items: center; z-index: 1000;
   }
-
   .login-card {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-    width: 90%;
-    max-width: 350px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    background: white; padding: 30px; border-radius: 12px; text-align: center;
+    width: 90%; max-width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
   }
 
-  .login-card h3 { margin-top: 0; color: #1e293b; }
+  #mainContent { display: none; padding: 10px; }
 
-  /* Main App Container */
-  #mainContent {
-    display: none;
-    padding: 10px;
-  }
+  h2 { text-align: center; color: #1e293b; margin: 10px 0; }
 
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: var(--bg-color);
-    margin: 0;
-  }
-
-  h2 { text-align: center; color: #1e293b; font-size: 1.5rem; margin: 10px 0; }
-
-  /* Form & Table Styles */
   form {
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    max-width: 600px;
-    margin: 0 auto 20px;
+    background: #fff; padding: 15px; border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto 20px;
   }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
 
   input, select, button {
-    width: 100%;
-    padding: 12px;
-    border-radius: 5px;
-    border: 1px solid var(--border-color);
-    font-size: 14px;
-    box-sizing: border-box;
+    width: 100%; padding: 12px; border-radius: 5px;
+    border: 1px solid var(--border-color); font-size: 14px; box-sizing: border-box;
   }
 
   .add-btn {
-    background: var(--primary-color);
-    color: #fff;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    grid-column: span 2;
-    margin-top: 10px;
+    background: var(--primary-color); color: #fff; font-weight: bold;
+    border: none; cursor: pointer; grid-column: span 2; margin-top: 10px;
   }
 
-  .search-box {
-    max-width: 600px;
-    margin: 0 auto 15px;
-    display: flex;
-    gap: 5px;
-  }
-
+  .search-box { max-width: 600px; margin: 0 auto 15px; display: flex; gap: 5px; }
   .search-input { flex: 1; border: 2px solid var(--primary-color); }
-  .search-btn { width: 80px; background: var(--primary-color); color: white; border: none; }
 
   .table-container {
-    width: 100%;
-    overflow-x: auto;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    max-height: 500px;
+    width: 100%; overflow-x: auto; background: #fff;
+    border: 1px solid var(--border-color); border-radius: 4px; max-height: 500px;
   }
-
   table { width: 100%; border-collapse: collapse; min-width: 1000px; font-size: 13px; }
-  th { background: #e2e8f0; color: #334155; padding: 12px 8px; border: 1px solid var(--border-color); position: sticky; top: 0; z-index: 10; }
-  td { border: 1px solid var(--border-color); padding: 10px 8px; text-align: center; white-space: nowrap; }
-  tr:nth-child(even) { background: #f8fafc; }
+  th { background: #e2e8f0; padding: 12px 8px; border: 1px solid var(--border-color); position: sticky; top: 0; }
+  td { border: 1px solid var(--border-color); padding: 10px 8px; text-align: center; }
 
-  .delete-btn { background: var(--danger-color); color: white; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; border: none; width: auto; }
-  .password-cell { background: #fff3cd; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-weight: bold; }
+  .delete-btn { background: var(--danger-color); color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+  .password-cell { background: #fff3cd; padding: 4px 8px; border-radius: 4px; font-family: monospace; }
   
-  /* Status Colors */
   .expiry-active { color: var(--success-color); font-weight: bold; }
   .expiry-expired { color: var(--danger-color); font-weight: bold; }
+  #syncStatus { text-align: center; font-size: 12px; color: var(--primary-color); margin-bottom: 5px; }
 </style>
 </head>
 
@@ -145,20 +80,21 @@
 <div id="loginOverlay">
   <div class="login-card">
     <h3>🔒 Admin Login</h3>
-    <input type="password" id="adminPass" placeholder="Enter Admin Password" style="margin-bottom: 15px;">
-    <button onclick="checkLogin()" style="background: #2563eb; color:white;">Login</button>
-    <p id="errorMsg" style="color: red; font-size: 12px; margin-top: 10px; display: none;"> Wrong Password!</p>
+    <input type="password" id="adminPass" placeholder="Enter Password">
+    <button onclick="checkLogin()" style="background: #2563eb; color:white; margin-top:10px;">Login</button>
+    <p id="errorMsg" style="color: red; font-size: 12px; margin-top: 10px; display: none;">Wrong Password!</p>
   </div>
 </div>
 
 <div id="mainContent">
   <h2>💳 Gym Payment XL Sheet</h2>
+  <div id="syncStatus">☁️ Connecting to Cloud...</div>
 
   <form id="payForm">
     <div class="form-grid">
       <input type="text" id="name" placeholder="Name" required>
       <input type="text" id="username" placeholder="User Name" required>
-      <input type="text" id="password" placeholder="Password (Visible)" required>
+      <input type="text" id="password" placeholder="Password" required>
       <input type="tel" id="phone" placeholder="Phone Number" required>
       <input type="number" id="amount" placeholder="Amount ₹" required>
       <select id="method">
@@ -175,12 +111,11 @@
         <input type="datetime-local" id="expiry" required>
       </div>
     </div>
-    <button type="submit" class="add-btn">➕ Add to Sheet</button>
+    <button type="submit" class="add-btn" id="submitBtn">➕ Add to Cloud Sheet</button>
   </form>
 
   <div class="search-box">
-    <input type="text" id="searchInput" class="search-input" placeholder="Search by Name, Phone, Gym, User...">
-    <button onclick="searchData()" class="search-btn">🔍 Search</button>
+    <input type="text" id="searchInput" class="search-input" placeholder="Search Name, Phone, Gym...">
   </div>
 
   <div class="table-container">
@@ -205,59 +140,100 @@
   </div>
 </div>
 
-<script>
-// --- Login Function ---
-function checkLogin() {
-  const passInput = document.getElementById("adminPass").value;
-  const errorMsg = document.getElementById("errorMsg");
-  const loginOverlay = document.getElementById("loginOverlay");
-  const mainContent = document.getElementById("mainContent");
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-  if (passInput === "Admin12345") {
-    loginOverlay.style.display = "none";
-    mainContent.style.display = "block";
+  const firebaseConfig = {
+    apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
+    authDomain: "z-fitness-a.firebaseapp.com",
+    projectId: "z-fitness-a",
+    storageBucket: "z-fitness-a.firebasestorage.app",
+    messagingSenderId: "289896498711",
+    appId: "1:289896498711:web:6bc6943dcfb06cca2d7e52",
+    measurementId: "G-G8BVVRSCXH",
+    databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const paymentsRef = ref(db, 'gymPayments');
+
+  // --- Global functions for HTML ---
+  window.deleteRow = (id) => {
+    if (confirm("Are you sure you want to delete this record?")) {
+      remove(ref(db, `gymPayments/${id}`));
+    }
+  };
+
+  // --- Sync Data from Firebase ---
+  onValue(paymentsRef, (snapshot) => {
+    const data = snapshot.val();
+    const syncStatus = document.getElementById("syncStatus");
+    syncStatus.innerText = "✅ Cloud Synced";
+    
+    const list = [];
+    for (let id in data) {
+      list.push({ id, ...data[id] });
+    }
+    render(list);
+    window.allGymData = list; // For search
+  });
+
+  // --- Add Data to Firebase ---
+  const form = document.getElementById("payForm");
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const submitBtn = document.getElementById("submitBtn");
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Saving...";
+
+    const newEntry = {
+      name: document.getElementById("name").value,
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value,
+      phone: document.getElementById("phone").value,
+      amount: document.getElementById("amount").value,
+      method: document.getElementById("method").value,
+      dateTime: document.getElementById("dateTime").value,
+      gym: document.getElementById("gym").value,
+      expiry: document.getElementById("expiry").value,
+      createdAt: new Date().toISOString()
+    };
+
+    const newPostRef = push(paymentsRef);
+    set(newPostRef, newEntry).then(() => {
+      form.reset();
+      submitBtn.disabled = false;
+      submitBtn.innerText = "➕ Add to Cloud Sheet";
+    });
+  });
+</script>
+
+<script>
+// --- Login Logic ---
+function checkLogin() {
+  const pass = document.getElementById("adminPass").value;
+  if (pass === "Admin12345") {
+    document.getElementById("loginOverlay").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
   } else {
-    errorMsg.style.display = "block";
-    document.getElementById("adminPass").value = "";
+    document.getElementById("errorMsg").style.display = "block";
   }
 }
 
-document.getElementById("adminPass").addEventListener("keyup", function(event) {
-  if (event.key === "Enter") {
-    checkLogin();
-  }
-});
-
-// --- Gym Data Script ---
-const form = document.getElementById("payForm");
-const tableBody = document.getElementById("tableBody");
-const searchInput = document.getElementById("searchInput");
-
-let gymData = JSON.parse(localStorage.getItem("gymPayments")) || [];
-
-function render(list = gymData) {
+// --- Render Table ---
+function render(list) {
+  const tableBody = document.getElementById("tableBody");
   tableBody.innerHTML = "";
-  if(list.length === 0) {
-    tableBody.innerHTML = "<tr><td colspan='11'>தகவல்கள் எதுவும் இல்லை...</td></tr>";
-    return;
-  }
-
-  // தற்போதைய நேரத்தை எடுக்கவும்
   const now = new Date();
 
   list.forEach((item, index) => {
-    const originalIndex = gymData.findIndex(d => d === item);
-    
-    // Expiry Date-ஐ ஒப்பிடுதல்
     const expiryDate = new Date(item.expiry);
-    let statusClass = "expiry-active"; // Default Green
-
-    if (expiryDate < now) {
-      statusClass = "expiry-expired"; // Expired என்றால் Red
-    }
+    const statusClass = (expiryDate < now) ? "expiry-expired" : "expiry-active";
 
     let row = `<tr>
-      <td style="font-weight:bold; background:#f1f5f9;">${index + 1}</td>
+      <td style="font-weight:bold;">${index + 1}</td>
       <td>${item.name}</td>
       <td>${item.username}</td>
       <td><span class="password-cell">${item.password}</span></td>
@@ -267,55 +243,23 @@ function render(list = gymData) {
       <td>${item.gym}</td>
       <td>${item.dateTime.replace('T', ' ')}</td>
       <td class="${statusClass}">${item.expiry.replace('T', ' ')}</td>
-      <td><button class="delete-btn" onclick="deleteRow(${originalIndex})">Delete</button></td>
+      <td><button class="delete-btn" onclick="deleteRow('${item.id}')">Delete</button></td>
     </tr>`;
     tableBody.innerHTML += row;
   });
 }
 
-render();
-
-form.addEventListener("submit", e => {
-  e.preventDefault();
-  let newEntry = {
-    name: document.getElementById("name").value,
-    username: document.getElementById("username").value,
-    password: document.getElementById("password").value,
-    phone: document.getElementById("phone").value,
-    amount: document.getElementById("amount").value,
-    method: document.getElementById("method").value,
-    dateTime: document.getElementById("dateTime").value,
-    gym: document.getElementById("gym").value,
-    expiry: document.getElementById("expiry").value
-  };
-  gymData.push(newEntry);
-  localStorage.setItem("gymPayments", JSON.stringify(gymData));
-  form.reset();
-  render();
+// --- Search Logic ---
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  const query = e.target.value.toLowerCase();
+  const filtered = window.allGymData.filter(item => 
+    item.name.toLowerCase().includes(query) || 
+    item.phone.includes(query) || 
+    item.gym.toLowerCase().includes(query) ||
+    item.username.toLowerCase().includes(query)
+  );
+  render(filtered);
 });
-
-function deleteRow(index) {
-  if (confirm("நிச்சயமாக நீக்க வேண்டுமா?")) {
-    gymData.splice(index, 1);
-    localStorage.setItem("gymPayments", JSON.stringify(gymData));
-    render();
-  }
-}
-
-function searchData() {
-  const query = searchInput.value.toLowerCase();
-  const filteredResult = gymData.filter(item => {
-    return (
-      item.name.toLowerCase().includes(query) ||
-      item.username.toLowerCase().includes(query) ||
-      item.phone.includes(query) ||
-      item.gym.toLowerCase().includes(query) ||
-      item.password.toLowerCase().includes(query)
-    );
-  });
-  render(filteredResult);
-}
-searchInput.addEventListener("input", searchData);
 </script>
 
 </body>
