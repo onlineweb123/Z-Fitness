@@ -1,30 +1,54 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Profile - Maathu Fitness</title>
+<title>Profile - Z Fitness</title>
 
-
-
-
-
-<!-- Google tag (gtag.js) ஆரம்பம் -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-P0JBRSCYFF"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-P0JBRSCYFF');
 </script>
 
-<!-- Google tag (gtag.js) முடிவு -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
+    const firebaseConfig = {
+        apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
+        authDomain: "z-fitness-a.firebaseapp.com",
+        projectId: "z-fitness-a",
+        storageBucket: "z-fitness-a.firebasestorage.app",
+        messagingSenderId: "289896498711",
+        appId: "1:289896498711:web:6bc6943dcfb06cca2d7e52",
+        databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
+    };
 
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
+    // Redirect to login if not authenticated
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+        window.location.href = "login.html";
+    }
 
+    // Sync Profile Data from Firebase
+    const userName = localStorage.getItem("name");
+    const profileRef = ref(database, `users/${userName}/profile`);
+    onValue(profileRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            document.getElementById("showName").innerText = data.fullName || userName;
+            document.getElementById("showWeight").innerText = data.weight || "--";
+            document.getElementById("showHeight").innerText = data.height || "--";
+            document.getElementById("showAge").innerText = data.age || "--";
+            document.getElementById("showGender").innerText = data.gender || "--";
+        }
+    });
+</script>
 
 <style>
 :root{
@@ -70,6 +94,7 @@ header{
   position:fixed;top:0;bottom:0;left:-260px;
   padding-top:70px;z-index:20;
   border-right:1px solid var(--border);
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 }
 .sidebar.open{left:0;}
 .sidebar a{
@@ -80,6 +105,10 @@ header{
 .sidebar a:hover{
   background:#f4fffc;color:var(--accent);
   padding-left:28px;
+}
+.sidebar a.signout {
+  color: #ff4757;
+  font-weight: bold;
 }
 .overlay{
   position:fixed;inset:0;background:#0006;
@@ -98,6 +127,7 @@ header{
   background:var(--card);padding:15px;
   border-radius:14px;box-shadow:0 4px 12px #0001;
   text-align:center;margin-bottom:18px;
+  border: 1px solid var(--border);
 }
 
 .profile-pic{
@@ -122,7 +152,7 @@ h3{margin:10px 0 5px;}
 
 .info-row{
   display:flex;justify-content:space-between;
-  padding:8px 0;font-size:15px;
+  padding:12px 0;font-size:15px;
   border-bottom:1px solid #eee;
 }
 .info-row:last-child{border:none}
@@ -136,12 +166,12 @@ h3{margin:10px 0 5px;}
 .bottom button{
   background:none;border:none;
   display:flex;flex-direction:column;
+  align-items:center;
   font-size:13px;opacity:.6;cursor:pointer;
 }
 .bottom button.active,
 .bottom button:hover{
   opacity:1;color:var(--accent);
-  transform:scale(1.08);
 }
 .bottom button span{font-size:22px;}
 
@@ -181,6 +211,7 @@ h3{margin:10px 0 5px;}
   <a href="profile.html">👤 Profile</a>
   <a href="settings.html">⚙️ Settings</a>
   <a href="#" onclick="shareApp()">🔁 Share</a>
+  <a href="#" onclick="signOut()" class="signout">🚪 Sign Out</a>
 </div>
 
 <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
@@ -199,16 +230,15 @@ h3{margin:10px 0 5px;}
   </div>
 
   <div class="profile-card">
-    <h2>Premium Code</h2>
+    <h2>Premium Access</h2>
 
     <button class="buttonpre" onclick="window.location.href='https://onlineweb123.github.io/Fitness-Free-Trial/index.html'">
       Free Version
     </button>
     <br><br>
 
-    <!-- 🔓 UNLOCK PAYMENT BUTTON -->
     <button class="buttonpre" onclick="payPremium()">
-      Unlock – ₹299
+      Unlock Premium – ₹299
     </button>
   </div>
 
@@ -222,19 +252,20 @@ h3{margin:10px 0 5px;}
 </div>
 
 <script>
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+
 function toggleMenu(){
   sidebar.classList.toggle("open");
   overlay.classList.toggle("show");
 }
 
-function loadData(){
-  showName.innerText = localStorage.getItem("name") || "--";
-  showHeight.innerText = localStorage.getItem("height") || "--";
-  showWeight.innerText = localStorage.getItem("weight") || "--";
-  showAge.innerText = localStorage.getItem("age") || "--";
-  showGender.innerText = localStorage.getItem("gender") || "--";
+function signOut() {
+    if(confirm("Are you sure you want to sign out?")) {
+        localStorage.clear();
+        window.location.href = "login.html";
+    }
 }
-loadData();
 
 /* 💰 UPI PAYMENT FUNCTION */
 function payPremium(){
@@ -246,9 +277,11 @@ function shareApp(){
   if(navigator.share){
     navigator.share({
       title:"Z Fitness",
-      text:"Check out this Fitness App!",
+      text:"Achieve your fitness goals with Z Fitness!",
       url:"https://onlineweb123.github.io/Z-Fitness/"
     });
+  } else {
+    alert("Sharing not supported on this browser.");
   }
 }
 </script>
