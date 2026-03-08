@@ -30,63 +30,31 @@
         window.dbChild = child;
     </script>
 
-
-
-<link rel="manifest" href="manifest.json">
-
-<meta name="theme-color" content="#000000">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="apple-touch-icon" href="icon-192x192.png">
-
-
-
-
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
 
     <style>
-        :root { 
-            --bg: #f8fbff; --card: #ffffff; --border: #e2e8f0; 
-            --primary: #0077b6; --accent2: #009f7b;
-            --text-main: #1e293b; --text-sub: #64748b;
-        }
+        :root { --bg: #f8fbff; --card: #ffffff; --border: #e2e8f0; --primary: #0077b6; --accent2: #009f7b; --text-main: #1e293b; --text-sub: #64748b; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .auth-container { width: 100%; max-width: 420px; background: var(--card); padding: 30px 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); border: 1px solid var(--border); }
         .logo-area { text-align: center; margin-bottom: 25px; }
-        .logo-area span { font-size: 40px; }
-        .logo-area h1 { font-size: 24px; color: var(--primary); margin: 5px 0; font-weight: 800; }
-        .logo-area p { font-size: 13px; color: var(--text-sub); margin: 0; }
+        .logo-area h1 { font-size: 24px; color: var(--primary); margin: 5px 0; }
         .tab-group { display: flex; background: #f1f5f9; padding: 5px; border-radius: 15px; margin-bottom: 20px; }
-        .tab { flex: 1; padding: 10px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; border-radius: 12px; transition: 0.3s; color: var(--text-sub); }
+        .tab { flex: 1; padding: 10px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; border-radius: 12px; color: var(--text-sub); }
         .tab.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         form { display: none; }
         form.active { display: block; }
         .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-main); }
-        .form-group input { width: 100%; padding: 12px 15px; border: 1.5px solid var(--border); border-radius: 12px; font-family: inherit; font-size: 14px; outline: none; transition: 0.3s; }
-        .form-group input:focus { border-color: var(--primary); background: #f0f9ff; }
-        
-        /* Button with Spinner Support */
-        .btn-auth { 
-            width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 15px; 
-            font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        .btn-auth:hover { opacity: 0.9; transform: translateY(-2px); }
-        .btn-auth:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-
-        /* Spinner Animation */
-        .spinner {
-            width: 18px; height: 18px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            display: none; /* hidden by default */
-        }
+        .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 12px 15px; border: 1.5px solid var(--border); border-radius: 12px; outline: none; }
+        .btn-auth { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 15px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .spinner { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .error-msg { color: #ff4757; font-size: 13px; text-align: center; margin-bottom: 15px; display: none; background: #fff0f1; padding: 10px; border-radius: 10px; border: 1px solid #ffccd0; }
+        .error-msg { color: #ff4757; font-size: 13px; text-align: center; margin-bottom: 15px; display: none; background: #fff0f1; padding: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -95,7 +63,6 @@
     <div class="logo-area">
         <span>💪</span>
         <h1>Z Fitness</h1>
-        <p>Health is the real wealth</p>
     </div>
 
     <div class="tab-group">
@@ -108,11 +75,11 @@
     <form id="loginForm" class="active" onsubmit="handleLogin(event)">
         <div class="form-group">
             <label>Username</label>
-            <input type="text" id="loginUser" placeholder="Enter your username" required>
+            <input type="text" id="loginUser" required>
         </div>
         <div class="form-group">
             <label>Password</label>
-            <input type="password" id="loginPass" placeholder="••••••••" required>
+            <input type="password" id="loginPass" required>
         </div>
         <button type="submit" class="btn-auth" id="loginBtn">
             <div class="spinner" id="loginSpinner"></div>
@@ -123,19 +90,19 @@
     <form id="signupForm" onsubmit="handleSignup(event)">
         <div class="form-group">
             <label>Full Name</label>
-            <input type="text" id="regName" placeholder="Enter full name" required>
+            <input type="text" id="regName" required>
         </div>
         <div class="form-group">
             <label>Phone Number</label>
-            <input type="tel" id="regPhone" placeholder="10 digit mobile number" pattern="[0-9]{10}" title="Please enter 10 digits" required>
+            <input type="tel" id="regPhone" pattern="[0-9]{10}" required>
         </div>
         <div class="form-group">
-            <label>Username (Your unique ID)</label>
-            <input type="text" id="regUser" placeholder="e.g. Mathavan123" required>
+            <label>Username</label>
+            <input type="text" id="regUser" required>
         </div>
         <div class="form-group">
             <label>Password</label>
-            <input type="password" id="regPass" placeholder="Create a password" required>
+            <input type="password" id="regPass" required>
         </div>
         <button type="submit" class="btn-auth" id="signupBtn" style="background: var(--accent2);">
             <div class="spinner" id="signupSpinner"></div>
@@ -167,26 +134,20 @@
         const spinner = document.getElementById('loginSpinner');
         const text = document.getElementById('loginText');
 
-        // Start Loading
-        btn.disabled = true;
-        spinner.style.display = "block";
-        text.innerText = "Verifying...";
+        btn.disabled = true; spinner.style.display = "block"; text.innerText = "Verifying...";
 
         try {
             const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.db), `users/${user}/profile`));
-
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 if (userData.password === pass) {
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('name', user); 
-                    localStorage.setItem('fullName', userData.fullName || user);
-                    localStorage.setItem('weight', userData.weight || "0");
-                    localStorage.setItem('goal', userData.goal || "None");
-                    localStorage.setItem('workout-level', userData.workoutLevel || "Beginner");
-                    localStorage.setItem('calorie', userData.calorie || "0");
-                    
-                    window.location.href = "index.html"; 
+                    if (userData.status === "Active") {
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('name', user);
+                        window.location.href = "index.html";
+                    } else {
+                        showError("Account is Expired! Contact Admin.");
+                    }
                 } else {
                     showError("Incorrect Password!");
                 }
@@ -194,12 +155,9 @@
                 showError("User not found!");
             }
         } catch (error) {
-            showError("Network Error! Try again.");
+            showError("Connection Error!");
         } finally {
-            // Stop Loading
-            btn.disabled = false;
-            spinner.style.display = "none";
-            text.innerText = "Sign In";
+            btn.disabled = false; spinner.style.display = "none"; text.innerText = "Sign In";
         }
     }
 
@@ -213,12 +171,7 @@
         const spinner = document.getElementById('signupSpinner');
         const text = document.getElementById('signupText');
 
-        if(user.includes(" ")) return showError("Username cannot contain spaces!");
-
-        // Start Loading
-        btn.disabled = true;
-        spinner.style.display = "block";
-        text.innerText = "Processing...";
+        btn.disabled = true; spinner.style.display = "block"; text.innerText = "Processing...";
 
         try {
             const checkUser = await window.dbGet(window.dbChild(window.dbRef(window.db), `users/${user}`));
@@ -226,26 +179,16 @@
                 showError("Username already exists!");
             } else {
                 await window.dbSet(window.dbRef(window.db, 'users/' + user + '/profile'), {
-                    fullName: name,
-                    phone: phone,
-                    username: user,
-                    password: pass,
-                    weight: "0",
-                    goal: "None",
-                    workoutLevel: "Beginner",
-                    calorie: "0",
-                    created: new Date().toISOString()
+                    fullName: name, phone: phone, username: user, password: pass,
+                    status: "Expired", weight: "0", goal: "None", workoutLevel: "Beginner", calorie: "0"
                 });
-                alert("Account created successfully! Please Login.");
+                alert("Account created! Please wait for Admin activation.");
                 switchTab('login');
             }
         } catch (error) {
             showError("Signup Failed!");
         } finally {
-            // Stop Loading
-            btn.disabled = false;
-            spinner.style.display = "none";
-            text.innerText = "Create Account";
+            btn.disabled = false; spinner.style.display = "none"; text.innerText = "Create Account";
         }
     }
 </script>
