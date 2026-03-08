@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Z Fitness | Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f0f4f8; margin: 0; padding: 15px; }
+        .container { max-width: 600px; margin: auto; }
+        h2 { text-align: center; color: #0f172a; margin-bottom: 20px; }
+        
+        .search-box { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; }
+        
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .user-card { background: white; padding: 16px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .active { background: #dcfce7; color: #166534; }
+        .expired { background: #fee2e2; color: #991b1b; }
+        
+        .update-row { display: flex; gap: 8px; }
+        input[type="date"] { flex-grow: 1; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; }
+        .btn-save { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; color: white; background: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>💪 Membership Tracker</h2>
+        <input type="text" id="searchInput" class="search-box" placeholder="Search by Name, Username or Phone..." onkeyup="filterUsers()">
+        <div id="userList"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
+            authDomain: "z-fitness-a.firebaseapp.com",
+            projectId: "z-fitness-a",
+            storageBucket: "z-fitness-a.firebasestorage.app",
+            messagingSenderId: "289896498711",
+            appId: "1:289896498711:web:6bc6943dcfb06cca2d7e52",
+            databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        let allUsers = [];
+
+        window.loadUsers = async function() {
+            const list = document.getElementById('userList');
+            list.innerHTML = "<div class='spinner'></div>";
+            
+            try {
+                const snap = await get(ref(database, 'users'));
+                if (snap.exists()) {
+                    allUsers = Object.entries(snap.val());
+                    renderUsers(allUsers);
+                } else { list.innerHTML = "<p style='text-align:center;'>No users found.</p>"; }
+            } catch (e) { list.innerHTML = "<p style='color:red; text-align:center;'>Error loading data!</p>"; }
+        }
+
+        function renderUsers(users) {
+            const list = document.getElementById('userList');
+            list.innerHTML = "";
+            const today = new Date().toISOString().split('T')[0];
+
+            users.forEach(([username, data]) => {
+                const p = data.profile || {};
+                let status = (p.expiryDate && p.expiryDate >= today) ? "Active" : "Expired";
+
+                list.innerHTML += `
+                    <div class="user-card">
+                        <div class="user-info">
+                            <div>
+                                <div style="font-weight:700;">${p.fullName || 'User'}</div>
+                                <div style="font-size:12px; color:#64748b;">@${username} | 📞 ${p.phone || 'N/A'}</div>
+                            </div>
+                            <span class="badge ${status.toLowerCase()}">${status}</span>
+                        </div>
+                        <div class="update-row">
+                            <input type="date" id="date_${username}" value="${p.expiryDate || ''}">
+                            <button class="btn-save" onclick="saveDate('${username}')">Save</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        window.filterUsers = function() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allUsers.filter(([username, data]) => {
+                const p = data.profile || {};
+                return (p.fullName || '').toLowerCase().includes(query) ||
+                       (username || '').toLowerCase().includes(query) ||
+                       (p.phone || '').includes(query);
+            });
+            renderUsers(filtered);
+        }
+
+        window.saveDate = async (username) => {
+            const date = document.getElementById(`date_${username}`).value;
+            const today = new Date().toISOString().split('T')[0];
+            const status = (date >= today) ? "Active" : "Expired";
+            
+            await update(ref(database, `users/${username}/profile`), { expiryDate: date, status: status });
+            alert("Updated successfully!");
+            window.loadUsers();
+        };
+
+        window.onload = window.loadUsers;
+    </script>
+</body>
+</html>
