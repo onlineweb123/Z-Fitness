@@ -2,20 +2,59 @@
 <html lang="ta">
 <head>
     <meta charset="UTF-8">
-    <title>Z Fitness | Payment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z Fitness | Premium Membership</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; text-align: center; }
-        .payment-card { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .qr-code { width: 250px; height: 250px; background: #eee; margin: 20px 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .payment-card { background: white; padding: 40px; border-radius: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.06); max-width: 400px; width: 100%; text-align: center; border: 1px solid #e2e8f0; }
+        .brand-name { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+        .tagline { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+        
+        .price-box { margin: 20px 0; }
+        .old-price { font-size: 20px; color: #94a3b8; text-decoration: line-through; }
+        .new-price { font-size: 40px; font-weight: 800; color: #0f172a; display: block; }
+        
+        .upi-box { background: #f8fafc; padding: 15px; border-radius: 16px; margin: 20px 0; border: 1px solid #e2e8f0; }
+        .upi-id { font-size: 16px; font-weight: 700; color: #2563eb; }
+        
+        .btn-unlock { background: #2563eb; color: white; padding: 16px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; width: 100%; font-size: 16px; margin-bottom: 10px; transition: 0.3s; }
+        .btn-whatsapp { background: #25d366; color: white; padding: 16px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; width: 100%; font-size: 16px; }
+        
+        .footer-text { margin-top: 20px; font-size: 12px; color: #94a3b8; }
     </style>
 </head>
 <body>
+
     <div class="payment-card">
-        <h2>💰 Subscription Payment</h2>
-        <p>Please pay to activate your account.</p>
-        <div class="qr-code"> [Insert QR Image Here] </div>
-        <p>UPI ID: <b>yourupi@bank</b></p>
-        <button onclick="alert('Payment screenshot sent to admin!')">I have Paid</button>
+        <div class="brand-name">Z Fitness</div>
+        <div class="tagline">Invest in your health</div>
+        
+        <div class="price-box">
+            <span class="old-price">Rs: 4,999</span>
+            <span class="new-price">Rs: 299</span>
+        </div>
+        
+     
+
+        <a href="upi://pay?pa=mm05270331@oksbi&pn=ZFitness&am=299&cu=INR" style="text-decoration:none;">
+            <button class="btn-unlock">Unlock Premium</button>
+        </a>
+
+        <button class="btn-whatsapp" onclick="sendWhatsApp()">Send Payment Receipt</button>
+
+        <p class="footer-text">
+            Pay Rs.299 to activate your account. Send the screenshot via WhatsApp for instant access.
+        </p>
     </div>
+
+    <script>
+        function sendWhatsApp() {
+            const phoneNumber = "919344165879";
+            const message = "Hi, I have completed the payment of Rs.299 for Z Fitness Premium. Please activate my account. [Attached: Payment Screenshot]";
+            const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+    </script>
 </body>
 </html>
