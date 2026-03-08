@@ -305,7 +305,67 @@
         document.getElementById("waterFill").style.height = (current/3000*100) + "%";
         document.getElementById("waterText").innerText = current + " ml";
     }
-    renderWater();
+    renderWater(); 
+    
+    // Data Sync Function
+function startDataSync(userName) {
+    document.getElementById("usernameDisplay").innerText = userName;
+
+    const profileRef = window.dbRef(window.db, `users/${userName}/profile`);
+    window.dbOnValue(profileRef, (snap) => {
+        const data = snap.val();
+        
+        // 1. முதலாவதாக, Expired ஆக இருந்தால் redirect செய்துவிட்டு இங்கேயே நிறுத்திவிடுங்கள்
+        if(data && data.status === "Expired") {
+            window.location.href = "payment.html";
+            return; 
+        }
+
+        // 2. Active ஆக இருந்தால் மட்டும் கீழேயுள்ள டேட்டாவை ஏற்றவும்
+        if(data) {
+            document.getElementById("weightShow").innerText = data.weight || "--";
+            document.getElementById("goalShow").innerText = data.goal || "--";
+            document.getElementById("levelShow").innerText = data.workoutLevel || "--";
+            document.getElementById("calorieTargetText").innerText = (data.calorie || "--") + " kcal";
+        }
+    });
+
+    // 3. இந்த டேட்டா ஏற்றும் வேலைகள் 'if' கண்டிஷனுக்கு வெளியே இருக்க வேண்டும், 
+    // அப்போதுதான் பேமெண்ட் பக்கம் போகாத பட்சத்தில் இவை சரியாக லோட் ஆகும்.
+
+    const now = new Date();
+    const monthYear = (now.getMonth() + 1) + "_" + now.getFullYear();
+    const day = now.getDate();
+    
+    // Workout Log Sync
+    const workoutRef = window.dbRef(window.db, `users/${userName}/logs/${monthYear}/${day}`);
+    window.dbOnValue(workoutRef, (snap) => {
+        const data = snap.val();
+        document.getElementById("todayWorkoutText").innerText = data ? data.status : "No update yet 😴";
+    });
+
+    // Nutrition Sync
+    const todayKey = now.toLocaleDateString('en-CA', {timeZone: 'Asia/Kolkata'});
+    const nutritionRef = window.dbRef(window.db, `users/${userName}/nutrition/${todayKey}`);
+    window.dbOnValue(nutritionRef, (snap) => {
+        const foods = snap.val() || [];
+        let tCal = 0, tP = 0, tC = 0, tF = 0;
+        foods.forEach(f => {
+            tCal += parseFloat(f.calorie) || 0;
+            tP += parseFloat(f.protein) || 0;
+            tC += parseFloat(f.carbs) || 0;
+            tF += parseFloat(f.fat) || 0;
+        });
+        document.getElementById("totalCalorieDisplay").innerText = tCal.toFixed(0) + " kcal";
+        document.getElementById("totalP").innerText = tP.toFixed(1);
+        document.getElementById("totalC").innerText = tC.toFixed(1);
+        document.getElementById("totalF").innerText = tF.toFixed(1);
+    });
+
+    renderChart(userName, monthYear);
+}
+
+
 </script>
 </body>
 </html>
