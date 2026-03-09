@@ -30,35 +30,33 @@
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    // Redirect to login if not authenticated
     if (localStorage.getItem("isLoggedIn") !== "true") {
         window.location.href = "login.html";
     }
 
-    // Sync Profile Data from Firebase
     const userName = localStorage.getItem("name");
     const profileRef = ref(database, `users/${userName}/profile`);
     onValue(profileRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             document.getElementById("showName").innerText = data.fullName || userName;
-            document.getElementById("showWeight").innerText = data.weight || "--";
-            document.getElementById("showHeight").innerText = data.height || "--";
+            document.getElementById("showWeight").innerText = (data.weight || "--") + " kg";
+            document.getElementById("showHeight").innerText = (data.height || "--") + " cm";
             document.getElementById("showAge").innerText = data.age || "--";
             document.getElementById("showGender").innerText = data.gender || "--";
+            document.getElementById("showGoal").innerText = data.goal || "Not set";
         }
     });
 </script>
 
 <style>
 :root{
-  --bg:#eef3f8;
-  --card:#ffffffdd;
-  --border:#d7e0ea;
-  --accent:#007bff;
+  --bg:#f4f7fa;
+  --card:#ffffff;
+  --border:#e1e8ef;
+  --accent:#0052cc;
   --accent2:#00c08b;
   --text:#1c1c1c;
-  --blur:blur(18px);
 }
 
 body{
@@ -67,7 +65,6 @@ body{
   background:var(--bg);
   color:var(--text);
 }
-*,button,a{transition:0.25s;}
 
 header{
   height:60px;
@@ -81,6 +78,7 @@ header{
   background:blue;
   z-index:10;
   color:white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 .menu-btn{
   position:absolute;left:14px;
@@ -88,108 +86,111 @@ header{
   color:white;cursor:pointer;
 }
 
-/* Sidebar */
+/* Sidebar & Overlay */
 .sidebar{
-  width:250px;background:#fff;
-  position:fixed;top:0;bottom:0;left:-260px;
+  width:260px;background:#fff;
+  position:fixed;top:0;bottom:0;left:-270px;
   padding-top:70px;z-index:20;
   border-right:1px solid var(--border);
-  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  transition: 0.3s;
 }
 .sidebar.open{left:0;}
 .sidebar a{
-  display:flex;padding:14px 20px;gap:10px;
-  font-size:17px;color:var(--text);
-  text-decoration:none;border-bottom:1px solid #f3f3f3;
+  display:flex;padding:15px 22px;gap:12px;
+  font-size:16px;color:var(--text);
+  text-decoration:none;border-bottom:1px solid #f8f9fa;
 }
-.sidebar a:hover{
-  background:#f4fffc;color:var(--accent);
-  padding-left:28px;
-}
-.sidebar a.signout {
-  color: #ff4757;
-  font-weight: bold;
-}
-.overlay{
-  position:fixed;inset:0;background:#0006;
-  display:none;z-index:15;
-}
+.sidebar a:hover{ background:#f0f7ff; color:var(--accent); }
+.sidebar a.signout { color: #ff4757; font-weight: bold; margin-top: 20px; }
+
+.overlay{ position:fixed;inset:0;background:#0006; display:none;z-index:15; backdrop-filter: blur(3px); }
 .overlay.show{display:block;}
 
 .main {
-  padding: 90px 15px 90px;
-  overflow-y: auto;
-  max-height: 200vh;
+  padding: 85px 20px 100px;
 }
 
-/* Profile Display */
+/* Profile Visuals */
 .profile-card{
-  background:var(--card);padding:15px;
-  border-radius:14px;box-shadow:0 4px 12px #0001;
-  text-align:center;margin-bottom:18px;
+  background:var(--card);
+  padding:25px 20px;
+  border-radius:20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  text-align:center;
+  margin-bottom:20px;
   border: 1px solid var(--border);
 }
 
 .profile-pic{
-  width:90px;height:90px;background:#ddd;
-  border-radius:50%;margin:auto;font-size:40px;
+  width:100px;height:100px;
+  background: linear-gradient(135deg, #0052cc, #00c08b);
+  border-radius:50%;margin:0 auto 15px;
+  font-size:45px;
   display:flex;align-items:center;justify-content:center;
-  border:4px solid var(--accent);
+  color: white;
+  box-shadow: 0 5px 15px rgba(0,82,204,0.3);
 }
 
 .tag{
   display:inline-block;
-  background:#00c08b;
-  padding:6px 14px;
-  font-size:13px;
+  background:var(--accent2);
+  padding:5px 15px;
+  font-size:12px;
   border-radius:20px;
   color:white;
-  font-weight:700;
-  margin-top:6px;
+  font-weight:600;
+  letter-spacing: 0.5px;
 }
 
-h3{margin:10px 0 5px;}
+h3{ margin:10px 0 2px; font-size: 22px; }
+.user-id { color: #888; font-size: 13px; margin-bottom: 20px; display: block; }
 
-.info-row{
-  display:flex;justify-content:space-between;
-  padding:12px 0;font-size:15px;
-  border-bottom:1px solid #eee;
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 20px;
 }
-.info-row:last-child{border:none}
+
+.info-item {
+  background: #f8fbff;
+  padding: 15px;
+  border-radius: 15px;
+  border: 1px solid #edf2f7;
+  text-align: left;
+}
+.info-item small { color: #718096; display: block; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; }
+.info-item span { font-weight: 700; font-size: 16px; color: #2d3748; }
+
+.action-btn {
+  background: white;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  cursor: pointer;
+}
+.action-btn:hover { background: var(--accent); color: white; }
 
 /* Bottom Nav */
 .bottom{
-  height:60px;position:fixed;bottom:0;left:0;right:0;
+  height:65px;position:fixed;bottom:0;left:0;right:0;
   display:flex;justify-content:space-around;align-items:center;
   background:#fff;border-top:1px solid var(--border);
+  padding-bottom: 5px;
 }
 .bottom button{
   background:none;border:none;
   display:flex;flex-direction:column;
-  align-items:center;
-  font-size:13px;opacity:.6;cursor:pointer;
+  align-items:center; font-size:12px; opacity:.5;
 }
-.bottom button.active,
-.bottom button:hover{
-  opacity:1;color:var(--accent);
-}
-.bottom button span{font-size:22px;}
+.bottom button.active{ opacity:1; color:var(--accent); font-weight: bold; }
+.bottom button span{ font-size:24px; margin-bottom: 2px; }
 
-.buttonpre {
-  color: white;
-  background: #005bf5;
-  font-size: 16px;
-  padding: 15px;
-  margin: 1.5px;
-  width: 100%;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 91, 245, 0.3);
-}
-.buttonpre:hover{
-  background:#1d4ed8;
-}
 </style>
 </head>
 
@@ -197,7 +198,7 @@ h3{margin:10px 0 5px;}
 
 <header>
   <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  👤 Profile
+  👤 My Profile
 </header>
 
 <div id="sidebar" class="sidebar">
@@ -206,11 +207,10 @@ h3{margin:10px 0 5px;}
   <a href="diet.html">🥗 Diet Plans</a>
   <a href="fit tools.html">📋 Fit Tools</a>
   <a href="habit traker.html">♾️ Habit Traker</a>
-  <a href="meditation.html">🎧 Meditation</a>
   <a href="progress.html">📊 Progress Tracker</a>
   <a href="profile.html">👤 Profile</a>
   <a href="settings.html">⚙️ Settings</a>
-  <a href="#" onclick="shareApp()">🔁 Share</a>
+  <a href="#" onclick="shareApp()">🔁 Share App</a>
   <a href="#" onclick="signOut()" class="signout">🚪 Sign Out</a>
 </div>
 
@@ -221,25 +221,36 @@ h3{margin:10px 0 5px;}
   <div class="profile-card">
     <div class="profile-pic">👤</div>
     <h3 id="showName">--</h3>
-    <div class="tag">🏋️ Fitness Person</div>
+    <span class="user-id">Z-Fitness Member</span>
+    <div class="tag">🏋️ FITNESS ENTHUSIAST</div>
 
-    <div class="info-row"><b>Height</b><span id="showHeight">--</span> cm</div>
-    <div class="info-row"><b>Weight</b><span id="showWeight">--</span> kg</div>
-    <div class="info-row"><b>Age</b><span id="showAge">--</span></div>
-    <div class="info-row"><b>Gender</b><span id="showGender">--</span></div>
-  </div>
+    <div class="info-grid">
+        <div class="info-item">
+            <small>Weight</small>
+            <span id="showWeight">--</span>
+        </div>
+        <div class="info-item">
+            <small>Height</small>
+            <span id="showHeight">--</span>
+        </div>
+        <div class="info-item">
+            <small>Age</small>
+            <span id="showAge">--</span>
+        </div>
+        <div class="info-item">
+            <small>Gender</small>
+            <span id="showGender">--</span>
+        </div>
+    </div>
+    
+    <div class="info-item" style="margin-top:15px; width: auto;">
+        <small>Current Goal</small>
+        <span id="showGoal">--</span>
+    </div>
 
-  <div class="profile-card">
-    <h2>Premium Access</h2>
-
-    <button class="buttonpre" onclick="window.location.href='https://onlineweb123.github.io/Fitness-Free-Trial/index.html'">
-      Free Version
-    </button>
-    <br><br>
-
-    <button class="buttonpre" onclick="payPremium()">
-      Unlock Premium – ₹299
-    </button>
+    <div style="margin-top: 25px;">
+        <button class="action-btn" onclick="location.href='setting.html'">⚙️ Edit Profile Details</button>
+    </div>
   </div>
 
 </div>
@@ -252,12 +263,9 @@ h3{margin:10px 0 5px;}
 </div>
 
 <script>
-const sidebar = document.getElementById("sidebar");
-const overlay = document.getElementById("overlay");
-
 function toggleMenu(){
-  sidebar.classList.toggle("open");
-  overlay.classList.toggle("show");
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("show");
 }
 
 function signOut() {
@@ -267,22 +275,72 @@ function signOut() {
     }
 }
 
-/* 💰 UPI PAYMENT FUNCTION */
-function payPremium(){
-  const upi = "upi://pay?pa=mm05270331@oksbi&pn=Z Fitness&am=299&cu=INR&tn=Premium Unlock";
-  window.location.href = upi;
-}
-
 function shareApp(){
   if(navigator.share){
     navigator.share({
       title:"Z Fitness",
-      text:"Achieve your fitness goals with Z Fitness!",
+      text:"Join me on Z Fitness and reach your goals!",
       url:"https://onlineweb123.github.io/Z-Fitness/"
     });
-  } else {
-    alert("Sharing not supported on this browser.");
   }
+} 
+
+// Data Sync Function
+function startDataSync(userName) {
+    document.getElementById("usernameDisplay").innerText = userName;
+
+    const profileRef = window.dbRef(window.db, `users/${userName}/profile`);
+    window.dbOnValue(profileRef, (snap) => {
+        const data = snap.val();
+        
+        // 1. முதலாவதாக, Expired ஆக இருந்தால் redirect செய்துவிட்டு இங்கேயே நிறுத்திவிடுங்கள்
+        if(data && data.status === "Expired") {
+            window.location.href = "payment.html";
+            return; 
+        }
+
+        // 2. Active ஆக இருந்தால் மட்டும் கீழேயுள்ள டேட்டாவை ஏற்றவும்
+        if(data) {
+            document.getElementById("weightShow").innerText = data.weight || "--";
+            document.getElementById("goalShow").innerText = data.goal || "--";
+            document.getElementById("levelShow").innerText = data.workoutLevel || "--";
+            document.getElementById("calorieTargetText").innerText = (data.calorie || "--") + " kcal";
+        }
+    });
+
+    // 3. இந்த டேட்டா ஏற்றும் வேலைகள் 'if' கண்டிஷனுக்கு வெளியே இருக்க வேண்டும், 
+    // அப்போதுதான் பேமெண்ட் பக்கம் போகாத பட்சத்தில் இவை சரியாக லோட் ஆகும்.
+
+    const now = new Date();
+    const monthYear = (now.getMonth() + 1) + "_" + now.getFullYear();
+    const day = now.getDate();
+    
+    // Workout Log Sync
+    const workoutRef = window.dbRef(window.db, `users/${userName}/logs/${monthYear}/${day}`);
+    window.dbOnValue(workoutRef, (snap) => {
+        const data = snap.val();
+        document.getElementById("todayWorkoutText").innerText = data ? data.status : "No update yet 😴";
+    });
+
+    // Nutrition Sync
+    const todayKey = now.toLocaleDateString('en-CA', {timeZone: 'Asia/Kolkata'});
+    const nutritionRef = window.dbRef(window.db, `users/${userName}/nutrition/${todayKey}`);
+    window.dbOnValue(nutritionRef, (snap) => {
+        const foods = snap.val() || [];
+        let tCal = 0, tP = 0, tC = 0, tF = 0;
+        foods.forEach(f => {
+            tCal += parseFloat(f.calorie) || 0;
+            tP += parseFloat(f.protein) || 0;
+            tC += parseFloat(f.carbs) || 0;
+            tF += parseFloat(f.fat) || 0;
+        });
+        document.getElementById("totalCalorieDisplay").innerText = tCal.toFixed(0) + " kcal";
+        document.getElementById("totalP").innerText = tP.toFixed(1);
+        document.getElementById("totalC").innerText = tC.toFixed(1);
+        document.getElementById("totalF").innerText = tF.toFixed(1);
+    });
+
+    renderChart(userName, monthYear);
 }
 </script>
 
