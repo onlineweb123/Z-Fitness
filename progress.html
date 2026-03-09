@@ -3,106 +3,82 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>📊 Progress - Maathu Fitness</title>
+<title>📊 Progress - Z Fitness</title>
 
-
-
-<!-- Google tag (gtag.js) ஆரம்பம் -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-P0JBRSCYFF"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-P0JBRSCYFF');
 </script>
 
-<!-- Google tag (gtag.js) முடிவு -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
+    authDomain: "z-fitness-a.firebaseapp.com",
+    projectId: "z-fitness-a",
+    databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
+  };
 
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
 
+  window.db = database;
+  window.dbRef = ref;
+  window.dbOnValue = onValue;
+
+  // பயனர் லாகின் செய்துள்ளாரா என சரிபார்த்தல்
+  const storedUserName = localStorage.getItem("name");
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+  if (isLoggedIn !== "true" || !storedUserName) {
+      window.location.href = "login.html";
+  } else {
+      // index.html-இல் உள்ள அதே பயனர் பெயரை பயன்படுத்தி Tracker-ஐ துவங்கு
+      initTracker(storedUserName);
+  }
+</script>
 
 <style>
-:root{
-  --bg:#eef3f8;
-  --card:#ffffffcc;
-  --border:#d7e0ea;
-  --accent:#007bff;
-  --accent2:#009f7b;
-  --text:#1c1c1c;
-}
+:root{ --bg:#eef3f8; --card:#ffffffcc; --border:#d7e0ea; --accent:#007bff; --text:#1c1c1c; }
+body{ margin:0; font-family:'Poppins',Arial,sans-serif; background:var(--bg); color:var(--text); }
 
-body{
-  margin:0;
-  font-family:'Poppins',Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
-*,button,a{transition:.25s;}
+header{ height:60px; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; position:fixed; top:0; left:0; right:0; background:blue; color:white; z-index:10; }
+.menu-btn{ position:absolute; left:14px; font-size:26px; background:none; border:none; color:white; cursor:pointer; }
 
-header{
-  height:60px; display:flex; align-items:center; justify-content:center;
-  font-size:19px; font-weight:700;
-  position:fixed; top:0; left:0; right:0;
-  background:blue; color:white;
-  z-index:10;
-}
-.menu-btn{position:absolute; left:14px; font-size:26px; background:none; border:none; color:white; cursor:pointer;}
+.sidebar{ width:250px; background:#ffffffee; position:fixed; top:0; bottom:0; left:-260px; padding-top:75px; border-right:1px solid var(--border); transition:.35s; backdrop-filter:blur(10px); z-index:20; }
+.sidebar.open{ left:0; }
+.sidebar a{ display:block; padding:16px 22px; font-size:17px; text-decoration:none; color:var(--text); border-bottom:1px solid #f1f4f6; }
 
-.sidebar{
-  width:250px; background:#ffffffee; position:fixed; top:0; bottom:0; left:-260px; 
-  padding-top:75px; border-right:1px solid var(--border); transition:.35s;
-  backdrop-filter:blur(10px);
-  z-index:20;
-}
-.sidebar.open{left:0;}
-.sidebar a{
-  display:block; padding:16px 22px; font-size:17px; color:var(--text);
-  text-decoration:none; border-bottom:1px solid #f1f4f6;
-}
-.sidebar a:hover{background:#f8fffd;color:var(--accent);padding-left:28px;}
+.overlay{ position:fixed; inset:0; background:#0008; display:none; backdrop-filter:blur(4px); z-index:15; }
+.overlay.show{ display:block; }
 
-.overlay{
-  position:fixed; inset:0; background:#0008; display:none;
-  backdrop-filter:blur(4px); z-index:15;
-}
-.overlay.show{display:block;}
+.main{ position:absolute; top:65px; bottom:65px; left:0; right:0; overflow-y:auto; padding:18px; }
+.card{ padding:18px; background:var(--card); border-radius:18px; box-shadow:0 6px 14px rgba(0,0,0,.08); margin-bottom:16px; border:1px solid var(--border); }
 
-.main{
-  position:absolute; top:65px; bottom:65px; left:0; right:0;
-  overflow-y:auto; padding:18px;
-}
+.chart-box{ height:180px; background:#fff; border-radius:12px; border:1px solid var(--border); padding:10px; }
+.chart-days{ display:flex; gap:4px; height:100%; align-items:flex-end; }
+.chart-bar{ width:10px; border-radius:4px; transition:.3s; }
 
-.card{
-  padding:18px; background:var(--card); border-radius:18px;
-  box-shadow:0 6px 14px rgba(0,0,0,.08); border:1px solid var(--border);
-  margin-bottom:20px;
-}
+/* Status Colors */
+.future{ background:#cfcfcf; } 
+.completed{ background:#007bff; } 
+.medium{ background:orange; } 
+.missed{ background:red; }
 
-.chart-box{
-  height:180px; background:#fff; border-radius:12px; border:1px solid var(--border);
-  padding:10px;
-}
-.chart-days{display:flex; gap:4px; height:100%; align-items:flex-end;}
-.chart-bar{width:10px;border-radius:4px;transition:.3s;}
+.legend { display: flex; justify-content: space-between; font-size: 11px; margin-top: 10px; }
+.legend span { display: flex; align-items: center; gap: 4px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
-/* colors */
-.future{background:#cfcfcf;}
-.completed{background:#007bff;}
-.medium{background:orange;}
-.missed{background:red;}
+select { width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:16px; outline:none; background: white; }
 
-.bottom{
-  height:60px; position:fixed; bottom:0; left:0; right:0;
-  display:flex; justify-content:space-around; align-items:center;
-  background:#ffffffcc; border-top:1px solid var(--border);
-}
-.bottom button{
-  background:none; border:none; font-size:13px;
-  display:flex; flex-direction:column; align-items:center; opacity:.6;
-}
-.bottom button.active{opacity:1; color:var(--accent);}
-.bottom button span{font-size:22px;}
+.bottom{ height:60px; position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; align-items:center; background:#ffffffcc; border-top:1px solid var(--border); }
+.bottom button{ background:none; border:none; font-size:13px; display:flex; flex-direction:column; align-items:center; opacity:.6; cursor:pointer; }
+.bottom button span{ font-size:22px; }
 </style>
 </head>
 
@@ -119,38 +95,39 @@ header{
   <a href="diet.html">🥗 Diet Plans</a>
   <a href="fit tools.html">📋 Fit Tools</a>
   <a href="habit traker.html">♾️ Habit Traker</a>
-<a href="meditation.html">🎧 Meditation</a>
   <a href="progress.html">📊 Progress Tracker</a>
   <a href="profile.html">👤 Profile</a>
-  <a href="settings.html">⚙️ Settings</a>
-<a href="#" onclick="shareApp()">🔁 Share</a>
+  <a href="#" onclick="logout()">🚪 Logout</a>
 </div>
 
 <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
 
 <div class="main">
-
   <div class="card">
+    <p style="margin-top:0; color: #666;">பயனர்: <b id="displayUser">--</b></p>
     <h3>📅 Select Month</h3>
-    <select id="monthSelect" onchange="loadHistory()">
-      <option value="current">📈 Current Month</option>
-    </select>
+    <select id="monthSelect" onchange="handleMonthChange()"></select>
   </div>
 
   <div class="card">
-    <h3>📈 Monthly Workout Status</h3>
+    <h3 id="chartTitle">📈 Workout Status</h3>
     <div class="chart-box">
       <div class="chart-days" id="daysChart"></div>
     </div>
+    <div class="legend">
+        <span><i class="dot completed"></i> Done</span>
+        <span><i class="dot medium"></i> Half</span>
+        <span><i class="dot missed"></i> Missed</span>
+        <span><i class="dot future"></i> Future</span>
+    </div>
   </div>
-
 </div>
 
 <div class="bottom">
   <button onclick="location.href='index.html'"><span>🏠</span>Home</button>
   <button onclick="location.href='workouts.html'"><span>🔥</span>Workout</button>
   <button onclick="location.href='diet.html'"><span>🥗</span>Diet</button>
-  <button class="" onclick="location.href='profile.html'"><span>👤</span>Profile</button>
+  <button onclick="location.href='profile.html'"><span>👤</span>Profile</button>
 </div>
 
 <script>
@@ -159,81 +136,106 @@ function toggleMenu(){
   document.getElementById("overlay").classList.toggle("show");
 }
 
-// --- CHART CREATION FUNCTION ---
-function renderChart(done, medium, totalDays, today){
-  const box = document.getElementById("daysChart");
-  box.innerHTML = "";
-  for(let i=1;i<=totalDays;i++){
-    let bar = document.createElement("div");
-    bar.className = "chart-bar";
-
-    if(i>today){ bar.classList.add("future"); bar.style.height="20%"; }
-    else if(done.includes(i)){ bar.classList.add("completed"); bar.style.height="100%"; }
-    else if(medium.includes(i)){ bar.classList.add("medium"); bar.style.height="60%"; }
-    else{ bar.classList.add("missed"); bar.style.height="35%"; }
-
-    box.appendChild(bar);
-  }
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
 }
 
-// --- LOAD HISTORY MONTHS IN DROPDOWN ---
-function loadHistoryList(){
-  const select = document.getElementById("monthSelect");
-  for(let key in localStorage){
-    if(key.startsWith("history_done_")){
-      let m = key.split("_")[3];
-      let y = key.split("_")[2];
-      let opt = document.createElement("option");
-      opt.value = `${y}_${m}`;
-      opt.textContent = `${y} - Month ${parseInt(m)+1}`;
-      select.appendChild(opt);
-    }
-  }
+let currentUserName = "";
+
+function initTracker(userName) {
+    currentUserName = userName;
+    document.getElementById("displayUser").innerText = userName;
+    
+    // 1. Payment Status Check (Index-ல் உள்ளது போலவே)
+    const profileRef = window.dbRef(window.db, `users/${userName}/profile`);
+    window.dbOnValue(profileRef, (snap) => {
+        const data = snap.val();
+        if(data && data.status === "Expired") {
+            window.location.href = "payment.html";
+            return;
+        }
+        loadAvailableMonths();
+    });
 }
 
-// --- LOAD SELECTED MONTH DATA ---
-function loadHistory(){
-  const select = document.getElementById("monthSelect").value;
-  const d = new Date();
-  let y = d.getFullYear(), m = d.getMonth();
-  let total = new Date(y, m+1, 0).getDate();
-  let today = d.getDate();
+// 2. Firebase-ல் இருந்து அந்த பயனர் பதிவு செய்த மாதங்களை எடுத்தல்
+function loadAvailableMonths() {
+    const logsRef = window.dbRef(window.db, `users/${currentUserName}/logs`);
+    window.dbOnValue(logsRef, (snap) => {
+        const allLogs = snap.val();
+        const select = document.getElementById("monthSelect");
+        select.innerHTML = "";
 
-  let done, medium;
+        const now = new Date();
+        const currentMonthKey = (now.getMonth() + 1) + "_" + now.getFullYear();
 
-  if(select === "current"){
-    done = JSON.parse(localStorage.getItem("doneWorkoutDays")) || [];
-    medium = JSON.parse(localStorage.getItem("mediumWorkoutDays")) || [];
-  }else{
-    let parts = select.split("_");
-    y = parseInt(parts[0]);
-    m = parseInt(parts[1]);
-    total = new Date(y, m+1, 0).getDate();
-    today = total; // full month view
-    done = JSON.parse(localStorage.getItem(`history_done_${y}_${m}`)) || [];
-    medium = JSON.parse(localStorage.getItem(`history_medium_${y}_${m}`)) || [];
-  }
+        // தற்போதைய மாதம்
+        let currentOpt = document.createElement("option");
+        currentOpt.value = currentMonthKey;
+        currentOpt.textContent = "Current Month (" + currentMonthKey.replace("_", "/") + ")";
+        select.appendChild(currentOpt);
 
-  renderChart(done, medium, total, today);
+        // பழைய மாதங்கள் இருந்தால் சேர்த்தல்
+        if(allLogs) {
+            Object.keys(allLogs).sort().reverse().forEach(key => {
+                if(key !== currentMonthKey) {
+                    let opt = document.createElement("option");
+                    opt.value = key;
+                    opt.textContent = key.replace("_", "/");
+                    select.appendChild(opt);
+                }
+            });
+        }
+        handleMonthChange();
+    });
 }
 
-// --- INITIAL LOAD ---
-loadHistoryList();
-loadHistory();
+// 3. சார்ட் வரைதல்
+function handleMonthChange() {
+    const monthKey = document.getElementById("monthSelect").value;
+    const [m, y] = monthKey.split("_");
+    const logRef = window.dbRef(window.db, `users/${currentUserName}/logs/${monthKey}`);
 
-function shareApp(){
-    if (navigator.share) {
-        navigator.share({
-            title: "Z Fitness",
-            text: "Check out this Fitness App!",
-            url: "https://onlineweb123.github.io/Z-Fitness/"
-        })
-        .catch(err => console.log("Share cancelled"));
-    } else {
-        alert("Your device does not support sharing.");
-    }
+    window.dbOnValue(logRef, (snap) => {
+        const monthData = snap.val() || {};
+        const container = document.getElementById("daysChart");
+        container.innerHTML = "";
+
+        // அந்த மாதத்தின் மொத்த நாட்கள்
+        const totalDays = new Date(parseInt(y), parseInt(m), 0).getDate();
+        const now = new Date();
+        const isCurrentMonth = (now.getMonth() + 1 == m) && (now.getFullYear() == y);
+        const todayDate = now.getDate();
+
+        for(let i = 1; i <= totalDays; i++) {
+            let bar = document.createElement("div");
+            bar.classList.add("chart-bar");
+            
+            // Firebase-லிருந்து ஸ்டேட்டஸ் பெறுதல்
+            const dayStatus = monthData[i] ? monthData[i].status : "";
+
+            if(isCurrentMonth && i > todayDate) {
+                bar.classList.add("future");
+                bar.style.height = "15%";
+            } else if(dayStatus.includes("✅")) {
+                bar.classList.add("completed");
+                bar.style.height = "100%";
+            } else if(dayStatus.includes("🟡")) {
+                bar.classList.add("medium");
+                bar.style.height = "60%";
+            } else if(dayStatus.includes("❌")) {
+                bar.classList.add("missed");
+                bar.style.height = "35%";
+            } else {
+                // டேட்டா இல்லை என்றால்
+                bar.classList.add("future");
+                bar.style.height = "10%";
+            }
+            container.appendChild(bar);
+        }
+    });
 }
-
 </script>
 
 </body>
