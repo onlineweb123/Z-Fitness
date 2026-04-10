@@ -46,7 +46,7 @@
     padding: 12px 25px; cursor: pointer; margin-top: 15px; 
     font-weight: bold; width: 100%; transition: 0.3s;
   }
-  
+
   /* Loading status for button */
   #addBtn.loading { background: #555 !important; cursor: not-allowed; }
   #addBtn.error { background: #ff4757 !important; }
@@ -66,7 +66,7 @@
 </header>
 
 <main>
-  <div id="loadingTxt">டேட்டா லோடு ஆகிறது...</div>
+  <div id="loadingTxt">Loading...</div>
   <div id="dietContainer"></div>
 
   <div class="control-panel">
@@ -120,13 +120,13 @@ async function addDiet(){
     try {
         await window.dbSet(window.dbRef(window.db, 'users/' + userName + '/personalDiets'), diets);
         clearTimeout(timeout);
-        
+
         // வெற்றிகரமாக சேமிக்கப்பட்டால்
         addBtn.innerText = "✅ Saved!";
         addBtn.className = "success";
         document.getElementById("dietName").value = "";
         document.getElementById("dietDetails").value = "";
-        
+
         setTimeout(resetBtn, 2000);
     } catch (e) {
         clearTimeout(timeout);
