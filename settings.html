@@ -77,13 +77,6 @@ h3{ margin-top:0; color: var(--accent); font-size: 18px; }
 input,select{ width:100%; padding:12px; margin:8px 0; border-radius:10px; border:1px solid var(--border); font-size:14px; box-sizing: border-box; outline: none; }
 input:focus, select:focus{ border-color: var(--accent); }
 
-.status-box{display:flex; justify-content:space-between; margin: 15px 0;}
-.status-box button{ width:31%; padding:12px 5px; font-size:14px; font-weight:700; border:none; border-radius:8px; cursor:pointer; opacity: 0.6; }
-.yes{background:#00b894;color:white;}
-.medium{background:#f1c40f;color:black;}
-.no{background:#ff4757;color:white;}
-.status-box button.active { opacity: 1; transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-
 .save-btn{ width:100%; padding:14px; background:var(--accent2); color:white; font-weight:700; border:none; border-radius:10px; font-size:16px; cursor:pointer; margin-top:10px; box-shadow: 0 4px 6px rgba(0,184,148,0.2); }
 .save-btn:active{ transform: scale(0.98); }
 
@@ -99,8 +92,9 @@ input:focus, select:focus{ border-color: var(--accent); }
 <body>
 
 <header>
-  <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  📥 Save Fitness Data
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>👤Profile Details  
+
+
 </header>
 
 <div id="sidebar" class="sidebar">
@@ -149,17 +143,6 @@ input:focus, select:focus{ border-color: var(--accent); }
     <input type="number" id="calorie" placeholder="Daily Calorie Target (kcal)">
     <button class="save-btn" onclick="saveProfile()">💾 Save / Update Profile</button>
   </div>
-
-  <div class="card">
-    <h3>🏋️ Today's Workout Status</h3>
-    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">இன்று உங்கள் பயிற்சியை முடித்துவிட்டீர்களா?</p>
-    <div class="status-box">
-      <button class="yes" id="btnYes" onclick="setTempStatus('✅ Done')">✅ Done</button>
-      <button class="medium" id="btnMed" onclick="setTempStatus('🟡 Medium')">🟡 Med</button>
-      <button class="no" id="btnNo" onclick="setTempStatus('❌ Missed')">❌ No</button>
-    </div>
-    <button class="save-btn" style="background: var(--accent);" onclick="saveTodayStatus()">💾 Log Today's Status</button>
-  </div>
 </div>
 
 <div class="bottom">
@@ -201,38 +184,6 @@ async function saveProfile(){
     } catch (e) {
       alert("❌ Sync Failed! Please check internet.");
     }
-  }
-}
-
-// Daily Status Logic
-let todayStatus = "";
-function setTempStatus(val){ 
-    todayStatus = val;
-    document.querySelectorAll('.status-box button').forEach(b => b.classList.remove('active'));
-    if(val.includes('✅')) document.getElementById('btnYes').classList.add('active');
-    if(val.includes('🟡')) document.getElementById('btnMed').classList.add('active');
-    if(val.includes('❌')) document.getElementById('btnNo').classList.add('active');
-}
-
-async function saveTodayStatus(){
-  if(!todayStatus){ alert("தயவுசெய்து ஒரு நிலையைத் தேர்ந்தெடுக்கவும்!"); return; }
-
-  const now = new Date();
-  const day = now.getDate();
-  const monthYear = (now.getMonth() + 1) + "_" + now.getFullYear();
-
-  if(window.db) {
-      try {
-          const workoutRef = window.dbRef(window.db, `users/${userName}/logs/${monthYear}/${day}`);
-          await window.dbSet(workoutRef, {
-              status: todayStatus,
-              timestamp: new Date().toISOString()
-          });
-          alert("🔥 Today's status saved! View in Dashboard.");
-          window.location.href = "index.html"; // Redirect to see chart
-      } catch (e) {
-          alert("Error saving status.");
-      }
   }
 }
 </script>
