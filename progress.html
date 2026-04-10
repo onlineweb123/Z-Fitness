@@ -2,7 +2,7 @@
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>📊 Progress - Z Fitness</title>
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-P0JBRSCYFF"></script>
@@ -31,21 +31,19 @@
   window.dbRef = ref;
   window.dbOnValue = onValue;
 
-  // பயனர் லாகின் செய்துள்ளாரா என சரிபார்த்தல்
   const storedUserName = localStorage.getItem("name");
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   if (isLoggedIn !== "true" || !storedUserName) {
       window.location.href = "login.html";
   } else {
-      // index.html-இல் உள்ள அதே பயனர் பெயரை பயன்படுத்தி Tracker-ஐ துவங்கு
       initTracker(storedUserName);
   }
 </script>
 
 <style>
-:root{ --bg:#eef3f8; --card:#ffffffcc; --border:#d7e0ea; --accent:#007bff; --text:#1c1c1c; }
-body{ margin:0; font-family:'Poppins',Arial,sans-serif; background:var(--bg); color:var(--text); }
+:root{ --bg:#eef3f8; --card:#ffffffcc; --border:#d7e0ea; --accent:#007bff; --accent2:#00b894; --text:#1c1c1c; }
+body{ margin:0; font-family:'Poppins',Arial,sans-serif; background:var(--bg); color:var(--text); overflow: hidden; }
 
 header{ height:60px; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; position:fixed; top:0; left:0; right:0; background:blue; color:white; z-index:10; }
 .menu-btn{ position:absolute; left:14px; font-size:26px; background:none; border:none; color:white; cursor:pointer; }
@@ -64,7 +62,6 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
 .chart-days{ display:flex; gap:4px; height:100%; align-items:flex-end; }
 .chart-bar{ width:10px; border-radius:4px; transition:.3s; }
 
-/* Status Colors */
 .future{ background:#cfcfcf; } 
 .completed{ background:#007bff; } 
 .medium{ background:orange; } 
@@ -76,7 +73,30 @@ header{ height:60px; display:flex; align-items:center; justify-content:center; f
 
 select { width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:16px; outline:none; background: white; }
 
-.bottom{ height:60px; position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; align-items:center; background:#ffffffcc; border-top:1px solid var(--border); }
+/* Draggable FAB Style */
+.fab {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: var(--accent2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    text-decoration: none;
+    z-index: 1000;
+    touch-action: none; /* Prevents scrolling while dragging */
+    user-select: none;
+    cursor: grab;
+}
+.fab:active { cursor: grabbing; }
+
+.bottom{ height:60px; position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; align-items:center; background:#ffffffcc; border-top:1px solid var(--border); z-index: 10; }
 .bottom button{ background:none; border:none; font-size:13px; display:flex; flex-direction:column; align-items:center; opacity:.6; cursor:pointer; }
 .bottom button span{ font-size:22px; }
 </style>
@@ -102,9 +122,13 @@ select { width:100%; padding:12px; border-radius:10px; border:1px solid var(--bo
 
 <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
 
+<div id="draggableFab" class="fab" onclick="goToStatus(event)">
+  <span>📝</span>
+</div>
+
 <div class="main">
   <div class="card">
-    <p style="margin-top:0; color: #666;">பயனர்: <b id="displayUser">--</b></p>
+    <p style="margin-top:0; color: #666;">Name: <b id="displayUser">--</b></p>
     <h3>📅 Select Month</h3>
     <select id="monthSelect" onchange="handleMonthChange()"></select>
   </div>
@@ -131,6 +155,73 @@ select { width:100%; padding:12px; border-radius:10px; border:1px solid var(--bo
 </div>
 
 <script>
+// --- Draggable FAB Logic ---
+const fab = document.getElementById("draggableFab");
+let isDragging = false;
+let startX, startY, initialX, initialY;
+
+// நகர்த்தும் வசதி (Touch & Mouse)
+const onStart = (e) => {
+    isDragging = false; 
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+    
+    startX = clientX;
+    startY = clientY;
+    
+    const rect = fab.getBoundingClientRect();
+    initialX = rect.left;
+    initialY = rect.top;
+
+    document.addEventListener(e.type.includes('touch') ? 'touchmove' : 'mousemove', onMove);
+    document.addEventListener(e.type.includes('touch') ? 'touchend' : 'mouseup', onEnd);
+};
+
+const onMove = (e) => {
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+    
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+
+    // ஒரு 5 பிக்சலுக்கு மேல் நகர்ந்தால் மட்டுமே அது "Drag" எனக் கருதப்படும்
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        isDragging = true;
+    }
+
+    if (isDragging) {
+        let newX = initialX + dx;
+        let newY = initialY + dy;
+
+        // ஸ்க்ரீன் எல்லைக்குள் பட்டனை வைப்பதற்கான கட்டுப்பாடு
+        newX = Math.max(10, Math.min(newX, window.innerWidth - 70));
+        newY = Math.max(70, Math.min(newY, window.innerHeight - 130));
+
+        fab.style.left = `${newX}px`;
+        fab.style.top = `${newY}px`;
+        fab.style.right = 'auto';
+        fab.style.bottom = 'auto';
+    }
+};
+
+const onEnd = () => {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onEnd);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+};
+
+fab.addEventListener('mousedown', onStart);
+fab.addEventListener('touchstart', onStart, {passive: true});
+
+// பட்டனை கிளிக் செய்தால் லிங்க் போவதற்கான பங்க்ஷன்
+function goToStatus(e) {
+    if (!isDragging) {
+        window.location.href = "workout status.html";
+    }
+}
+
+// --- முந்தைய லாஜிக் ---
 function toggleMenu(){
   document.getElementById("sidebar").classList.toggle("open");
   document.getElementById("overlay").classList.toggle("show");
@@ -147,7 +238,6 @@ function initTracker(userName) {
     currentUserName = userName;
     document.getElementById("displayUser").innerText = userName;
     
-    // 1. Payment Status Check (Index-ல் உள்ளது போலவே)
     const profileRef = window.dbRef(window.db, `users/${userName}/profile`);
     window.dbOnValue(profileRef, (snap) => {
         const data = snap.val();
@@ -159,7 +249,6 @@ function initTracker(userName) {
     });
 }
 
-// 2. Firebase-ல் இருந்து அந்த பயனர் பதிவு செய்த மாதங்களை எடுத்தல்
 function loadAvailableMonths() {
     const logsRef = window.dbRef(window.db, `users/${currentUserName}/logs`);
     window.dbOnValue(logsRef, (snap) => {
@@ -170,13 +259,11 @@ function loadAvailableMonths() {
         const now = new Date();
         const currentMonthKey = (now.getMonth() + 1) + "_" + now.getFullYear();
 
-        // தற்போதைய மாதம்
         let currentOpt = document.createElement("option");
         currentOpt.value = currentMonthKey;
         currentOpt.textContent = "Current Month (" + currentMonthKey.replace("_", "/") + ")";
         select.appendChild(currentOpt);
 
-        // பழைய மாதங்கள் இருந்தால் சேர்த்தல்
         if(allLogs) {
             Object.keys(allLogs).sort().reverse().forEach(key => {
                 if(key !== currentMonthKey) {
@@ -191,7 +278,6 @@ function loadAvailableMonths() {
     });
 }
 
-// 3. சார்ட் வரைதல்
 function handleMonthChange() {
     const monthKey = document.getElementById("monthSelect").value;
     const [m, y] = monthKey.split("_");
@@ -202,7 +288,6 @@ function handleMonthChange() {
         const container = document.getElementById("daysChart");
         container.innerHTML = "";
 
-        // அந்த மாதத்தின் மொத்த நாட்கள்
         const totalDays = new Date(parseInt(y), parseInt(m), 0).getDate();
         const now = new Date();
         const isCurrentMonth = (now.getMonth() + 1 == m) && (now.getFullYear() == y);
@@ -211,8 +296,6 @@ function handleMonthChange() {
         for(let i = 1; i <= totalDays; i++) {
             let bar = document.createElement("div");
             bar.classList.add("chart-bar");
-            
-            // Firebase-லிருந்து ஸ்டேட்டஸ் பெறுதல்
             const dayStatus = monthData[i] ? monthData[i].status : "";
 
             if(isCurrentMonth && i > todayDate) {
@@ -228,7 +311,6 @@ function handleMonthChange() {
                 bar.classList.add("missed");
                 bar.style.height = "35%";
             } else {
-                // டேட்டா இல்லை என்றால்
                 bar.classList.add("future");
                 bar.style.height = "10%";
             }
@@ -237,6 +319,5 @@ function handleMonthChange() {
     });
 }
 </script>
-
 </body>
 </html>
