@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -70,10 +70,10 @@
   <div id="dietContainer"></div>
 
   <div class="control-panel">
-    <h3>🎯 புதிய Diet Plan சேர்க்க</h3>
-    <input type="text" id="dietName" class="input-box" placeholder="Diet பெயர்">
-    <textarea id="dietDetails" placeholder="Diet விவரங்கள்..."></textarea>
-    <button id="addBtn" onclick="addDiet()">சேர்</button>
+    <h3>🎯 Add New Diet Plan</h3>
+    <input type="text" id="dietName" class="input-box" placeholder="Diet Name">
+    <textarea id="dietDetails" placeholder="Diet Details..."></textarea>
+    <button id="addBtn" onclick="addDiet()">Add</button>
   </div>
 </main>
 
@@ -97,22 +97,22 @@ async function addDiet(){
   const name = document.getElementById("dietName").value.trim();
   const details = document.getElementById("dietDetails").value.trim();
 
-  if(!name || !details){ alert("விவரங்களை நிரப்பவும்!"); return; }
+  if(!name || !details){ alert("Please fill in all details!"); return; }
 
-  // புதிய டயட்டை தற்காலிகமாக லிஸ்டில் சேர்த்தல்
-  const originalDiets = [...diets]; // பேக்கப்
+  // Temporarily add new diet to the list (Optimistic UI)
+  const originalDiets = [...diets]; 
   diets.unshift({name, details});
 
-  // பட்டனை 'Saving' நிலைக்கு மாற்றுதல்
+  // Change button to 'Saving' state
   addBtn.disabled = true;
   addBtn.innerText = "⏳ Saving...";
   addBtn.className = "loading";
 
-  // நெட்வொர்க் டைம்-அவுட் செட் செய்தல் (10 வினாடிகள்)
+  // Network Timeout (10 seconds)
   const timeout = setTimeout(() => {
     addBtn.innerText = "❌ Not Stored (No Network)";
     addBtn.className = "error";
-    diets = originalDiets; // சேமிக்காததால் பழைய டேட்டாவுக்கே திரும்புதல்
+    diets = originalDiets; 
     setTimeout(resetBtn, 3000);
   }, 10000);
 
@@ -121,7 +121,7 @@ async function addDiet(){
         await window.dbSet(window.dbRef(window.db, 'users/' + userName + '/personalDiets'), diets);
         clearTimeout(timeout);
 
-        // வெற்றிகரமாக சேமிக்கப்பட்டால்
+        // Success
         addBtn.innerText = "✅ Saved!";
         addBtn.className = "success";
         document.getElementById("dietName").value = "";
@@ -140,14 +140,14 @@ async function addDiet(){
 
 function resetBtn() {
     addBtn.disabled = false;
-    addBtn.innerText = "சேர்";
+    addBtn.innerText = "Add";
     addBtn.className = "";
 }
 
 function deleteDiet(index){
-  if(confirm("இதை நீக்கவா?")){
+  if(confirm("Are you sure you want to delete this?")){
     diets.splice(index,1);
-    updateFirebaseOnly(); // நீக்குவதற்கு பழைய முறையே போதும்
+    updateFirebaseOnly(); 
   }
 }
 
@@ -169,7 +169,7 @@ function renderDiets(){
   const container = document.getElementById("dietContainer");
   container.innerHTML = "";
   if(diets.length === 0) {
-      container.innerHTML = "<p>டயட் எதுவும் இல்லை.</p>";
+      container.innerHTML = "<p>No diet plans found.</p>";
       return;
   }
   diets.forEach((diet, i) => {
