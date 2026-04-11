@@ -5,23 +5,19 @@
     <title>Z Fitness | Admin Panel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f0f4f8; margin: 0; padding: 15px; }
         .container { max-width: 600px; margin: auto; }
         h2 { text-align: center; color: #0f172a; margin-bottom: 20px; }
-        
         .search-box { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; }
-        
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
         .user-card { background: white; padding: 16px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
         .active { background: #dcfce7; color: #166534; }
         .expired { background: #fee2e2; color: #991b1b; }
-        
         .update-row { display: flex; gap: 8px; }
         input[type="date"] { flex-grow: 1; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; }
         .btn-save { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; color: white; background: #3b82f6; }
@@ -52,27 +48,60 @@
         const database = getDatabase(app);
         let allUsers = [];
 
+        const getToday = () => new Date().toISOString().split('T')[0];
+
+        const add30Days = (dateStr) => {
+            const date = new Date(dateStr);
+            date.setDate(date.getDate() + 30);
+            return date.toISOString().split('T')[0];
+        };
+
         window.loadUsers = async function() {
             const list = document.getElementById('userList');
             list.innerHTML = "<div class='spinner'></div>";
-            
+
             try {
                 const snap = await get(ref(database, 'users'));
                 if (snap.exists()) {
                     allUsers = Object.entries(snap.val());
-                    renderUsers(allUsers);
+                    await handleNewUsers(allUsers);
+                    await renderUsers(allUsers); // renderUsers இப்போது async ஆக மாற்றப்பட்டுள்ளது
                 } else { list.innerHTML = "<p style='text-align:center;'>No users found.</p>"; }
             } catch (e) { list.innerHTML = "<p style='color:red; text-align:center;'>Error loading data!</p>"; }
         }
 
-        function renderUsers(users) {
+        async function handleNewUsers(users) {
+            const today = getToday();
+            for (let [username, data] of users) {
+                const p = data.profile || {};
+                if (!p.expiryDate) {
+                    const firstExpiry = add30Days(today);
+                    await update(ref(database, `users/${username}/profile`), { 
+                        expiryDate: firstExpiry,
+                        status: "Active"
+                    });
+                    p.expiryDate = firstExpiry;
+                }
+            }
+        }
+
+        // --- முக்கிய மாற்றம் இங்கே ---
+        async function renderUsers(users) {
             const list = document.getElementById('userList');
             list.innerHTML = "";
-            const today = new Date().toISOString().split('T')[0];
+            const today = getToday();
 
-            users.forEach(([username, data]) => {
+            for (const [username, data] of users) {
                 const p = data.profile || {};
-                let status = (p.expiryDate && p.expiryDate >= today) ? "Active" : "Expired";
+                
+                // இன்றைய தேதியை வைத்து Status கணக்கிடுதல்
+                let calculatedStatus = (p.expiryDate && p.expiryDate >= today) ? "Active" : "Expired";
+
+                // டேட்டாபேஸில் இருக்கும் ஸ்டேட்டஸ் தப்பாக இருந்தால் ஆட்டோமேட்டிக்காக அப்டேட் செய்யும்
+                if (p.status !== calculatedStatus) {
+                    await update(ref(database, `users/${username}/profile`), { status: calculatedStatus });
+                    p.status = calculatedStatus; // தற்காலிகமாக UI-ல் காட்ட
+                }
 
                 list.innerHTML += `
                     <div class="user-card">
@@ -81,15 +110,15 @@
                                 <div style="font-weight:700;">${p.fullName || 'User'}</div>
                                 <div style="font-size:12px; color:#64748b;">@${username} | 📞 ${p.phone || 'N/A'}</div>
                             </div>
-                            <span class="badge ${status.toLowerCase()}">${status}</span>
+                            <span class="badge ${calculatedStatus.toLowerCase()}">${calculatedStatus}</span>
                         </div>
                         <div class="update-row">
                             <input type="date" id="date_${username}" value="${p.expiryDate || ''}">
-                            <button class="btn-save" onclick="saveDate('${username}')">Save</button>
+                            <button class="btn-save" onclick="saveDate('${username}')">Update</button>
                         </div>
                     </div>
                 `;
-            });
+            }
         }
 
         window.filterUsers = function() {
@@ -105,11 +134,13 @@
 
         window.saveDate = async (username) => {
             const date = document.getElementById(`date_${username}`).value;
-            const today = new Date().toISOString().split('T')[0];
-            const status = (date >= today) ? "Active" : "Expired";
+            if(!date) return alert("Please select a date!");
             
+            const today = getToday();
+            const status = (date >= today) ? "Active" : "Expired";
+
             await update(ref(database, `users/${username}/profile`), { expiryDate: date, status: status });
-            alert("Updated successfully!");
+            alert("Updated Successfully!");
             window.loadUsers();
         };
 
