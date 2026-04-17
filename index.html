@@ -107,11 +107,13 @@
   <a href="fit tools.html">📋 Fit Tools</a>
   <a href="habit traker.html">♾️ Habit Traker</a>
   <a href="nutrition tracker.html">🍱 Nutrition Tracker</a>
+    <a href="sun view.html">☀️ Sun Tan Tracker 
+
+</a>
   <a href="meditation.html">🎧 Meditation</a>
   <a href="progress.html">📊 Progress Tracker</a>
   <a href="profile.html">👤 Profile</a>
-  <a href="settings.html">⚙️ Settings</a>
-  <a href="terms and condition.html">📃 terms & condi...</a>
+ <a href="terms and condition.html">📃 terms & condi...</a>
   <a href="#" onclick="logout()">🚪 Logout</a>
 </div>
 
@@ -306,7 +308,7 @@
         document.getElementById("waterText").innerText = current + " ml";
     }
     renderWater(); 
-    
+
     // Data Sync Function
 function startDataSync(userName) {
     document.getElementById("usernameDisplay").innerText = userName;
@@ -314,7 +316,7 @@ function startDataSync(userName) {
     const profileRef = window.dbRef(window.db, `users/${userName}/profile`);
     window.dbOnValue(profileRef, (snap) => {
         const data = snap.val();
-        
+
         // 1. முதலாவதாக, Expired ஆக இருந்தால் redirect செய்துவிட்டு இங்கேயே நிறுத்திவிடுங்கள்
         if(data && data.status === "Expired") {
             window.location.href = "payment.html";
@@ -336,7 +338,7 @@ function startDataSync(userName) {
     const now = new Date();
     const monthYear = (now.getMonth() + 1) + "_" + now.getFullYear();
     const day = now.getDate();
-    
+
     // Workout Log Sync
     const workoutRef = window.dbRef(window.db, `users/${userName}/logs/${monthYear}/${day}`);
     window.dbOnValue(workoutRef, (snap) => {
