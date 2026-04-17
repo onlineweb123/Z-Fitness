@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Sun Log Entry</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #fff5f5;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h2 { color: #d32f2f; margin-bottom: 10px; }
+        p { color: #666; font-size: 14px; margin-bottom: 25px; }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #ffcdd2;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .delete-btn {
+            width: 100%;
+            padding: 18px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .delete-btn:active { transform: scale(0.95); background: #b71c1c; }
+        
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #555;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        #statusMsg { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🗑️ Remove Entry</h2>
+    <p>தவறாகப் பதிவிட்ட தேதியைத் தேர்ந்தெடுத்து நீக்கவும்.</p>
+
+    <div class="input-group">
+        <label>📅 Select Date to Delete</label>
+        <input type="date" id="targetDate">
+    </div>
+
+    <button class="delete-btn" onclick="confirmAndDelete()">DELETE LOG ❌</button>
+
+    <p id="statusMsg"></p>
+
+    <a href="sun view.html" class="back-link">← Back to History</a>
+</div>
+
+<script>
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
+        authDomain: "z-fitness-a.firebaseapp.com",
+        projectId: "z-fitness-a",
+        databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const currentUserName = localStorage.getItem("name") || "Guest";
+
+    // Date formatter for display (YYYY-MM-DD to DD/MM/YYYY)
+    function prettyDate(d) {
+        const p = d.split("-");
+        return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d;
+    }
+
+    function confirmAndDelete() {
+        const dateVal = document.getElementById('targetDate').value;
+        const msg = document.getElementById('statusMsg');
+
+        if (!dateVal) {
+            alert("Please select a date first!");
+            return;
+        }
+
+        if (currentUserName === "Guest") {
+            alert("Login required!");
+            return;
+        }
+
+        // முதலில் அந்தத் தேதியில் டேட்டா இருக்கிறதா என்று சரிபார்க்கும்
+        const logRef = database.ref('users/' + currentUserName + '/sun_logs/' + dateVal);
+        
+        logRef.once('value', (snapshot) => {
+            if (!snapshot.exists()) {
+                msg.style.color = "orange";
+                msg.innerText = "No entry found for this date! ⚠️";
+                return;
+            }
+
+            // டேட்டா இருந்தால் உறுதிப்படுத்திக் கொண்டு நீக்கும்
+            if (confirm(`${prettyDate(dateVal)} தேதியில் உள்ள பதிவை நீக்கவா?`)) {
+                logRef.remove()
+                .then(() => {
+                    msg.style.color = "green";
+                    msg.innerText = "Deleted successfully! ✅";
+                    document.getElementById('targetDate').value = ""; // Reset input
+                })
+                .catch((err) => {
+                    msg.style.color = "red";
+                    msg.innerText = "Error: " + err.message;
+                });
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
