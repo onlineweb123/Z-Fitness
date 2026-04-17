@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Color Tracker - Fixed Date</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        body { font-family: 'Arial', sans-serif; background: #f0f4f8; padding: 15px; }
+        .container { max-width: 450px; margin: auto; }
+        h2 { text-align: center; color: #333; margin-bottom: 25px; }
+
+        .log-card {
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: 0.3s;
+            border: 1px solid #ddd;
+        }
+
+        /* Date aligned neatly */
+        .date-label { 
+            font-weight: 800; 
+            font-size: 20px; 
+            margin-bottom: 12px; 
+            display: block; 
+            color: #1a1a1a;
+            letter-spacing: 1px;
+        }
+
+        .status-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.85);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 10px 0;
+        }
+
+        .color-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        .percentage-text { font-size: 24px; font-weight: 900; color: #222; }
+
+        .time-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
+        .time-chip {
+            background: white;
+            padding: 8px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        }
+        .time-chip span { display: block; font-size: 18px; margin-bottom: 3px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>☀️ Sun Tan Tracker</h2>
+    <div id="logsContainer"></div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
+        authDomain: "z-fitness-a.firebaseapp.com",
+        projectId: "z-fitness-a",
+        databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const currentUserName = localStorage.getItem("name") || "Guest";
+
+    // Date formatter: YYYY-MM-DD to DD/MM/YYYY
+    function formatDate(inputDate) {
+        if(!inputDate) return "--/--/----";
+        const parts = inputDate.split("-"); // Split by hyphen
+        if(parts.length !== 3) return inputDate; // Return original if not standard
+        return `${parts[2]}/${parts[1]}/${parts[0]}`; // Rearrange to DD/MM/YYYY
+    }
+
+    function getSkinColor(level) {
+        let l = parseInt(level);
+        return `hsl(30, 60%, ${100 - (l/1.5)}%)`;
+    }
+
+    const logsRef = database.ref('users/' + currentUserName + '/sun_logs');
+    logsRef.orderByKey().on('value', (snap) => {
+        const container = document.getElementById('logsContainer');
+        container.innerHTML = "";
+        
+        let logs = [];
+        snap.forEach(c => { logs.unshift({d: c.key, v: c.val()}); });
+
+        logs.forEach(log => {
+            const cardColor = getSkinColor(log.v.tanLevel);
+            const card = `
+                <div class="log-card" style="background-color: ${cardColor}">
+                    <span class="date-label">${formatDate(log.d)}</span>
+                    
+                    <div class="status-box">
+                        <div class="color-preview" style="background-color: ${cardColor}"></div>
+                        <div>
+                            <div style="font-size:12px; color:#555;">Color Level</div>
+                            <div class="percentage-text">${log.v.tanLevel}</div>
+                        </div>
+                    </div>
+
+                    <div class="time-grid">
+                        <div class="time-chip"><span>🌅</span>${log.v.morning}</div>
+                        <div class="time-chip"><span>☀️</span>${log.v.noon}</div>
+                        <div class="time-chip"><span>🌇</span>${log.v.evening}</div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += card;
+        });
+    });
+</script>
+</body>
+</html>
