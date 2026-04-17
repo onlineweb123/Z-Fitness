@@ -3,32 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Color Tracker - Fixed Date</title>
+    <title>Simple Color Tracker - History</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <style>
-        body { font-family: 'Arial', sans-serif; background: #f0f4f8; padding: 15px; }
+        body { font-family: 'Arial', sans-serif; background: #f0f4f8; padding: 15px; padding-bottom: 80px; }
         .container { max-width: 450px; margin: auto; }
         h2 { text-align: center; color: #333; margin-bottom: 25px; }
 
         .log-card {
-            border-radius: 20px;
+            border-radius: 25px;
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: 0.3s;
-            border: 1px solid #ddd;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* Date aligned neatly */
         .date-label { 
             font-weight: 800; 
             font-size: 20px; 
             margin-bottom: 12px; 
             display: block; 
             color: #1a1a1a;
-            letter-spacing: 1px;
         }
 
         .status-box {
@@ -37,7 +34,7 @@
             gap: 15px;
             background: rgba(255,255,255,0.85);
             padding: 15px;
-            border-radius: 15px;
+            border-radius: 18px;
             margin: 10px 0;
         }
 
@@ -46,7 +43,7 @@
             height: 50px;
             border-radius: 50%;
             border: 3px solid #fff;
-            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
         }
 
         .percentage-text { font-size: 24px; font-weight: 900; color: #222; }
@@ -55,21 +52,73 @@
         .time-chip {
             background: white;
             padding: 8px;
-            border-radius: 10px;
+            border-radius: 12px;
             text-align: center;
             font-size: 11px;
             font-weight: bold;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
         }
         .time-chip span { display: block; font-size: 18px; margin-bottom: 3px; }
+
+        /* --- Floating Action Button (FAB) Style --- */
+        .fab {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 65px;
+            height: 65px;
+            background-color: #e67e22;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 30px;
+            box-shadow: 0 6px 15px rgba(230, 126, 34, 0.4);
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, background-color 0.2s;
+            z-index: 1000;
+            border: none;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+            background-color: #d35400;
+        }
+
+        /* FAB Tooltip or Label (Optional) */
+        .fab::after {
+            content: "Add Log";
+            position: absolute;
+            right: 75px;
+            background: #333;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+        
+        /* Desktop hover effects */
+        @media (hover: hover) {
+            .fab:hover::after { opacity: 1; }
+            .fab:hover { transform: translateY(-3px); }
+        }
+
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>☀️ Sun Tan Tracker</h2>
+    <h2>☀️ Sun Tan Tracker  </h2>
     <div id="logsContainer"></div>
 </div>
+
+<a href="sun.html" class="fab">
+    <span>+</span>
+</a>
 
 <script>
     const firebaseConfig = {
@@ -83,12 +132,11 @@
     const database = firebase.database();
     const currentUserName = localStorage.getItem("name") || "Guest";
 
-    // Date formatter: YYYY-MM-DD to DD/MM/YYYY
     function formatDate(inputDate) {
         if(!inputDate) return "--/--/----";
-        const parts = inputDate.split("-"); // Split by hyphen
-        if(parts.length !== 3) return inputDate; // Return original if not standard
-        return `${parts[2]}/${parts[1]}/${parts[0]}`; // Rearrange to DD/MM/YYYY
+        const parts = inputDate.split("-");
+        if(parts.length !== 3) return inputDate;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
 
     function getSkinColor(level) {
@@ -104,12 +152,16 @@
         let logs = [];
         snap.forEach(c => { logs.unshift({d: c.key, v: c.val()}); });
 
+        if(logs.length === 0) {
+            container.innerHTML = "<p style='text-align:center; margin-top:50px; color:#777;'> login first </p>";
+            return;
+        }
+
         logs.forEach(log => {
             const cardColor = getSkinColor(log.v.tanLevel);
             const card = `
                 <div class="log-card" style="background-color: ${cardColor}">
                     <span class="date-label">${formatDate(log.d)}</span>
-                    
                     <div class="status-box">
                         <div class="color-preview" style="background-color: ${cardColor}"></div>
                         <div>
@@ -117,7 +169,6 @@
                             <div class="percentage-text">${log.v.tanLevel}</div>
                         </div>
                     </div>
-
                     <div class="time-grid">
                         <div class="time-chip"><span>🌅</span>${log.v.morning}</div>
                         <div class="time-chip"><span>☀️</span>${log.v.noon}</div>
