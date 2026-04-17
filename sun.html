@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sun Tan Tracker - Real-time Sync</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 450px;
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        h2 { text-align: center; color: #e67e22; margin-bottom: 20px; }
+        .user-welcome { text-align: center; font-size: 14px; color: #666; margin-bottom: 15px; }
+        
+        .section { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+
+        input[type="date"], input[type="time"] {
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .tan-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 18px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #ffe0b2, #a1887f, #3e2723);
+            outline: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .tan-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #fff;
+            border: 4px solid #e67e22;
+            cursor: pointer;
+        }
+
+        .timeline-box {
+            background: #fffbf0;
+            padding: 15px;
+            border-radius: 15px;
+            border-left: 6px solid #ff9800;
+            margin-bottom: 15px;
+        }
+        .time-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 18px;
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .save-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #msg { text-align: center; font-weight: bold; margin-top: 15px; font-size: 14px; }
+        .history-link { text-align: center; margin-top: 20px; display: block; color: #e67e22; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>☀️ Sun Tan Monitor</h2>
+    <div class="user-welcome">Logging for: <strong id="userDisplay">--</strong></div>
+
+    <div class="section">
+        <label>📅 Select Date</label>
+        <input type="date" id="logDate" style="width: 94%;" onchange="fetchExistingData()">
+    </div>
+
+    <div class="section">
+        <label>🎨 Melanin / Tan Level</label>
+        <input type="range" min="0" max="100" value="10" class="tan-slider" id="tanLevel" oninput="updateVal(this.value)">
+        <p style="text-align:right; font-size: 14px; color: #e67e22; font-weight: bold;">Level: <span id="tanVal">10</span>%</p>
+    </div>
+
+    <div class="section">
+        <label>⏰ Exposure Timeline</label>
+        
+        <div class="timeline-box">
+            <strong>Morning</strong>
+            <div class="time-inputs">
+                <input type="time" id="mornStart"> <span>to</span>
+                <input type="time" id="mornEnd">
+            </div>
+        </div>
+
+        <div class="timeline-box" style="border-left-color: #f44336; background: #fff5f5;">
+            <strong>Noon</strong>
+            <div class="time-inputs">
+                <input type="time" id="aftStart"> <span>to</span>
+                <input type="time" id="aftEnd">
+            </div>
+        </div>
+
+        <div class="timeline-box" style="border-left-color: #4caf50; background: #f5fff5;">
+            <strong>Evening</strong>
+            <div class="time-inputs">
+                <input type="time" id="eveStart"> <span>to</span>
+                <input type="time" id="eveEnd">
+            </div>
+        </div>
+    </div>
+
+    <button class="save-btn" id="saveBtn" onclick="saveData()">
+        <span class="spinner" id="spinner"></span>
+        <span id="btnText">SAVE LOG 💾</span>
+    </button>
+    <p id="msg"></p>
+    
+    <a href="sun view.html" class="history-link">View All History 📊</a>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAbcluHlCBt5acY5qBwjJgjbSYk7EgeT90",
+        authDomain: "z-fitness-a.firebaseapp.com",
+        projectId: "z-fitness-a",
+        storageBucket: "z-fitness-a.firebasestorage.app",
+        messagingSenderId: "289896498711",
+        appId: "1:289896498711:web:6bc6943dcfb06cca2d7e52",
+        databaseURL: "https://z-fitness-a-default-rtdb.firebaseio.com/"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const currentUserName = localStorage.getItem("name") || "Guest";
+    document.getElementById("userDisplay").innerText = currentUserName;
+
+    // Set today and load data
+    const dateInput = document.getElementById('logDate');
+    dateInput.valueAsDate = new Date();
+    
+    // Page load ஆனதும் இன்றைய டேட்டாவை எடுக்கும்
+    window.onload = fetchExistingData;
+
+    function updateVal(val) {
+        document.getElementById('tanVal').innerText = val;
+    }
+
+    // Firebase-லிருந்து டேட்டாவை எடுக்கும் function
+    function fetchExistingData() {
+        const dateVal = dateInput.value;
+        const msg = document.getElementById('msg');
+        
+        if (!dateVal || currentUserName === "Guest") return;
+
+        msg.style.color = "blue";
+        msg.innerText = "Checking existing data... 🔍";
+
+        database.ref('users/' + currentUserName + '/sun_logs/' + dateVal).once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Tan Level Update
+                const tanPercent = parseInt(data.tanLevel);
+                document.getElementById('tanLevel').value = tanPercent;
+                document.getElementById('tanVal').innerText = tanPercent;
+
+                // Time Inputs Update (split "HH:MM - HH:MM")
+                if(data.morning && data.morning.includes(" - ")) {
+                    const t = data.morning.split(" - ");
+                    document.getElementById('mornStart').value = t[0] !== "N/A" ? t[0] : "";
+                    document.getElementById('mornEnd').value = t[1] !== "N/A" ? t[1] : "";
+                }
+                if(data.noon && data.noon.includes(" - ")) {
+                    const t = data.noon.split(" - ");
+                    document.getElementById('aftStart').value = t[0] !== "N/A" ? t[0] : "";
+                    document.getElementById('aftEnd').value = t[1] !== "N/A" ? t[1] : "";
+                }
+                if(data.evening && data.evening.includes(" - ")) {
+                    const t = data.evening.split(" - ");
+                    document.getElementById('eveStart').value = t[0] !== "N/A" ? t[0] : "";
+                    document.getElementById('eveEnd').value = t[1] !== "N/A" ? t[1] : "";
+                }
+                msg.style.color = "green";
+                msg.innerText = "Previous data loaded! ✅";
+            } else {
+                // Reset if no data
+                resetInputs();
+                msg.style.color = "gray";
+                msg.innerText = "No data for this date. Ready to log! ✨";
+            }
+            setTimeout(() => { msg.innerText = ""; }, 2000);
+        });
+    }
+
+    function resetInputs() {
+        document.getElementById('tanLevel').value = 10;
+        document.getElementById('tanVal').innerText = 10;
+        document.getElementById('mornStart').value = "";
+        document.getElementById('mornEnd').value = "";
+        document.getElementById('aftStart').value = "";
+        document.getElementById('aftEnd').value = "";
+        document.getElementById('eveStart').value = "";
+        document.getElementById('eveEnd').value = "";
+    }
+
+    function saveData() {
+        if(currentUserName === "Guest") {
+            alert("Please login first!");
+            return;
+        }
+
+        const btn = document.getElementById('saveBtn');
+        const spinner = document.getElementById('spinner');
+        const btnText = document.getElementById('btnText');
+        const msg = document.getElementById('msg');
+
+        btn.disabled = true;
+        spinner.style.display = "block";
+        btnText.innerText = "Saving...";
+
+        const dateVal = dateInput.value;
+        const data = {
+            tanLevel: document.getElementById('tanLevel').value + "%",
+            morning: (document.getElementById('mornStart').value || "N/A") + " - " + (document.getElementById('mornEnd').value || "N/A"),
+            noon: (document.getElementById('aftStart').value || "N/A") + " - " + (document.getElementById('aftEnd').value || "N/A"),
+            evening: (document.getElementById('eveStart').value || "N/A") + " - " + (document.getElementById('eveEnd').value || "N/A"),
+            lastUpdated: new Date().toLocaleString()
+        };
+
+        database.ref('users/' + currentUserName + '/sun_logs/' + dateVal).set(data)
+        .then(() => {
+            msg.style.color = "green";
+            msg.innerText = "Data Saved Successfully! ✅";
+        })
+        .catch((error) => {
+            msg.style.color = "red";
+            msg.innerText = "Error: " + error.message;
+        })
+        .finally(() => {
+            btn.disabled = false;
+            spinner.style.display = "none";
+            btnText.innerText = "SAVE LOG 💾";
+            setTimeout(() => { msg.innerText = ""; }, 3000);
+        });
+    }
+</script>
+
+</body>
+</html>
