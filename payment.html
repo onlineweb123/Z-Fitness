@@ -10,11 +10,11 @@
         .payment-card { background: white; padding: 30px; border-radius: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.06); max-width: 380px; width: 100%; text-align: center; border: 1px solid #e2e8f0; }
         .brand-name { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
         .tagline { color: #64748b; font-size: 14px; margin-bottom: 20px; }
-        
+
         .price-box { margin: 15px 0; }
         .old-price { font-size: 18px; color: #94a3b8; text-decoration: line-through; }
         .new-price { font-size: 36px; font-weight: 800; color: #0f172a; display: block; }
-        
+
         /* QR Code Styling */
         .qr-container { margin: 20px 0; padding: 15px; background: #fff; border: 2px dashed #e2e8f0; border-radius: 20px; }
         .qr-image { width: 180px; height: 180px; object-fit: contain; border-radius: 10px; }
@@ -34,13 +34,11 @@
         transition: 0.3s; 
         text-decoration: none; 
         display: block;
-        
-        
          }
-        
+
         .btn-unlock:hover { 
         background: #1d4ed8; }
-        
+
         .btn-whatsapp { 
         background: #25d366; 
         color: white; 
@@ -54,7 +52,7 @@
         transition: 0.3s;
          }
         .btn-whatsapp:hover { background: #16a34a; }
-        
+
         .footer-text { margin-top: 20px; font-size: 12px; color: #94a3b8; line-height: 1.5; }
         .contact-info { font-weight: 700; color: #0f172a; margin-top: 5px; display: block; }
     </style>
@@ -64,33 +62,67 @@
     <div class="payment-card">
         <div class="brand-name">Z Fitness</div>
         <div class="tagline">Invest in your health</div>
-        
+
         <div class="price-box">
-            <span class="old-price">Rs: 4,999</span>
-            <span class="new-price">Rs: 299</span>
+            <span class="old-price" id="displayOldPrice">Rs: 4,999</span>
+            <span class="new-price" id="displayNewPrice">Rs: 299</span>
         </div>
 
         <div class="qr-container">
-            <img src="qr code.jpg" alt="UPI QR Code" class="qr-image">
+            <img id="qrImage" src="" alt="UPI QR Code" class="qr-image">
             <div class="scan-text">Scan this QR to pay</div>
         </div>
-        
-        <a href="upi://pay?pa=mm05270331@oksbi&pn=ZFitness&am=299&cu=INR" class="btn-unlock">
+
+        <a id="upiLink" href="#" class="btn-unlock">
             Pay via UPI App
         </a>
 
         <button class="btn-whatsapp" onclick="sendWhatsApp()">Send Payment Receipt</button>
 
-        <p class="footer-text">
+        <p class="footer-text" id="footerText">
             Pay Rs.299 to activate your account. Send the screenshot via WhatsApp for instant access.
             <span class="contact-info">Support: 9344165879</span>
         </p>
     </div>
 
     <script>
+        // வாட்ஸ்அப் மெசேஜிலும் தொகை தானாக மாற உலகளாவிய வேரியபிள் (Global Variable)
+        let currentNewPrice = "299";
+
+        window.onload = function() {
+            // அட்மின் பேனலில் இருந்து விபரங்களை எடுக்கிறது
+            let upiId = localStorage.getItem('global_upi_id');
+            let oldPrice = localStorage.getItem('global_old_price');
+            let newPrice = localStorage.getItem('global_new_price');
+            
+            // விபரங்கள் காலியாக இருந்தால் அசல் டீஃபால்ட் மதிப்புகள் பயன்படுத்தப்படும்
+            if (!upiId) upiId = "mm05270331@oksbi"; 
+            if (!oldPrice) oldPrice = "4,999";
+            if (!newPrice) newPrice = "299";
+
+            currentNewPrice = newPrice; // வாட்ஸ்அப் பயன்பாட்டிற்கு
+
+            // பக்கத்தில் உள்ள Text-களை மாற்றுதல் (நீங்கள் கேட்ட மூன்று இடங்கள்)
+            document.getElementById('displayOldPrice').textContent = `Rs: ${oldPrice}`;
+            document.getElementById('displayNewPrice').textContent = `Rs: ${newPrice}`;
+            document.getElementById('footerText').innerHTML = `Pay Rs.${newPrice} to activate your account. Send the screenshot via WhatsApp for instant access. <span class="contact-info">Support: 9344165879</span>`;
+
+            const name = "ZFitness";
+            
+            // க்யூஆர் கோடிலும் புதிய விலை (newPrice) தானாக ஏறும் லாஜிக்
+            const upiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${newPrice}&cu=INR`;
+            
+            // QR Code API உருவாக்கம்
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiString)}`;
+            
+            document.getElementById('qrImage').src = qrApiUrl;
+            document.getElementById('upiLink').href = upiString;
+        }
+
         function sendWhatsApp() {
             const phoneNumber = "919344165879";
-            const message = "Hi, I have completed the payment of Rs.299 for Z Fitness Premium. Please activate my account. [Attached: Payment Screenshot]";
+            // மெசேஜிலும் தொகை அட்மின் பேனலுக்கு ஏற்ப மாறும்
+            const message = `Hi, I have completed the payment of Rs.${currentNewPrice} for Z Fitness Premium. Please activate my account. [Attached: Payment Screenshot]`;
             const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
             window.open(url, '_blank');
         }
